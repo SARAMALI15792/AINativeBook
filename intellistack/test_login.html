@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>IntelliStack Test Login</title>
+</head>
+<body>
+    <h1>IntelliStack Auto Login</h1>
+    <p>Opening the application in your default browser...</p>
+    
+    <script>
+        // Open the application in the default browser
+        window.open('http://localhost:3000', '_blank');
+        
+        // Also redirect to the login page after a delay
+        setTimeout(function() {
+            window.location.href = 'http://localhost:3000/login';
+        }, 2000);
+    </script>
+</body>
+</html>

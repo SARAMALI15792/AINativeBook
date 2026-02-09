@@ -1,0 +1,467 @@
+openapi: 3.1.0
+info:
+  title: IntelliStack Auth API
+  version: 1.0.0
+  description: Authentication and authorization endpoints (FR-036 to FR-042)
+
+servers:
+  - url: /api/v1/auth
+    description: Auth API base path
+
+tags:
+  - name: Authentication
+    description: Login, logout, session management
+  - name: Users
+    description: User profile and preferences
+  - name: Roles
+    description: Role management (admin only)
+
+paths:
+  /register:
+    post:
+      tags: [Authentication]
+      summary: Register new user
+      operationId: registerUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: Email already exists
+
+  /login:
+    post:
+      tags: [Authentication]
+      summary: Authenticate user
+      operationId: loginUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+              description: Session cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Invalid credentials
+
+  /logout:
+    post:
+      tags: [Authentication]
+      summary: End session
+      operationId: logoutUser
+      security:
+        - sessionAuth: []
+      responses:
+        '204':
+          description: Logged out
+
+  /session:
+    get:
+      tags: [Authentication]
+      summary: Get current session
+      operationId: getSession
+      security:
+        - sessionAuth: []
+      responses:
+        '200':
+          description: Session valid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponse'
+        '401':
+          description: No valid session
+
+  /refresh:
+    post:
+      tags: [Authentication]
+      summary: Refresh session token
+      operationId: refreshSession
+      security:
+        - sessionAuth: []
+      responses:
+        '200':
+          description: Token refreshed
+        '401':
+          description: Session expired
+
+  /password/forgot:
+    post:
+      tags: [Authentication]
+      summary: Request password reset (FR-041)
+      operationId: forgotPassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+      responses:
+        '202':
+          description: Reset email sent (if account exists)
+
+  /password/reset:
+    post:
+      tags: [Authentication]
+      summary: Reset password with token
+      operationId: resetPassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token, password]
+              properties:
+                token:
+                  type: string
+                password:
+                  type: string
+                  minLength: 8
+      responses:
+        '200':
+          description: Password reset successful
+        '400':
+          description: Invalid or expired token
+
+  /me:
+    get:
+      tags: [Users]
+      summary: Get current user profile
+      operationId: getCurrentUser
+      security:
+        - sessionAuth: []
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+    patch:
+      tags: [Users]
+      summary: Update current user profile
+      operationId: updateCurrentUser
+      security:
+        - sessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: Profile updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+
+  /me/preferences:
+    get:
+      tags: [Users]
+      summary: Get user preferences
+      operationId: getUserPreferences
+      security:
+        - sessionAuth: []
+      responses:
+        '200':
+          description: User preferences
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPreferences'
+    put:
+      tags: [Users]
+      summary: Update user preferences
+      operationId: updateUserPreferences
+      security:
+        - sessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserPreferences'
+      responses:
+        '200':
+          description: Preferences updated
+
+  /me/delete:
+    post:
+      tags: [Users]
+      summary: Request account deletion (FR-090)
+      description: Initiates 30-day soft delete
+      operationId: requestAccountDeletion
+      security:
+        - sessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [confirmation]
+              properties:
+                confirmation:
+                  type: string
+                  enum: [DELETE_MY_ACCOUNT]
+      responses:
+        '202':
+          description: Deletion scheduled
+
+  /users/{userId}/roles:
+    get:
+      tags: [Roles]
+      summary: Get user roles (admin)
+      operationId: getUserRoles
+      security:
+        - sessionAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: User roles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RoleAssignment'
+        '403':
+          description: Not authorized
+    post:
+      tags: [Roles]
+      summary: Assign role to user (FR-038, FR-040)
+      operationId: assignRole
+      security:
+        - sessionAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [roleId]
+              properties:
+                roleId:
+                  type: string
+                  format: uuid
+      responses:
+        '201':
+          description: Role assigned
+        '403':
+          description: Not authorized
+    delete:
+      tags: [Roles]
+      summary: Revoke role from user
+      operationId: revokeRole
+      security:
+        - sessionAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: roleId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Role revoked
+
+components:
+  securitySchemes:
+    sessionAuth:
+      type: apiKey
+      in: cookie
+      name: session
+
+  schemas:
+    RegisterRequest:
+      type: object
+      required: [email, password, name]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    AuthResponse:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/UserResponse'
+        expiresAt:
+          type: string
+          format: date-time
+
+    SessionResponse:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        roles:
+          type: array
+          items:
+            type: string
+        expiresAt:
+          type: string
+          format: date-time
+
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        avatarUrl:
+          type: string
+          format: uri
+        bio:
+          type: string
+        roles:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+        avatarUrl:
+          type: string
+          format: uri
+        bio:
+          type: string
+          maxLength: 500
+
+    UserPreferences:
+      type: object
+      properties:
+        learningStyle:
+          type: string
+          enum: [preferred_video, preferred_text, preferred_interactive]
+        locale:
+          type: string
+          default: en
+        notifications:
+          type: object
+          properties:
+            email:
+              type: boolean
+              default: true
+            contentUpdates:
+              type: boolean
+              default: true
+            communityActivity:
+              type: boolean
+              default: true
+
+    RoleAssignment:
+      type: object
+      properties:
+        roleId:
+          type: string
+          format: uuid
+        roleName:
+          type: string
+        grantedAt:
+          type: string
+          format: date-time
+        grantedBy:
+          type: string
+          format: uuid
+
+  responses:
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    field:
+                      type: string
+                    message:
+                      type: string

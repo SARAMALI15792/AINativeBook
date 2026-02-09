@@ -1,0 +1,104 @@
+/**
+ * IntelliStack Custom Styles
+ *
+ * This file contains custom CSS for the IntelliStack learning platform.
+ */
+
+:root {
+  --ifm-color-primary: #2e8555;
+  --ifm-color-primary-dark: #29784c;
+  --ifm-color-primary-darker: #277148;
+  --ifm-color-primary-darkest: #205d3b;
+  --ifm-color-primary-light: #33925d;
+  --ifm-color-primary-lighter: #359962;
+  --ifm-color-primary-lightest: #3cad6e;
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme='dark'] {
+  --ifm-color-primary: #25c2a0;
+  --ifm-color-primary-dark: #21af90;
+  --ifm-color-primary-darker: #1fa588;
+  --ifm-color-primary-darkest: #1a8870;
+  --ifm-color-primary-light: #29d5b0;
+  --ifm-color-primary-lighter: #32d8b4;
+  --ifm-color-primary-lightest: #4fddbf;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
+
+/* Stage-specific styling */
+.stage-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-right: 0.5rem;
+}
+
+.stage-1 {
+  background-color: #e3f2fd;
+  color: #1565c0;
+}
+
+.stage-2 {
+  background-color: #f3e5f5;
+  color: #6a1b9a;
+}
+
+.stage-3 {
+  background-color: #fff3e0;
+  color: #e65100;
+}
+
+.stage-4 {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.stage-5 {
+  background-color: #fce4ec;
+  color: #c2185b;
+}
+
+/* Code block enhancements */
+.prism-code {
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* Simulation embed styling */
+.simulation-container {
+  border: 2px solid var(--ifm-color-primary);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin: 2rem 0;
+  background-color: var(--ifm-background-surface-color);
+}
+
+/* Learning objective boxes */
+.learning-objectives {
+  background-color: var(--ifm-color-primary-lightest);
+  border-left: 4px solid var(--ifm-color-primary);
+  padding: 1rem 1.5rem;
+  margin: 1.5rem 0;
+  border-radius: 0.25rem;
+}
+
+[data-theme='dark'] .learning-objectives {
+  background-color: rgba(37, 194, 160, 0.1);
+}
+
+/* Prerequisites section */
+.prerequisites {
+  background-color: #fff3cd;
+  border-left: 4px solid #ffc107;
+  padding: 1rem 1.5rem;
+  margin: 1.5rem 0;
+  border-radius: 0.25rem;
+}
+
+[data-theme='dark'] .prerequisites {
+  background-color: rgba(255, 193, 7, 0.1);
+}
