@@ -96,7 +96,13 @@ docker-compose.override.yml
 # Database
 # ======================
 *.sqlite
+*.sqlite3
 *.db
+
+# ======================
+# Windows Artifacts
+# ======================
+nul
 
 # ======================
 # Testing

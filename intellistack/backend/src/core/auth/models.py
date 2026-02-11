@@ -45,6 +45,16 @@ class User(Base):
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     is_verified: Mapped[bool] = mapped_column(Boolean, default=False)
 
+    # Security fields for account lockout
+    failed_login_attempts: Mapped[int] = mapped_column(default=0)
+    locked_until: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    last_login_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    last_login_ip: Mapped[Optional[str]] = mapped_column(String(45), nullable=True)
+
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
@@ -58,7 +68,10 @@ class User(Base):
 
     # Relationships
     roles: Mapped[list["UserRole"]] = relationship(
-        "UserRole", back_populates="user", lazy="selectin"
+        "UserRole",
+        back_populates="user",
+        lazy="selectin",
+        foreign_keys="UserRole.user_id"
     )
     progress: Mapped[Optional["Progress"]] = relationship(
         "Progress", back_populates="user", uselist=False
@@ -144,4 +157,90 @@ class Session(Base):
     )
     revoked_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True), nullable=True
+    )
+
+
+class OAuthAccount(Base):
+    """OAuth account linking for social login providers."""
+
+    __tablename__ = "oauth_accounts"
+
+    id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), primary_key=True, default=lambda: str(uuid4())
+    )
+    user_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("users.id"), nullable=False, index=True
+    )
+    provider: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
+    provider_account_id: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    access_token: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    refresh_token: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    expires_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    token_type: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    scope: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    id_token: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+    # Timestamps
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+    # Relationships
+    user: Mapped["User"] = relationship("User", lazy="selectin")
+
+
+class PasswordResetToken(Base):
+    """Password reset token for account recovery."""
+
+    __tablename__ = "password_reset_tokens"
+
+    id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), primary_key=True, default=lambda: str(uuid4())
+    )
+    user_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    token_hash: Mapped[str] = mapped_column(String(255), nullable=False, unique=True, index=True)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    used_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+    ip_address: Mapped[Optional[str]] = mapped_column(String(45), nullable=True)
+    user_agent: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+
+    @property
+    def is_expired(self) -> bool:
+        """Check if token has expired."""
+        return datetime.now(timezone.utc) > self.expires_at
+
+    @property
+    def is_used(self) -> bool:
+        """Check if token has been used."""
+        return self.used_at is not None
+
+    @property
+    def is_valid(self) -> bool:
+        """Check if token is still valid (not expired and not used)."""
+        return not self.is_expired and not self.is_used
+
+
+class LoginAttempt(Base):
+    """Track login attempts for security monitoring and account lockout."""
+
+    __tablename__ = "login_attempts"
+
+    id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), primary_key=True, default=lambda: str(uuid4())
+    )
+    email: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    ip_address: Mapped[str] = mapped_column(String(45), nullable=False, index=True)
+    user_agent: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    was_successful: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    failure_reason: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), index=True
     )

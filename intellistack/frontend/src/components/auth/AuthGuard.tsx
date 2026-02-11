@@ -2,58 +2,49 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { useUserStore } from '@/stores/userStore';
+import { useAuth } from '@/hooks/useAuth';
 
-const publicRoutes = ['/', '/login', '/register', '/forgot-password'];
-const authRoutes = ['/login', '/register'];
+const publicRoutes = ['/', '/login', '/register', '/forgot-password', '/reset-password'];
+const authRoutes = ['/login', '/register', '/forgot-password', '/reset-password'];
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { isAuthenticated, fetchUser } = useUserStore();
-  const [isLoading, setIsLoading] = useState(true);
+  const { isAuthenticated, isLoading } = useAuth();
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const token = localStorage.getItem('token');
-      const isPublicRoute = publicRoutes.includes(pathname);
-      const isAuthRoute = authRoutes.includes(pathname);
+    if (isLoading) return;
 
-      // If we have a token, verify it's still valid
-      if (token && !isAuthenticated) {
-        try {
-          await fetchUser();
-        } catch (error) {
-          // Token is invalid, will be cleared by fetchUser
-          if (!isPublicRoute) {
-            router.push(`/login?from=${pathname}`);
-          }
-        }
-      }
+    const isPublicRoute = publicRoutes.includes(pathname);
+    const isAuthRoute = authRoutes.includes(pathname);
 
-      // Redirect logic
-      if (!token && !isPublicRoute) {
-        router.push(`/login?from=${pathname}`);
-      } else if (token && isAuthRoute) {
-        router.push('/dashboard');
-      }
+    if (!isAuthenticated && !isPublicRoute) {
+      router.push(`/login?from=${encodeURIComponent(pathname)}`);
+    } else if (isAuthenticated && isAuthRoute) {
+      router.push('/dashboard');
+    }
 
-      setIsLoading(false);
-    };
+    setIsReady(true);
+  }, [pathname, isAuthenticated, isLoading, router]);
 
-    checkAuth();
-  }, [pathname, isAuthenticated, fetchUser, router]);
-
-  // Show loading state while checking auth
-  if (isLoading) {
+  if (isLoading || !isReady) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-900">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-slate-400">Loading...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading...</p>
         </div>
       </div>
     );
+  }
+
+  if (authRoutes.includes(pathname) && isAuthenticated) {
+    return null;
+  }
+
+  if (!publicRoutes.includes(pathname) && !isAuthenticated) {
+    return null;
   }
 
   return <>{children}</>;

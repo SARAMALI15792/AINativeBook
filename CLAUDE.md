@@ -206,5 +206,178 @@ Wait for consent; never auto-create ADRs. Group related decisions (stacks, authe
 - `history/adr/` — Architecture Decision Records
 - `.specify/` — SpecKit Plus templates and scripts
 
+---
+
+# Project Overview: IntelliStack Platform
+
+**Last Updated:** 2026-02-10
+
+## What is IntelliStack?
+
+IntelliStack is an **AI-Native Learning Platform** for Physical AI & Humanoid Robotics education. It provides a comprehensive learning management system with progressive learning paths, AI-powered tutoring, RAG chatbot with citations, content authoring, institution management, and community features.
+
+## Quick Facts
+
+| Attribute | Value |
+|-----------|-------|
+| **Project Name** | IntelliStack Platform |
+| **Purpose** | AI-Native Learning Management System for Robotics Education |
+| **Current Branch** | `001-intellistack-platform` |
+| **Overall Progress** | 74.5% (38/51 tasks complete) |
+| **Current Phase** | Phase 6 Complete → Moving to Phase 7 |
+| **Methodology** | Spec-Driven Development (SDD) |
+
+## Technology Stack
+
+### Frontend
+- **Framework:** Next.js 14 (App Router)
+- **Language:** TypeScript 5.3+
+- **Styling:** Tailwind CSS 3.4+ with ShadCN UI
+- **State Management:** Zustand
+- **Data Fetching:** TanStack Query (React Query)
+- **Authentication:** Better-Auth (modern auth library)
+
+### Backend
+- **Framework:** FastAPI (Python 3.11+)
+- **ORM:** SQLAlchemy 2.0 (async)
+- **Migrations:** Alembic
+- **Database:** PostgreSQL (Neon)
+- **Vector Store:** Qdrant (for RAG)
+- **Cache:** Redis
+- **AI/ML:** OpenAI API, LangChain/LangGraph, Cohere (reranking)
+
+### Infrastructure
+- **Containerization:** Docker & Docker Compose
+- **GPU Support:** NVIDIA Container Toolkit
+- **Simulation:** Gazebo, NVIDIA Isaac Sim
+
+## Project Structure
+
+```
+C:\Users\saram\OneDrive\Desktop\physicalhumoniodbook\
+├── intellistack/              # Main application code
+│   ├── backend/               # FastAPI backend (Python)
+│   └── frontend/              # Next.js frontend (TypeScript)
+├── specs/                     # Feature specifications (SDD)
+│   └── 001-intellistack-platform/
+│       ├── spec.md            # Feature requirements (~1400 lines)
+│       ├── plan.md            # Architecture decisions
+│       └── tasks.md           # Implementation tasks
+├── .specify/                  # SpecKit Plus templates
+│   ├── memory/                # Project constitution
+│   ├── scripts/               # Utility scripts
+│   └── templates/             # Document templates
+├── history/                   # Prompt History Records (PHRs)
+│   └── prompts/               # Conversation history
+├── CLAUDE.md                  # Development guidelines (this file)
+└── PROJECT_STATUS.md          # Current implementation status
+```
+
+## Completed Phases (100%)
+
+| Phase | Name | Description |
+|-------|------|-------------|
+| 0 | Vertical Slice | Initial proof-of-concept |
+| 1 | Setup | Infrastructure, Docker, database |
+| 2 | Foundation | Auth, API, base components |
+| 3 | Student Learning | 5-stage learning path, progress tracking |
+| 4 | Content Creation | CRUD, versioning, review workflow |
+| 5 | Institution Admin | Cohorts, analytics, webhooks |
+| 6 | RAG Chatbot | Qdrant vector search, streaming, citations |
+
+## Pending Phases
+
+| Phase | Name | Key Features |
+|-------|------|--------------|
+| 7 | AI Tutor | Socratic method, debugging helper, code review |
+| 8 | Community | Forums, study groups, mentorship |
+| 9 | Assessment | Quiz delivery, rubric-based grading |
+| 10 | Personalization | Adaptive content, recommendations |
+| 11 | Polish | Production readiness, security, docs |
+
+## Key Features Implemented
+
+### 5-Stage Learning Path
+- Foundations → ROS 2 & Simulation → Perception & Planning → AI Integration → Capstone
+- Stage locking/unlocking based on prerequisites
+- Progress tracking at lesson, exercise, assessment level
+- Badge issuance and certificate generation
+
+### RAG Chatbot (Phase 6 - Recently Completed)
+- OpenAI integration with SSE streaming
+- Qdrant vector store with hybrid retrieval
+- Text chunking with tiktoken (512 tokens, 50 overlap)
+- Cohere reranking (rerank-v3.5)
+- Citations with source passage viewer
+- Stage-based access control (only searches unlocked content)
+- Text selection queries
+
+### Content Authoring
+- MDX editor with preview
+- Version history with diff viewer
+- Review workflow (draft → in_review → published)
+- Content ingestion pipeline
+
+### Institution Management
+- Cohort creation with enrollment limits
+- Instructor assignment
+- Webhook notifications with retry logic
+- Analytics aggregation
+
+## Current Work In Progress
+
+Based on git status, current development focus:
+- Better-Auth integration v2 (authentication system upgrade)
+- Frontend styling fixes (Tailwind text-foreground errors)
+- Dashboard layout improvements
+- Auth page redesign
+
+## Key Files to Know
+
+### Specification & Planning
+- `specs/001-intellistack-platform/spec.md` - Full feature requirements
+- `specs/001-intellistack-platform/plan.md` - Architecture decisions
+- `specs/001-intellistack-platform/tasks.md` - Task tracking with progress
+- `PROJECT_STATUS.md` - Current implementation status
+
+### Backend Entry Points
+- `intellistack/backend/src/main.py` - FastAPI application entry
+- `intellistack/backend/src/config/settings.py` - Configuration
+- `intellistack/backend/src/shared/database.py` - Database setup
+
+### Frontend Entry Points
+- `intellistack/frontend/src/app/(auth)/` - Authentication routes
+- `intellistack/frontend/src/app/(dashboard)/` - Dashboard routes
+- `intellistack/frontend/src/stores/userStore.ts` - User state management
+
+## Important Context for New Sessions
+
+### When Working on This Project:
+
+1. **Always check PROJECT_STATUS.md first** - It has the latest progress and current phase
+
+2. **Follow the spec** - The spec.md file is the authoritative source for requirements
+
+3. **Use Context7 for libraries** - When integrating libraries, query Context7 for latest patterns
+
+4. **Create PHRs after every task** - This is mandatory per CLAUDE.md rules
+
+5. **Better-Auth is being integrated** - There's an ongoing auth system upgrade; check current auth implementation before making changes
+
+6. **Database uses Alembic** - Any model changes require migrations
+
+7. **Vector store is Qdrant** - For RAG functionality, use the existing Qdrant client patterns
+
+8. **Frontend uses ShadCN UI** - When adding UI components, use ShadCN patterns
+
+### Common Tasks:
+
+- **Backend API changes:** Edit files in `intellistack/backend/src/core/`
+- **Frontend components:** Edit files in `intellistack/frontend/src/components/`
+- **Database models:** Edit in `intellistack/backend/src/core/<module>/models.py`
+- **New routes:** Add to `intellistack/backend/src/core/<module>/routes.py`
+
+---
+
 ## Code Standards
 See `.specify/memory/constitution.md` for code quality, testing, performance, security, and architecture principles.

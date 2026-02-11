@@ -29,6 +29,8 @@ from src.core.institution.models import (
 )
 from src.core.content.models import Content, ContentVersion, ContentReview
 from src.ai.rag.models import RAGConversation, RAGMessage, RAGRetrieval
+from src.ai.tutor.session_store import TutorSessionItem
+from src.ai.chatkit.models import ChatKitThread, ChatKitThreadItem, ChatKitRateLimit, AiUsageMetric, AuthEventLog
 
 # Alembic Config object
 config = context.config

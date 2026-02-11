@@ -6,7 +6,6 @@ from typing import Optional, List
 import secrets
 
 import jwt
-from fastapi import HTTPException, status
 from passlib.context import CryptContext
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -21,7 +20,7 @@ from src.core.auth.schemas import (
     TokenData,
     UserResponse,
 )
-from src.shared.exceptions import AuthenticationError, AuthorizationError
+from src.shared.exceptions import AuthenticationError, AuthorizationError, ConflictError, NotFoundError
 
 settings = get_settings()
 
@@ -99,9 +98,10 @@ async def register_user(
     existing_user = result.scalar_one_or_none()
 
     if existing_user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email already registered",
+        raise ConflictError(
+            resource="User",
+            field="email",
+            message="Email already registered",
         )
 
     # Create user
@@ -273,7 +273,7 @@ async def assign_role(
     )
     user = user_result.scalar_one_or_none()
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise NotFoundError(resource="User", resource_id=str(user_id))
 
     # Check role exists
     role_result = await db.execute(
@@ -281,7 +281,7 @@ async def assign_role(
     )
     role = role_result.scalar_one_or_none()
     if not role:
-        raise HTTPException(status_code=404, detail="Role not found")
+        raise NotFoundError(resource="Role", resource_id=role_name)
 
     # Check if already assigned
     existing_result = await db.execute(
@@ -294,7 +294,10 @@ async def assign_role(
     existing = existing_result.scalar_one_or_none()
 
     if existing:
-        raise HTTPException(status_code=400, detail="Role already assigned")
+        raise ConflictError(
+            resource="UserRole",
+            message="Role already assigned to this user",
+        )
 
     # Create assignment
     user_role = UserRole(
@@ -328,7 +331,7 @@ async def revoke_role(
     )
     role = role_result.scalar_one_or_none()
     if not role:
-        raise HTTPException(status_code=404, detail="Role not found")
+        raise NotFoundError(resource="Role", resource_id=role_name)
 
     # Find assignment
     assignment_result = await db.execute(
@@ -341,7 +344,7 @@ async def revoke_role(
     assignment = assignment_result.scalar_one_or_none()
 
     if not assignment:
-        raise HTTPException(status_code=404, detail="Role assignment not found")
+        raise NotFoundError(resource="Role assignment")
 
     # Revoke
     assignment.revoked_at = datetime.now(timezone.utc)

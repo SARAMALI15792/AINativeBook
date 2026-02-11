@@ -26,8 +26,14 @@ class VectorStore:
             config: Qdrant configuration
         """
         self.config = config or get_qdrant_config()
+        host = self.config.host
+        # Use HTTPS for cloud instances, HTTP for localhost
+        if host in ("localhost", "127.0.0.1"):
+            url = f"http://{host}:{self.config.port}"
+        else:
+            url = f"https://{host}:{self.config.port}"
         self.client = AsyncQdrantClient(
-            url=f"http://{self.config.host}:{self.config.port}",
+            url=url,
             api_key=self.config.api_key,
         )
         self.collection_name = self.config.collection_name
