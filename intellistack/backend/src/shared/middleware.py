@@ -1,5 +1,5 @@
 """
-Middleware for rate limiting, RBAC, request processing, and BetterAuth session handling.
+Middleware for rate limiting, RBAC, request processing, and JWT validation.
 """
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
@@ -12,8 +12,9 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.config.logging import get_logger
-from src.core.auth.better_auth_config import get_better_auth_config
+from src.config.settings import get_settings
 from src.core.auth.models import Role, UserRole
+from src.core.auth.jwks import JWKSManager
 from src.shared.exceptions import AuthorizationError
 
 logger = get_logger(__name__)
@@ -178,57 +179,120 @@ async def check_permissions(
     return any(role in user_roles for role in required_roles)
 
 
-class BetterAuthSessionMiddleware(BaseHTTPMiddleware):
+class JWKSAuthMiddleware(BaseHTTPMiddleware):
     """
-    Middleware to extract and validate BetterAuth-style session cookies.
+    Middleware to extract and validate Better-Auth JWT tokens from Authorization header.
 
     This middleware:
-    1. Extracts the session token from cookies
-    2. Validates the JWT token
-    3. Injects session data into request.state for downstream use
-    4. Handles token refresh if needed
-    5. Sets appropriate cookie attributes for security
+    1. Extracts the Bearer token from Authorization header
+    2. Validates the JWT using JWKS public keys (no auth-server call needed)
+    3. Injects user context into request.state for downstream use
+    4. Handles expired/invalid tokens gracefully
+    5. Optional: Also checks cookies for session tokens (backward compatibility)
+
+    JWT Validation:
+    - Uses RS256 public keys from JWKS endpoint
+    - 5-minute cache with exponential backoff for resilience
+    - Falls back to last-known-good keys if endpoint unavailable
     """
 
-    def __init__(self, app, cookie_name: str = "intellistack.session"):
+    def __init__(self, app, cookie_name: str = None):
         super().__init__(app)
-        self.cookie_name = cookie_name
-        self.better_auth = get_better_auth_config()
+        settings = get_settings()
+        self.cookie_name = cookie_name or settings.better_auth_session_cookie_name
+        self.jwks_manager = JWKSManager(
+            jwks_url=settings.better_auth_jwks_url,
+            cache_ttl_minutes=5,
+        )
 
     async def dispatch(
         self, request: Request, call_next: RequestResponseEndpoint
     ) -> Response:
-        # Extract session token from cookie
-        session_token = request.cookies.get(self.cookie_name)
+        # Extract token from Authorization header (preferred)
+        auth_header = request.headers.get("Authorization", "")
+        token = None
 
-        if session_token:
-            # Validate the token
-            payload = self.better_auth.decode_token(session_token)
-
-            if payload:
-                # Check if token is expired
-                exp = payload.get("exp")
-                if exp and datetime.fromtimestamp(exp, tz=timezone.utc) > datetime.now(timezone.utc):
-                    # Valid session - inject into request.state
-                    request.state.session = {
-                        "userId": payload.get("userId") or payload.get("sub"),
-                        "sessionId": payload.get("sessionId"),
-                        "email": payload.get("email"),
-                        "roles": payload.get("roles", []),
-                        "token": session_token,
-                    }
-                    request.state.user_id = payload.get("userId") or payload.get("sub")
-                else:
-                    # Expired token
-                    request.state.session = None
-                    request.state.user_id = None
-            else:
-                # Invalid token
-                request.state.session = None
-                request.state.user_id = None
+        if auth_header.startswith("Bearer "):
+            token = auth_header[7:]  # Remove "Bearer " prefix
         else:
-            # No session cookie
-            request.state.session = None
+            # Fallback: check for session cookie
+            token = request.cookies.get(self.cookie_name)
+
+        if token:
+            try:
+                # Validate JWT using JWKS
+                import jwt
+
+                # Get unverified header to extract kid (key ID)
+                unverified_header = jwt.get_unverified_header(token)
+                kid = unverified_header.get("kid")
+
+                # Fetch JWKS
+                jwks = await self.jwks_manager.fetch_jwks()
+
+                # Find the key
+                key_data = None
+                if kid:
+                    for key in jwks.get("keys", []):
+                        if key.get("kid") == kid:
+                            key_data = key
+                            break
+
+                if key_data:
+                    # Verify JWT signature
+                    settings = get_settings()
+                    payload = jwt.decode(
+                        token,
+                        key_data,
+                        algorithms=["RS256"],
+                        options={"verify_exp": True},
+                        audience=settings.better_auth_audience or None,
+                        issuer=settings.better_auth_issuer or None,
+                    )
+
+                    # Extract user claims
+                    user_id = payload.get("sub") or payload.get("user_id")
+                    email = payload.get("email")
+
+                    if user_id and email:
+                        # Valid session - inject into request.state
+                        request.state.user = {
+                            "id": user_id,
+                            "email": email,
+                            "name": payload.get("name"),
+                            "email_verified": payload.get("email_verified", False),
+                            "role": payload.get("role", "student"),
+                        }
+                        request.state.user_id = user_id
+                        logger.debug(f"✅ JWT validated for user {email}")
+                    else:
+                        # Missing required claims
+                        request.state.user = None
+                        request.state.user_id = None
+                        logger.warning("JWT missing required claims (sub, email)")
+                else:
+                    # Key not found in JWKS
+                    request.state.user = None
+                    request.state.user_id = None
+                    logger.warning(f"Key ID '{kid}' not found in JWKS")
+
+            except jwt.ExpiredSignatureError:
+                request.state.user = None
+                request.state.user_id = None
+                logger.debug("JWT token expired")
+
+            except jwt.InvalidTokenError as e:
+                request.state.user = None
+                request.state.user_id = None
+                logger.warning(f"JWT validation failed: {e}")
+
+            except Exception as e:
+                request.state.user = None
+                request.state.user_id = None
+                logger.warning(f"Unexpected error during JWT validation: {e}")
+        else:
+            # No token provided
+            request.state.user = None
             request.state.user_id = None
 
         # Process the request

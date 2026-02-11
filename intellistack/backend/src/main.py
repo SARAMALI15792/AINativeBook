@@ -14,15 +14,13 @@ from src.shared.exceptions import IntelliStackError
 
 # Import routers
 from src.ai.rag.routes import router as rag_router
-from src.core.auth.routes import router as auth_router
-from src.core.auth.routes_v2 import router as auth_v2_router
 from src.core.content.routes import router as content_router
 from src.core.institution.routes import router as institution_router
 from src.core.learning.routes import router as learning_router
 
-# Import Better Auth middleware
+# Import middleware
 from src.shared.middleware import (
-    BetterAuthSessionMiddleware,
+    JWKSAuthMiddleware,
     RequestLoggingMiddleware,
 )
 
@@ -76,8 +74,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         allow_headers=["*"],
     )
 
-    # Add Better Auth session middleware (extracts session from cookies)
-    app.add_middleware(BetterAuthSessionMiddleware)
+    # Add JWT authentication middleware (validates Better-Auth tokens from Authorization header or cookies)
+    app.add_middleware(JWKSAuthMiddleware)
 
     # Add request logging middleware
     app.add_middleware(RequestLoggingMiddleware)
@@ -141,8 +139,6 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         }
 
     # Register routers with API prefix
-    # BetterAuth v2 router (cookie-based session auth)
-    app.include_router(auth_v2_router, prefix="/api/v1")
     app.include_router(content_router, prefix="/api/v1")
     app.include_router(institution_router, prefix="/api/v1")
     app.include_router(learning_router, prefix="/api/v1")

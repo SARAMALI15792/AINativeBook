@@ -83,6 +83,18 @@ class Settings(BaseSettings):
     post_login_redirect_path: str = Field(default="/learn", alias="POST_LOGIN_REDIRECT_PATH")
     post_logout_redirect_path: str = Field(default="/login", alias="POST_LOGOUT_REDIRECT_PATH")
 
+    # Better-Auth OIDC Server (JWT validation)
+    better_auth_url: str = Field(default="http://localhost:3001", alias="BETTER_AUTH_URL")
+    better_auth_jwks_url: str = Field(default="http://localhost:3001/.well-known/jwks.json", alias="BETTER_AUTH_JWKS_URL")
+    better_auth_issuer: str | None = Field(default=None, alias="BETTER_AUTH_ISSUER")
+    better_auth_audience: str | None = Field(default=None, alias="BETTER_AUTH_AUDIENCE")
+    better_auth_session_cookie_name: str = "better-auth.session_token"
+
+    # ChatKit AI Tutor
+    chatkit_rate_limit_student: int = 20  # messages per day for students
+    chatkit_rate_limit_instructor: int = 0  # unlimited for instructors (0 = no limit)
+    chatkit_rate_limit_admin: int = 0  # unlimited for admins
+
     # Logging
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "INFO"
     log_format: Literal["json", "console"] = "json"
