@@ -38,6 +38,7 @@ export default [
     exact: true
   },
   {
+<<<<<<< HEAD
     path: '/forgot-password',
     component: ComponentCreator('/forgot-password', 'c2e'),
     exact: true
@@ -73,6 +74,8 @@ export default [
     exact: true
   },
   {
+=======
+>>>>>>> 8bdb83a5eaef4c27e68fc3bbe9764efb4286407a
     path: '/docs',
     component: ComponentCreator('/docs', '13c'),
     routes: [

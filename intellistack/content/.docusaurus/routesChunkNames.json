@@ -42,6 +42,7 @@
       "plugin": "plugin---docusaurus-debugb-38-ad3"
     }
   },
+<<<<<<< HEAD
   "/forgot-password-c2e": {
     "__comp": "__comp---site-src-pages-forgot-password-tsxed-3-6c3",
     "__context": {
@@ -91,6 +92,8 @@
     },
     "config": "config---forgot-password-5-e-9-749"
   },
+=======
+>>>>>>> 8bdb83a5eaef4c27e68fc3bbe9764efb4286407a
   "/docs-13c": {
     "__comp": "__comp---theme-docs-root-5-e-9-0b6",
     "__context": {
@@ -163,8 +166,14 @@
   "/-e5f": {
     "__comp": "__comp---site-src-pages-index-tsx-1-df-d3e",
     "__context": {
+<<<<<<< HEAD
       "plugin": "plugin---forgot-passworda-74-3af"
     },
     "config": "config---forgot-password-5-e-9-749"
+=======
+      "plugin": "plugin---a-74-9d6"
+    },
+    "config": "config---5-e-9-4f3"
+>>>>>>> 8bdb83a5eaef4c27e68fc3bbe9764efb4286407a
   }
 }
