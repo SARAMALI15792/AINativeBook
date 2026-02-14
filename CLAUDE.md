@@ -229,14 +229,6 @@ IntelliStack is an **AI-Native Learning Platform** for Physical AI & Humanoid Ro
 
 ## Technology Stack
 
-### Frontend
-- **Framework:** Next.js 14 (App Router)
-- **Language:** TypeScript 5.3+
-- **Styling:** Tailwind CSS 3.4+ with ShadCN UI
-- **State Management:** Zustand
-- **Data Fetching:** TanStack Query (React Query)
-- **Authentication:** Better-Auth (modern auth library)
-
 ### Backend
 - **Framework:** FastAPI (Python 3.11+)
 - **ORM:** SQLAlchemy 2.0 (async)
@@ -257,7 +249,7 @@ IntelliStack is an **AI-Native Learning Platform** for Physical AI & Humanoid Ro
 C:\Users\saram\OneDrive\Desktop\physicalhumoniodbook\
 ├── intellistack/              # Main application code
 │   ├── backend/               # FastAPI backend (Python)
-│   └── frontend/              # Next.js frontend (TypeScript)
+│   └── auth-server/           # Better-Auth OIDC server (TypeScript)
 ├── specs/                     # Feature specifications (SDD)
 │   └── 001-intellistack-platform/
 │       ├── spec.md            # Feature requirements (~1400 lines)
@@ -328,9 +320,7 @@ C:\Users\saram\OneDrive\Desktop\physicalhumoniodbook\
 
 Based on git status, current development focus:
 - Better-Auth integration v2 (authentication system upgrade)
-- Frontend styling fixes (Tailwind text-foreground errors)
-- Dashboard layout improvements
-- Auth page redesign
+- Frontend removed (preparing for new frontend framework)
 
 ## Key Files to Know
 
@@ -345,10 +335,9 @@ Based on git status, current development focus:
 - `intellistack/backend/src/config/settings.py` - Configuration
 - `intellistack/backend/src/shared/database.py` - Database setup
 
-### Frontend Entry Points
-- `intellistack/frontend/src/app/(auth)/` - Authentication routes
-- `intellistack/frontend/src/app/(dashboard)/` - Dashboard routes
-- `intellistack/frontend/src/stores/userStore.ts` - User state management
+### Auth Server Entry Points
+- `intellistack/auth-server/src/index.ts` - Better-Auth server entry
+- `intellistack/auth-server/src/auth.ts` - Auth configuration
 
 ## Important Context for New Sessions
 
@@ -368,12 +357,11 @@ Based on git status, current development focus:
 
 7. **Vector store is Qdrant** - For RAG functionality, use the existing Qdrant client patterns
 
-8. **Frontend uses ShadCN UI** - When adding UI components, use ShadCN patterns
+8. **Frontend was removed** - The Next.js frontend has been removed; a new frontend will be added later
 
 ### Common Tasks:
 
 - **Backend API changes:** Edit files in `intellistack/backend/src/core/`
-- **Frontend components:** Edit files in `intellistack/frontend/src/components/`
 - **Database models:** Edit in `intellistack/backend/src/core/<module>/models.py`
 - **New routes:** Add to `intellistack/backend/src/core/<module>/routes.py`
 

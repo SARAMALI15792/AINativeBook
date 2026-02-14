@@ -109,21 +109,6 @@ services:
       timeout: 10s
       retries: 3
 
-  # Frontend (development mode)
-  frontend:
-    build:
-      context: .
-      dockerfile: docker/frontend.Dockerfile
-    container_name: intellistack-frontend
-    ports:
-      - "3000:3000"
-    environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:8000
-      - NEXT_PUBLIC_BETTER_AUTH_URL=http://localhost:3001
-    depends_on:
-      - backend
-      - auth-server
-
 volumes:
   postgres_data:
   redis_data:

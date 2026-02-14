@@ -33,7 +33,6 @@ Successfully implemented **6 out of 12 phases** of the IntelliStack platform, de
 **Purpose:** Project initialization
 - ✅ Monorepo structure
 - ✅ Backend project (Python 3.11+, FastAPI, SQLAlchemy 2.0)
-- ✅ Frontend project (Next.js 14, TypeScript, TanStack Query)
 - ✅ Content site (Docusaurus 3.7.0)
 - ✅ Docker configuration (PostgreSQL, Redis, Qdrant)
 - ✅ Development tools (ruff, black, eslint, prettier)
@@ -46,8 +45,6 @@ Successfully implemented **6 out of 12 phases** of the IntelliStack platform, de
 - ✅ Learning base models
 - ✅ Authentication system (JWT, RBAC, rate limiting)
 - ✅ API infrastructure (FastAPI, CORS, versioning)
-- ✅ Frontend core setup (auth, API client, stores, hooks)
-- ✅ Frontend layouts and auth pages
 
 #### Phase 3: Student Learning Journey (9/9 tasks)
 **Purpose:** Core learning features (P1 - MVP)
@@ -150,43 +147,8 @@ backend/
 - Cohere API (reranking)
 - PostgreSQL + Redis
 
-### Frontend Architecture
-
-```
-frontend/
-├── src/
-│   ├── app/                       # Next.js 14 App Router
-│   │   ├── (auth)/                # Auth pages
-│   │   ├── (dashboard)/           # Dashboard layout
-│   │   │   ├── learn/             # Learning pages
-│   │   │   ├── admin/             # Content management
-│   │   │   └── ai/chatbot/        # RAG chatbot
-│   │   └── (institution)/         # Institution admin
-│   ├── components/                # React components
-│   │   ├── learning/              # 7 components
-│   │   ├── admin/                 # 4 components
-│   │   ├── institution/           # 16 components
-│   │   └── ai/                    # 6 components
-│   ├── hooks/                     # Custom hooks
-│   │   ├── useAuth.ts
-│   │   ├── useProgress.ts
-│   │   ├── useStreaming.ts        # SSE streaming
-│   │   └── useAIChat.ts           # Chat management
-│   ├── stores/                    # Zustand stores
-│   │   ├── userStore.ts
-│   │   └── learningStore.ts
-│   └── lib/                       # Utilities
-│       ├── api.ts                 # TanStack Query client
-│       └── auth.ts                # Better-Auth client
-```
-
-**Key Technologies:**
-- Next.js 14 (App Router, Server Components)
-- TypeScript (type safety)
-- TanStack Query (data fetching)
-- Zustand (state management)
-- ShadCN UI (component library)
-- Tailwind CSS (styling)
+### Frontend
+> **Note:** The Next.js frontend has been removed. A new frontend will be added in a future phase.
 
 ---
 
@@ -195,14 +157,11 @@ frontend/
 ### Code Metrics
 | Metric | Count |
 |--------|-------|
-| Total Files | ~76 files |
+| Total Files | ~45 files (backend only) |
 | Backend Files | ~45 files |
-| Frontend Files | ~31 files |
-| Lines of Code | ~12,000+ |
+| Lines of Code | ~8,000+ (backend) |
 | Database Models | 25+ models |
 | API Endpoints | 40+ endpoints |
-| React Components | 33+ components |
-| Custom Hooks | 10+ hooks |
 
 ### Feature Coverage
 | Category | Completed | Total | % |
@@ -317,7 +276,6 @@ while (true) {
 
 ### Code Artifacts
 ✅ Complete backend API (40+ endpoints)
-✅ Complete frontend application (33+ components)
 ✅ Database schema (25+ models, migrations)
 ✅ Vector database integration
 ✅ Content structure (Docusaurus site)

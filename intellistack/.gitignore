@@ -45,16 +45,9 @@ coverage.xml
 *.cover
 
 # ======================
-# Node.js / Frontend
+# Node.js
 # ======================
 node_modules/
-.next/
-out/
-.nuxt/
-dist/
-.cache/
-*.tsbuildinfo
-next-env.d.ts
 .npm
 .yarn
 
