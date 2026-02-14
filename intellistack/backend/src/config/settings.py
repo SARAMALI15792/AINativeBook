@@ -62,15 +62,11 @@ class Settings(BaseSettings):
     rate_limit_unauth: int = 10  # requests per minute for unauthenticated
 
     # CORS
-    cors_origins: list[str] | str = Field(default=["http://localhost:3000", "http://localhost:3001"])
+    cors_origins: list[str] | str = Field(default=["http://localhost:3001"])
     cors_allow_credentials: bool = True
 
-    # Frontend URL (for OAuth redirects)
-    frontend_url: str = Field(default="http://localhost:3000", alias="FRONTEND_URL")
-
     # OAuth Providers
-    # NOTE: Redirect URIs must point to the BACKEND server (port 8000), not the frontend
-    # The backend handles the OAuth callback and then redirects to the frontend
+    # NOTE: Redirect URIs must point to the BACKEND server (port 8000)
     google_client_id: str | None = Field(default=None, alias="GOOGLE_CLIENT_ID")
     google_client_secret: str | None = Field(default=None, alias="GOOGLE_CLIENT_SECRET")
     google_redirect_uri: str = Field(default="http://localhost:8000/api/v1/auth/callback/google", alias="GOOGLE_REDIRECT_URI")
