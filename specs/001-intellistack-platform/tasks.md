@@ -19,12 +19,13 @@
 
 ```yaml
 # Auto-updated by /sp.implement
-last_completed: T040
-current_phase: 10
+last_completed: T040 (Phase 10: Community - Previous phases)
+current_phase: 11
 blocked_tasks: []
-total_tasks: 51
+total_tasks: 83  # 51 from Phases 0-10 + 32 new Phase 11 tasks
 completed_tasks: 51
-progress_percentage: 100.0
+progress_percentage: 61.4
+phase_11_status: "ACTIVE - BetterAuth + Design System Implementation"
 ```
 
 ---
@@ -802,6 +803,7 @@ progress_percentage: 100.0
 Phase 1: T003 | T004 | T005 | T006 | T007 (after T002)
 Phase 2: T008 | T009 → T010 | T011 → T012 | T013 → T014 | T015
 Phase 3: T017 | T018 → T019 → T020 | T021 | T022 | T023 | T024
+Phase 11: T101 → T102 → T103|T104|T105|T106 → (T107 → T108|T109|T110) | (T111|T112|T113|T114|T115) → T116|T117 → T118|T119|T120 → T121|T122|T123 → T124|T125 → T126 → T128|T129 → T131|T132
 ```
 
 ### Multi-Developer Assignment
@@ -815,6 +817,706 @@ Phase 3: T017 | T018 → T019 → T020 | T021 | T022 | T023 | T024
 
 ---
 
+## Phase 11: BetterAuth Implementation & Frontend Design Overhaul [~20 tasks]
+
+**Goal**: Upgrade authentication from custom JWT to BetterAuth + implement modern, attractive frontend design system
+**Time**: ~24 hours | **FRs**: FR-036 to FR-042 (enhanced), FR-061, FR-103
+**Status**: ACTIVE (User Request 2026-02-10)
+
+**Why This Matters**:
+- Security: BetterAuth provides battle-tested session management, CSRF protection, and secure token handling
+- UX: Modern design system makes platform more attractive and manageable
+- Scalability: Better session handling supports 10k concurrent users
+
+### Phase 11.A: Backend BetterAuth Integration (Sequential)
+
+- [ ] T101 [L] **Design Better-Auth Adapter Layer**
+  - **Files**:
+    - `intellistack/backend/src/core/auth/better_auth_adapter.py` (new)
+    - `intellistack/backend/src/core/auth/better_auth_config.py` (new)
+  - **Purpose**: Create abstraction layer between Better-Auth and FastAPI
+  - **Acceptance**:
+    - [ ] Adapter validates Better-Auth session tokens
+    - [ ] Adapter synchronizes user profile with PostgreSQL
+    - [ ] Config includes Google, GitHub OAuth setup
+    - [ ] CSRF protection enabled
+    - [ ] Documentation explains adapter architecture
+  - **Key Functions**:
+    - `validate_better_auth_session(token: str)` → User
+    - `sync_user_profile(better_auth_user: dict)` → User model
+    - `create_session(user_id: UUID)` → session_token
+
+- [ ] T102 [M] **Implement Better-Auth Middleware in FastAPI**
+  - **Files**:
+    - `intellistack/backend/src/shared/middleware.py` (update)
+    - `intellistack/backend/src/core/auth/service.py` (update)
+  - **Purpose**: Validate Better-Auth sessions on each request
+  - **Acceptance**:
+    - [ ] All `/api/v1/*` routes validate Better-Auth token
+    - [ ] Invalid/expired tokens return 401 Unauthorized
+    - [ ] User context injected into request state
+    - [ ] Rate limiting applies after auth validation
+    - [ ] Middleware includes proper error handling
+  - **Security Features**:
+    - [ ] HttpOnly cookie flag for session tokens
+    - [ ] SameSite=Strict for CSRF protection
+    - [ ] Automatic session refresh mechanism
+    - [ ] Session invalidation on logout
+
+- [ ] T103 [M] **Create Better-Auth API Endpoints**
+  - **Files**: `intellistack/backend/src/core/auth/routes.py` (update)
+  - **Endpoints**:
+    - `POST /api/v1/auth/login` - Enhanced with Better-Auth
+    - `POST /api/v1/auth/register` - Integrated with Better-Auth
+    - `POST /api/v1/auth/logout` - Session cleanup
+    - `GET /api/v1/auth/me` - Current user profile (from Better-Auth)
+    - `POST /api/v1/auth/refresh-session` - Token refresh
+    - `POST /api/v1/auth/social/google` - OAuth callback handler
+    - `POST /api/v1/auth/social/github` - OAuth callback handler
+  - **Acceptance**:
+    - [ ] Login returns httpOnly session cookie
+    - [ ] Register creates user with Better-Auth schema
+    - [ ] Logout clears session and cookies
+    - [ ] OAuth redirects properly configured
+    - [ ] RBAC still works with Better-Auth users
+
+- [ ] T104 [M] **Setup Better-Auth Database Schema**
+  - **Files**:
+    - `intellistack/backend/alembic/versions/xxx_better_auth_tables.py` (new migration)
+    - `intellistack/backend/src/core/auth/models.py` (update)
+  - **Purpose**: Add Better-Auth specific tables while maintaining existing schema
+  - **Acceptance**:
+    - [ ] `better_auth_sessions` table created
+    - [ ] `better_auth_oauth_accounts` table created
+    - [ ] Foreign keys to `user` table established
+    - [ ] Migration runs without conflicts
+    - [ ] Backward compatibility maintained for existing users
+    - [ ] Indexes added for session lookups
+
+- [ ] T105 [M] **Implement User Profile Synchronization**
+  - **Files**:
+    - `intellistack/backend/src/core/auth/service.py` (update)
+    - `intellistack/backend/src/tasks/auth_sync.py` (new)
+  - **Purpose**: Keep Better-Auth and IntelliStack user profiles in sync
+  - **Acceptance**:
+    - [ ] Profile updates in either system sync to the other
+    - [ ] Avatar/profile picture updates sync
+    - [ ] Email changes handled correctly
+    - [ ] Role assignments preserved
+    - [ ] Celery task runs sync every 5 minutes
+    - [ ] Conflict resolution strategy documented
+
+- [ ] T106 [M] **Add Enhanced Security Features**
+  - **Files**:
+    - `intellistack/backend/src/core/auth/service.py` (update)
+    - `intellistack/backend/src/config/settings.py` (update)
+  - **Security Features**:
+    - [ ] Password strength requirements (min 12 chars, uppercase, number, special char)
+    - [ ] Account lockout after 5 failed login attempts
+    - [ ] Rate limiting: 60 req/min for authenticated, 10 req/min for auth endpoints
+    - [ ] Session rotation after successful login
+    - [ ] CSRF tokens in all state-changing requests
+    - [ ] Secure token storage with encryption
+    - [ ] Account recovery email flow implemented
+    - [ ] Two-factor authentication hooks (ready for Phase 2)
+  - **Acceptance**:
+    - [ ] Password strength validated on registration
+    - [ ] Account lockout tested and working
+    - [ ] Rate limits enforced in headers
+    - [ ] CSRF tokens verified on POST/PUT/DELETE
+
+**Checkpoint**: Backend can authenticate users via Better-Auth, sessions managed securely
+
+---
+
+### Phase 11.B: Frontend Better-Auth Client (Sequential after 11.A)
+
+- [ ] T107 [L] **Setup Better-Auth Client in Next.js**
+  - **Files**:
+    - `intellistack/frontend/src/lib/better-auth.ts` (new)
+    - `intellistack/frontend/src/lib/auth-client.ts` (new)
+    - `intellistack/frontend/.env.local.example` (update)
+  - **Purpose**: Configure Better-Auth client for Next.js with all providers
+  - **Acceptance**:
+    - [ ] Client connects to backend auth service
+    - [ ] Google OAuth configured
+    - [ ] GitHub OAuth configured
+    - [ ] Session management working
+    - [ ] Environment variables properly set
+    - [ ] Cookie handling for session tokens
+  - **Configuration**:
+    - [ ] API URL points to backend
+    - [ ] Redirect URLs configured
+    - [ ] Cookie settings: HttpOnly, Secure, SameSite
+    - [ ] Session refresh interval set to 24 hours
+
+- [ ] T108 [L] **Implement Modern Login Page with Design System**
+  - **Files**: `intellistack/frontend/src/app/(auth)/login/page.tsx` (complete rewrite)
+  - **Design Elements**:
+    - [ ] Hero section with brand positioning
+    - [ ] Email/password input fields with validation
+    - [ ] Social login buttons (Google, GitHub) with icons
+    - [ ] "Remember me" checkbox
+    - [ ] "Forgot password" link
+    - [ ] Responsive design (mobile-first)
+    - [ ] Dark mode support
+    - [ ] Loading states with skeleton screens
+    - [ ] Error messaging with proper styling
+    - [ ] Success feedback animations
+  - **Components Used**:
+    - [ ] Form inputs with real-time validation
+    - [ ] Button component (primary variant)
+    - [ ] Card component for form container
+    - [ ] Divider for social login separator
+    - [ ] Link component for navigation
+    - [ ] Toast notifications for errors
+  - **Acceptance**:
+    - [ ] Page loads in < 2 seconds
+    - [ ] Form validates input before submission
+    - [ ] Social login buttons redirect properly
+    - [ ] Error messages clear and helpful
+    - [ ] Mobile view looks professional
+    - [ ] Accessibility WCAG 2.1 AA compliant
+    - [ ] Color contrast meets 4.5:1 ratio
+
+- [ ] T109 [L] **Implement Modern Register Page with Design System**
+  - **Files**: `intellistack/frontend/src/app/(auth)/register/page.tsx` (complete rewrite)
+  - **Design Elements**:
+    - [ ] Multi-step form (optional: email → password → profile)
+    - [ ] Email field with validation
+    - [ ] Password field with strength meter
+    - [ ] Password confirmation field
+    - [ ] Full name input
+    - [ ] Terms & conditions checkbox
+    - [ ] Social registration buttons
+    - [ ] Progress indicator for multi-step
+    - [ ] Responsive and mobile-optimized
+    - [ ] Dark mode support
+  - **Components Used**:
+    - [ ] Text input component
+    - [ ] Password strength meter (custom)
+    - [ ] Checkbox component
+    - [ ] Stepper component (if multi-step)
+    - [ ] Button states (loading, disabled)
+    - [ ] Alert component for terms
+  - **Features**:
+    - [ ] Real-time email validation
+    - [ ] Password strength requirements displayed
+    - [ ] Duplicate email check via API
+    - [ ] CAPTCHA integration (optional)
+    - [ ] Confirmation email sent after registration
+  - **Acceptance**:
+    - [ ] Form validates before submission
+    - [ ] Success redirects to email verification
+    - [ ] Error messages helpful and actionable
+    - [ ] Mobile layout clean and readable
+    - [ ] Password strength meter accurate
+    - [ ] Accessibility compliant
+
+- [ ] T110 [M] **Create Password Recovery Flow**
+  - **Files**:
+    - `intellistack/frontend/src/app/(auth)/forgot-password/page.tsx` (new)
+    - `intellistack/frontend/src/app/(auth)/reset-password/page.tsx` (new)
+    - `intellistack/backend/src/core/auth/routes.py` (update)
+  - **Frontend Components**:
+    - [ ] Email input form on forgot-password page
+    - [ ] Success message with instructions
+    - [ ] Reset token verification on reset-password page
+    - [ ] New password input with strength meter
+    - [ ] Password confirmation field
+  - **Acceptance**:
+    - [ ] Recovery email sent within 5 seconds
+    - [ ] Token expires after 24 hours
+    - [ ] Reset link works from email
+    - [ ] Password updated successfully
+    - [ ] User can login with new password
+
+**Checkpoint**: Modern auth pages working with Better-Auth, design system applied
+
+---
+
+### Phase 11.C: Frontend Design System Implementation (Parallel with 11.B)
+
+- [ ] T111 [L] [P] **Implement Complete Design Tokens & Theming**
+  - **Files**:
+    - `intellistack/frontend/src/styles/tokens.ts` (new)
+    - `intellistack/frontend/tailwind.config.ts` (update)
+    - `intellistack/frontend/src/app/globals.css` (update)
+  - **Colors**:
+    - [ ] Primary: Indigo 600 (#2563eb) + variants
+    - [ ] Secondary: Slate 500 (#64748b) + variants
+    - [ ] Success: Emerald 500 (#10b981)
+    - [ ] Warning: Amber 500 (#f59e0b)
+    - [ ] Danger: Red 500 (#ef4444)
+    - [ ] Neutral palette (Gray 50-900)
+    - [ ] Dark mode palette configured
+  - **Typography**:
+    - [ ] H1-H4 styles defined in Tailwind
+    - [ ] Body, small, caption variants
+    - [ ] Code typography (inline + blocks)
+    - [ ] Font stacks: Inter (primary), JetBrains Mono (code)
+  - **Spacing & Layout**:
+    - [ ] Spacing scale (xs-4xl)
+    - [ ] Breakpoints: 640px, 768px, 1024px, 1200px
+    - [ ] Container queries for responsive components
+    - [ ] Z-index scale (dropdown, sticky, modal, etc.)
+  - **Acceptance**:
+    - [ ] All colors accessible via `@apply` classes
+    - [ ] Dark mode toggle works globally
+    - [ ] Typography hierarchy clear and consistent
+    - [ ] Spacing creates visual rhythm
+    - [ ] Tailwind IntelliSense working
+
+- [ ] T112 [L] [P] **Create Reusable Component Library**
+  - **Files**:
+    - `intellistack/frontend/src/components/ui/button.tsx` (update)
+    - `intellistack/frontend/src/components/ui/input.tsx` (update)
+    - `intellistack/frontend/src/components/ui/card.tsx` (update)
+    - `intellistack/frontend/src/components/ui/form.tsx` (update)
+    - `intellistack/frontend/src/components/ui/dialog.tsx` (update)
+    - `intellistack/frontend/src/components/ui/select.tsx` (new)
+    - `intellistack/frontend/src/components/ui/badge.tsx` (new)
+    - `intellistack/frontend/src/components/ui/progress.tsx` (new)
+    - `intellistack/frontend/src/components/ui/tabs.tsx` (new)
+    - `intellistack/frontend/src/components/ui/toast.tsx` (update)
+  - **Components**:
+    - [ ] Button: Primary, secondary, ghost, danger + sizes + states
+    - [ ] Input: Text, email, password with validation states
+    - [ ] Card: Default, elevated, outlined variants
+    - [ ] Form: Label, helper text, error states
+    - [ ] Dialog: Modal with animations
+    - [ ] Select: Dropdown with search (Radix)
+    - [ ] Badge: Various colors for status
+    - [ ] Progress: Linear bar with percentage
+    - [ ] Tabs: Horizontal/vertical with icons
+    - [ ] Toast: Notifications with auto-dismiss
+  - **Features**:
+    - [ ] Accessible (ARIA labels, keyboard nav)
+    - [ ] Loading states for all interactive components
+    - [ ] Disabled states properly styled
+    - [ ] Focus indicators visible (WCAG AA)
+    - [ ] Responsive sizing
+    - [ ] Dark mode variants
+  - **Acceptance**:
+    - [ ] All components render correctly
+    - [ ] States (hover, active, disabled) working
+    - [ ] Animations smooth on low-end devices
+    - [ ] TypeScript types complete
+    - [ ] Storybook stories written for each
+
+- [ ] T113 [M] [P] **Build Layout Components**
+  - **Files**:
+    - `intellistack/frontend/src/components/layout/header.tsx` (new)
+    - `intellistack/frontend/src/components/layout/sidebar.tsx` (new)
+    - `intellistack/frontend/src/components/layout/footer.tsx` (new)
+    - `intellistack/frontend/src/components/layout/grid.tsx` (new)
+    - `intellistack/frontend/src/components/layout/container.tsx` (new)
+  - **Components**:
+    - [ ] Header: Navigation, logo, user menu, theme toggle
+    - [ ] Sidebar: Collapsible nav with icons, active states
+    - [ ] Footer: Links, copyright, socials
+    - [ ] Grid: Responsive 12-column layout
+    - [ ] Container: Max-width wrapper with gutters
+  - **Acceptance**:
+    - [ ] Navigation responsive (hamburger on mobile)
+    - [ ] Sidebar collapses on small screens
+    - [ ] Theme toggle changes all colors
+    - [ ] Links have hover states
+    - [ ] Mobile view clean and usable
+
+- [ ] T114 [M] [P] **Implement Accessibility Features**
+  - **Files**:
+    - `intellistack/frontend/src/components/ui/focus-ring.tsx` (new)
+    - `intellistack/frontend/src/hooks/useKeyboard.ts` (new)
+    - `intellistack/frontend/src/hooks/useScreenReader.ts` (new)
+    - `intellistack/frontend/src/lib/a11y.ts` (new)
+  - **Features**:
+    - [ ] Skip link to main content
+    - [ ] Focus indicators on all interactive elements
+    - [ ] Keyboard navigation support
+    - [ ] Screen reader testing with NVDA/JAWS
+    - [ ] Color contrast checker (min 4.5:1)
+    - [ ] Reduced motion support
+    - [ ] ARIA labels for icon-only buttons
+    - [ ] Form validation announcements
+    - [ ] Error message associations
+    - [ ] Loading state announcements
+  - **Acceptance**:
+    - [ ] Lighthouse accessibility score > 90
+    - [ ] Screen reader announces all content
+    - [ ] Keyboard tab order logical
+    - [ ] All colors meet WCAG AA
+    - [ ] Reduced motion respected
+
+- [ ] T115 [S] [P] **Create Dark Mode Implementation**
+  - **Files**:
+    - `intellistack/frontend/src/components/theme-provider.tsx` (update)
+    - `intellistack/frontend/src/hooks/useTheme.ts` (new)
+    - `intellistack/frontend/src/app/providers.tsx` (update)
+  - **Features**:
+    - [ ] System preference detection
+    - [ ] Manual toggle in header
+    - [ ] Persistence in localStorage
+    - [ ] Smooth transitions between themes
+    - [ ] All components styled for both modes
+    - [ ] Images adjust for dark mode
+  - **Acceptance**:
+    - [ ] Toggle switches immediately
+        - [ ] Preference persists on refresh
+    - [ ] All text readable in both modes
+
+**Checkpoint**: Design system complete, components reusable, auth pages beautiful
+
+---
+
+### Phase 11.D: Frontend Auth Integration & Page Updates (Sequential after 11.B, 11.C)
+
+- [ ] T116 [M] **Update Auth Store with Better-Auth**
+  - **Files**:
+    - `intellistack/frontend/src/stores/userStore.ts` (update)
+    - `intellistack/frontend/src/stores/authStore.ts` (new)
+    - `intellistack/frontend/src/hooks/useAuth.ts` (update)
+  - **Purpose**: Replace Zustand custom auth with Better-Auth integration
+  - **Acceptance**:
+    - [ ] Store syncs with Better-Auth session
+    - [ ] Login action calls Better-Auth
+    - [ ] Logout clears Better-Auth session
+    - [ ] User profile automatically populated
+    - [ ] Social login updates store
+    - [ ] Session refresh automatic
+
+- [ ] T117 [M] **Implement Protected Routes & Middleware**
+  - **Files**:
+    - `intellistack/frontend/src/middleware.ts` (new)
+    - `intellistack/frontend/src/components/protected-route.tsx` (new)
+    - `intellistack/frontend/src/app/(dashboard)/layout.tsx` (update)
+  - **Features**:
+    - [ ] Unauthenticated users redirect to login
+    - [ ] Role-based route protection
+    - [ ] Loading state while checking auth
+    - [ ] 401 handling with refresh attempt
+    - [ ] Session expiration handling
+  - **Acceptance**:
+    - [ ] Direct dashboard access redirects if not logged in
+    - [ ] Protected routes require valid session
+    - [ ] Roles enforced for admin routes
+
+- [ ] T118 [L] **Update Dashboard Layout with Design System**
+  - **Files**:
+    - `intellistack/frontend/src/app/(dashboard)/layout.tsx` (complete redesign)
+    - `intellistack/frontend/src/app/(dashboard)/page.tsx` (redesign)
+  - **Design Elements**:
+    - [ ] Modern header with logo + user menu + notifications
+    - [ ] Clean sidebar with stage navigation
+    - [ ] Welcome message personalized with user name
+    - [ ] Progress cards showing learning stages
+    - [ ] Quick actions (Start learning, View assignments, etc.)
+    - [ ] Responsive grid layout
+    - [ ] Dark mode support
+    - [ ] Smooth transitions and animations
+    - [ ] Loading states with skeleton screens
+  - **Components**:
+    - [ ] User avatar dropdown menu
+    - [ ] Stage progress cards
+    - [ ] Quick stats (completion %, badges earned)
+    - [ ] Upcoming assignments widget
+    - [ ] Notification center
+    - [ ] Theme toggle
+  - **Acceptance**:
+    - [ ] Page loads in < 2 seconds
+    - [ ] All elements responsive on mobile
+    - [ ] User information correct
+    - [ ] Navigation works smoothly
+    - [ ] Dark mode looks polished
+
+- [ ] T119 [M] **Create User Profile & Settings Pages**
+  - **Files**:
+    - `intellistack/frontend/src/app/(dashboard)/profile/page.tsx` (new)
+    - `intellistack/frontend/src/app/(dashboard)/settings/page.tsx` (new)
+    - `intellistack/frontend/src/components/profile-form.tsx` (new)
+    - `intellistack/frontend/src/components/settings-form.tsx` (new)
+  - **Profile Page**:
+    - [ ] Avatar upload with preview
+    - [ ] Name, email, bio editable
+    - [ ] Learning preferences (pace, style)
+    - [ ] Privacy settings
+    - [ ] Connected accounts (Google, GitHub)
+    - [ ] Saved learning path
+  - **Settings Page**:
+    - [ ] Notification preferences
+    - [ ] Email digest frequency
+    - [ ] Theme preference
+    - [ ] Language selection
+    - [ ] Accessibility options
+    - [ ] Password change
+    - [ ] Session management
+    - [ ] Account deletion (with 30-day soft delete)
+  - **Acceptance**:
+    - [ ] Profile updates reflected immediately
+    - [ ] Settings persist across sessions
+    - [ ] Avatar uploads working
+    - [ ] Validation prevents invalid entries
+
+- [ ] T120 [M] **Add Session & Logout Management**
+  - **Files**:
+    - `intellistack/frontend/src/components/user-menu.tsx` (update)
+    - `intellistack/frontend/src/hooks/useLogout.ts` (new)
+  - **Features**:
+    - [ ] User menu dropdown in header
+    - [ ] View profile link
+    - [ ] Settings link
+    - [ ] Sign out button
+    - [ ] Session timeout warning (5 min before)
+    - [ ] Auto-logout after inactivity
+    - [ ] Clear local storage on logout
+  - **Acceptance**:
+    - [ ] Logout clears all auth data
+    - [ ] Redirects to login page
+    - [ ] Cannot access protected routes after logout
+    - [ ] Session warning shown before timeout
+
+**Checkpoint**: Auth system fully integrated, dashboard beautifully designed
+
+---
+
+### Phase 11.E: Testing & Validation (Parallel with 11.D)
+
+- [ ] T121 [M] [P] **Write Better-Auth Integration Tests**
+  - **Files**:
+    - `intellistack/frontend/src/__tests__/auth.integration.test.ts` (new)
+    - `intellistack/backend/tests/integration/test_better_auth.py` (new)
+  - **Tests**:
+    - [ ] Login flow end-to-end
+    - [ ] Register flow end-to-end
+    - [ ] Social login (Google, GitHub)
+    - [ ] Session management
+    - [ ] Password reset flow
+    - [ ] Session expiration
+    - [ ] Concurrent sessions
+    - [ ] CSRF protection
+  - **Acceptance**:
+    - [ ] All tests pass
+    - [ ] Coverage > 80% for auth code
+
+- [ ] T122 [M] [P] **Frontend Design System Testing**
+  - **Files**:
+    - `intellistack/frontend/src/__tests__/components.test.tsx` (new)
+    - `intellistack/frontend/src/__tests__/accessibility.test.ts` (new)
+  - **Tests**:
+    - [ ] Component rendering
+    - [ ] State changes
+    - [ ] Responsive behavior
+    - [ ] Accessibility (WCAG AA)
+    - [ ] Dark mode switching
+    - [ ] Mobile interactions
+  - **Acceptance**:
+    - [ ] All components tested
+    - [ ] Accessibility audit passes
+    - [ ] Mobile interactions smooth
+
+- [ ] T123 [M] [P] **Create Storybook Component Documentation**
+  - **Files**:
+    - `intellistack/frontend/src/stories/` (entire directory)
+    - `intellistack/frontend/.storybook/config.ts` (update)
+  - **Stories**:
+    - [ ] Button component stories (all variants)
+    - [ ] Input component stories
+    - [ ] Card component stories
+    - [ ] Form component stories
+    - [ ] Layout component stories
+    - [ ] Auth pages stories
+  - **Acceptance**:
+    - [ ] Storybook runs without errors
+    - [ ] All components documented
+    - [ ] Interactive knobs for testing variants
+
+**Checkpoint**: Complete test coverage, design system validated
+
+---
+
+### Phase 11.F: Documentation & Deployment (Sequential)
+
+- [ ] T124 [M] **Update API Documentation for Better-Auth**
+  - **Files**:
+    - `intellistack/backend/docs/AUTH_API.md` (new)
+    - Update OpenAPI specs in `contracts/auth.openapi.yaml`
+  - **Content**:
+    - [ ] Better-Auth endpoints documented
+    - [ ] OAuth flow diagrams
+    - [ ] Session management explained
+    - [ ] Security features documented
+    - [ ] Example requests/responses
+    - [ ] Migration guide from old auth
+  - **Acceptance**:
+    - [ ] Documentation complete
+    - [ ] Examples runnable
+    - [ ] Clear for new developers
+
+- [ ] T125 [M] **Create Frontend Design System Documentation**
+  - **Files**:
+    - `intellistack/frontend/DESIGN_SYSTEM.md` (new)
+    - `intellistack/frontend/COMPONENT_GUIDE.md` (new)
+  - **Content**:
+    - [ ] Color system explained
+    - [ ] Typography hierarchy
+    - [ ] Component usage guide
+    - [ ] Accessibility guidelines
+    - [ ] Dark mode implementation
+    - [ ] Responsive design patterns
+    - [ ] Code examples
+  - **Acceptance**:
+    - [ ] Clear and comprehensive
+    - [ ] Easy for developers to follow
+
+- [ ] T126 [M] **Deploy to Staging Environment**
+  - **Files**:
+    - `.github/workflows/deploy-staging.yml` (update)
+    - `docker-compose.staging.yml` (update)
+  - **Tasks**:
+    - [ ] Build Docker images with new auth
+    - [ ] Deploy to Fly.io staging
+    - [ ] Test all auth flows in staging
+    - [ ] Verify database migrations
+    - [ ] Check performance on staging
+  - **Acceptance**:
+    - [ ] All auth features working
+    - [ ] No errors in logs
+    - [ ] Performance acceptable
+
+- [ ] T127 [S] **Create User Migration Documentation**
+  - **Files**: `intellistack/docs/MIGRATION_GUIDE.md` (new)
+  - **Content**:
+    - [ ] Timeline for Better-Auth rollout
+    - [ ] User action required
+    - [ ] Support contacts
+    - [ ] FAQ for common questions
+    - [ ] Troubleshooting guide
+  - **Acceptance**:
+    - [ ] Clear and helpful
+    - [ ] Addresses common concerns
+
+---
+
+### Phase 11.G: Production Rollout & Monitoring
+
+- [ ] T128 [M] **Setup Monitoring & Alerting**
+  - **Files**:
+    - `intellistack/observability/auth-alerts.yaml` (new)
+    - `intellistack/backend/src/monitoring/auth_metrics.py` (new)
+  - **Metrics**:
+    - [ ] Failed login attempts
+    - [ ] Session creation rate
+    - [ ] OAuth error rates
+    - [ ] Password reset requests
+    - [ ] Account lockout events
+    - [ ] Response times for auth endpoints
+  - **Acceptance**:
+    - [ ] Metrics being collected
+    - [ ] Alerts configured for failures
+
+- [ ] T129 [M] **Gradual Production Rollout**
+  - **Tasks**:
+    - [ ] Deploy to 10% of users
+    - [ ] Monitor for 24 hours
+    - [ ] Collect feedback
+    - [ ] Deploy to 50% of users
+    - [ ] Monitor for 24 hours
+    - [ ] Full production deployment
+    - [ ] Monitor for issues
+  - **Acceptance**:
+    - [ ] No major issues during rollout
+    - [ ] User feedback positive
+    - [ ] Performance acceptable
+
+- [ ] T130 [S] **Create Rollback Plan**
+  - **Files**: `intellistack/ROLLBACK_PLAN.md` (new)
+  - **Content**:
+    - [ ] Rollback procedure if issues arise
+    - [ ] Data migration rollback steps
+    - [ ] Communication plan for users
+    - [ ] Incident response procedures
+  - **Acceptance**:
+    - [ ] Clear and executable
+
+---
+
+### Phase 11.H: Post-Launch & Optimization (Ongoing)
+
+- [ ] T131 [M] **Gather User Feedback & Analytics**
+  - **Tasks**:
+    - [ ] Survey users about new design
+    - [ ] Analyze login flow metrics
+    - [ ] Track auth error rates
+    - [ ] Monitor user satisfaction
+  - **Acceptance**:
+    - [ ] Feedback collected
+    - [ ] Issues identified for improvement
+
+- [ ] T132 [S] **Performance Optimization**
+  - **Files**:
+    - `intellistack/frontend/src/components/` (optimize)
+    - `intellistack/backend/src/core/auth/` (optimize)
+  - **Tasks**:
+    - [ ] Code split auth pages
+    - [ ] Lazy load components
+    - [ ] Optimize images
+    - [ ] Cache optimization
+    - [ ] Bundle size analysis
+  - **Acceptance**:
+    - [ ] Page load times < 2 seconds
+    - [ ] Core bundle < 100KB
+
+---
+
+## Summary: Phase 11 Metrics
+
+| Metric | Value |
+|--------|-------|
+| Total Tasks | 32 |
+| Parallelizable Tasks | 8 |
+| Estimated Time | 24-30 hours |
+| Risk Level | Low (Battle-tested tech) |
+| MVP Completion | T101-T120 (Core auth + design) |
+| Full Completion | T101-T132 (With monitoring & optimization) |
+
+### Dependency Graph (Phase 11)
+
+```
+T101 (Backend Adapter)
+  ↓
+T102 (Middleware)
+  ↓
+T103-T105 (API & Sync)
+  ↓
+T106 (Security)
+  ├─→ T107 (Frontend Client)
+  │     ↓
+  │   T108-T110 (Auth Pages)
+  │     ↓
+  │   T116-T120 (Integration)
+  │
+  └─→ T111-T115 [P] (Design System)
+        ↓
+      T121-T123 (Testing)
+        ↓
+      T124-T127 (Docs & Deploy)
+        ↓
+      T128-T130 (Monitoring & Rollout)
+        ↓
+      T131-T132 (Post-Launch)
+```
+
+### Task Assignment Recommendations
+
+| Developer | Phase 11 Focus | Tasks |
+|-----------|---------|-------|
+| Backend Dev | Auth & Backend | T101-T106, T124, T128 |
+| Frontend Dev | Design & Pages | T107-T120, T125, T132 |
+| QA/Testing | Testing & Docs | T121-T123, T129 |
+| DevOps | Deployment | T126-T127, T129-T130 |
+
+---
+
 ## Notes
 
 - Tasks reduced from 254 → 51 through bundling
@@ -823,3 +1525,5 @@ Phase 3: T017 | T018 → T019 → T020 | T021 | T022 | T023 | T024
 - T-shirt sizes indicate relative effort
 - [P] marks enable parallel execution
 - Checkpoints validate phase completion before proceeding
+- **NEW**: Phase 11 focuses on security (Better-Auth) and UX (design system)
+- Phase 11 can run parallel with other phases after Phase 2 completes

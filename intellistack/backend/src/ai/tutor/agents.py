@@ -5,13 +5,16 @@ Latest patterns from Context7: OpenAI Agents Python SDK
 """
 
 import asyncio
+import uuid
 from typing import Annotated, List, Dict, Optional, Any
 from pydantic import BaseModel, Field
 from enum import Enum
 
-from agents import Agent, Runner, SQLiteSession, function_tool
+from agents import Agent, Runner, function_tool
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from .models import IntentType
+from .session_store import PostgresSession
 from .guardrails import (
     SocraticGuardrails,
     CodeSolutionGuardrails,
@@ -354,34 +357,41 @@ async def run_tutor_conversation(
     agent: Agent,
     user_message: str,
     session_id: str,
-    db_path: str = "tutor_conversations.db",
+    db_session: AsyncSession,
+    user_id: Optional[uuid.UUID] = None,
 ) -> Dict[str, Any]:
     """
-    Run a single turn of tutor conversation with session persistence
+    Run a single turn of tutor conversation with PostgreSQL session persistence
 
     Args:
         agent: The tutor agent
         user_message: Student's message
         session_id: Unique conversation ID
-        db_path: SQLite database path for session storage
+        db_session: SQLAlchemy async session for PostgreSQL storage
+        user_id: Optional user UUID for associating session with user
 
     Returns:
         Result dictionary with final_output and metadata
     """
-    # Create persistent session (FR-033, FR-034)
-    session = SQLiteSession(session_id, db_path)
+    # Create persistent session using PostgreSQL (FR-033, FR-034)
+    # Replaces SQLiteSession from OpenAI Agents SDK
+    session = PostgresSession(session_id, db_session, user_id)
 
     # Run agent with conversation context
     result = await Runner.run(
         agent,
         user_message,
-        session=session
+        context=await session.get_conversation_history(),
     )
+
+    # Store the exchange in PostgreSQL
+    await session.add_item("user", user_message)
+    await session.add_item("assistant", result.final_output)
 
     return {
         "final_output": result.final_output,
         "session_id": session_id,
-        "turns": len(await session.get_items()) // 2,  # User + Assistant = 1 turn
+        "turns": await session.get_turn_count(),
     }
 
 
@@ -393,9 +403,20 @@ def run_tutor_sync(
     agent: Agent,
     user_message: str,
     session_id: str,
-    db_path: str = "tutor_conversations.db",
+    db_session: AsyncSession,
+    user_id: Optional[uuid.UUID] = None,
 ) -> Dict[str, Any]:
     """
     Synchronous wrapper for FastAPI routes
+
+    Args:
+        agent: The tutor agent
+        user_message: Student's message
+        session_id: Unique conversation ID
+        db_session: SQLAlchemy async session for PostgreSQL storage
+        user_id: Optional user UUID for associating session with user
+
+    Returns:
+        Result dictionary with final_output and metadata
     """
-    return asyncio.run(run_tutor_conversation(agent, user_message, session_id, db_path))
+    return asyncio.run(run_tutor_conversation(agent, user_message, session_id, db_session, user_id))

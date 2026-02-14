@@ -9,15 +9,22 @@ from fastapi.responses import JSONResponse
 
 from src.config.logging import get_logger, setup_logging
 from src.config.settings import Settings, get_settings
-from src.shared.database import close_db, init_db
+from src.shared.database import close_db, ensure_tables_created, init_db, seed_initial_data_if_needed
 from src.shared.exceptions import IntelliStackError
 
 # Import routers
 from src.ai.rag.routes import router as rag_router
-from src.core.auth.routes import router as auth_router
+from src.ai.chatkit.routes import router as chatkit_router
 from src.core.content.routes import router as content_router
 from src.core.institution.routes import router as institution_router
 from src.core.learning.routes import router as learning_router
+from src.core.users.routes import router as users_router
+
+# Import middleware
+from src.shared.middleware import (
+    JWKSAuthMiddleware,
+    RequestLoggingMiddleware,
+)
 
 logger = get_logger(__name__)
 
@@ -31,6 +38,12 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     logger.info("Starting IntelliStack API", environment=settings.environment)
     setup_logging(settings)
     init_db(settings)
+
+    # Skip auto-table creation - PostgreSQL uses Alembic migrations
+    await ensure_tables_created(settings)
+
+    # Seed initial data if needed (roles, etc.)
+    await seed_initial_data_if_needed(settings)
 
     yield
 
@@ -62,6 +75,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    # Add JWT authentication middleware (validates Better-Auth tokens from Authorization header or cookies)
+    app.add_middleware(JWKSAuthMiddleware)
+
+    # Add request logging middleware
+    app.add_middleware(RequestLoggingMiddleware)
 
     # Exception handlers
     @app.exception_handler(IntelliStackError)
@@ -122,11 +141,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         }
 
     # Register routers with API prefix
-    app.include_router(auth_router, prefix="/api/v1")
     app.include_router(content_router, prefix="/api/v1")
     app.include_router(institution_router, prefix="/api/v1")
     app.include_router(learning_router, prefix="/api/v1")
     app.include_router(rag_router, prefix="/api/v1")
+    app.include_router(chatkit_router)  # ChatKit has its own /api/v1/chatkit prefix
+    app.include_router(users_router)  # Users has its own /api/v1/users prefix
 
     return app
 

@@ -19,6 +19,34 @@ services:
       timeout: 5s
       retries: 5
 
+  # Better-Auth OIDC Server
+  auth-server:
+    build:
+      context: ./auth-server
+      dockerfile: Dockerfile
+    container_name: intellistack-auth-server
+    ports:
+      - "3001:3001"
+    environment:
+      - DATABASE_URL=postgresql://intellistack:intellistack_dev@postgres:5432/intellistack
+      - BETTER_AUTH_SECRET=dev-secret-key-min32-chars-for-jwt-signing
+      - BETTER_AUTH_URL=http://localhost:3001
+      - BETTER_AUTH_TRUST_HOST=true
+      - NODE_ENV=development
+      - RESEND_API_KEY=${RESEND_API_KEY:-sk-placeholder}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-}
+      - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID:-}
+      - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
   # Redis Cache
   redis:
     image: redis:7-alpine
@@ -62,6 +90,8 @@ services:
       - QDRANT_PORT=6333
       - SECRET_KEY=dev-secret-key-change-in-production-min32chars
       - OPENAI_API_KEY=${OPENAI_API_KEY:-sk-placeholder}
+      - BETTER_AUTH_URL=http://auth-server:3001
+      - BETTER_AUTH_JWKS_URL=http://auth-server:3001/.well-known/jwks.json
       - ENVIRONMENT=development
       - DEBUG=true
     depends_on:
@@ -71,6 +101,8 @@ services:
         condition: service_healthy
       qdrant:
         condition: service_started
+      auth-server:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
@@ -87,8 +119,10 @@ services:
       - "3000:3000"
     environment:
       - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NEXT_PUBLIC_BETTER_AUTH_URL=http://localhost:3001
     depends_on:
       - backend
+      - auth-server
 
 volumes:
   postgres_data:

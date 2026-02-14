@@ -10,7 +10,10 @@ from sqlalchemy.ext.asyncio import (
 )
 from sqlalchemy.orm import DeclarativeBase
 
+from src.config.logging import get_logger
 from src.config.settings import Settings, get_settings
+
+logger = get_logger(__name__)
 
 
 class Base(DeclarativeBase):
@@ -86,3 +89,43 @@ async def drop_tables() -> None:
 
     async with _engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
+
+
+async def ensure_tables_created(settings: Settings) -> None:
+    """Create tables via Alembic migrations (PostgreSQL)."""
+    if _engine is None:
+        raise RuntimeError("Database not initialized. Call init_db() first.")
+
+    # PostgreSQL requires migrations - skip auto-creation
+    logger.info("Using PostgreSQL - tables managed via Alembic migrations")
+    return
+
+
+async def seed_initial_data_if_needed(settings: Settings) -> None:
+    """Seed essential data (roles) if database is empty."""
+    if _engine is None or _async_session_factory is None:
+        raise RuntimeError("Database not initialized. Call init_db() first.")
+
+    from sqlalchemy import select
+    from src.core.auth.models import Role, RoleName
+
+    async with _async_session_factory() as session:
+        # Check if roles exist
+        result = await session.execute(select(Role).limit(1))
+        if result.scalar_one_or_none():
+            logger.info("Database already seeded, skipping")
+            return
+
+        # Seed essential roles
+        logger.info("Seeding initial roles...")
+        roles = [
+            Role(name=RoleName.STUDENT.value, description="Default student user"),
+            Role(name=RoleName.AUTHOR.value, description="Content author"),
+            Role(name=RoleName.INSTRUCTOR.value, description="Course instructor"),
+            Role(name=RoleName.INSTITUTION_ADMIN.value, description="Institution administrator"),
+            Role(name=RoleName.PLATFORM_ADMIN.value, description="Platform administrator"),
+        ]
+        for role in roles:
+            session.add(role)
+        await session.commit()
+        logger.info("Initial roles seeded successfully")

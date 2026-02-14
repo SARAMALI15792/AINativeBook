@@ -421,6 +421,18 @@ A student asks questions about textbook content and receives AI-generated answer
 
 - **FR-115**: System MUST support automated deployment via documented pipeline.
 
+#### OAuth & UI Enhancements (FR-116 to FR-120)
+
+- **FR-116**: System MUST support Google OAuth 2.0 login with configurable client ID, client secret, and redirect URI.
+
+- **FR-117**: System MUST support GitHub OAuth login with configurable client ID, client secret, and redirect URI.
+
+- **FR-118**: System MUST redirect authenticated users (via email or OAuth) to the learning content page (`/learn`) after successful login or registration.
+
+- **FR-119**: System MUST display the platform logo in circular form (`rounded-full`) consistently across all pages including landing, authentication, and dashboard navigation.
+
+- **FR-120**: System MUST feature animated brand panels on authentication pages with floating background elements, staggered text animations, and feature/stats highlights to convey platform value proposition.
+
 ---
 
 ### Key Entities
@@ -997,6 +1009,399 @@ User Request → Classify Intent →
         ├── Attempt 1-3: Polite redirect + explain philosophy
         ├── Attempt 4-5: Cooldown + alternatives offered
         └── Attempt 6+: Escalate to instructor
+```
+
+---
+
+## Authentication System Upgrade (v2)
+
+### Overview
+
+This section details the upgrade from custom JWT implementation to Better Auth, enhancing security, user experience, and extensibility.
+
+### Current State Analysis
+
+- **Backend**: Custom JWT implementation with SQLAlchemy models (User, Role, UserRole, Session)
+- **Frontend**: Zustand store with localStorage token management
+- **Architecture**: FastAPI backend with Next.js frontend
+
+### Target Architecture
+
+- **Frontend Authentication**: Better Auth for Next.js with enhanced security features
+- **Backend Integration**: Adapter layer in FastAPI to synchronize with Better Auth sessions
+- **Database**: Maintain existing PostgreSQL schema with enhanced session management
+- **Security**: Improved session handling, CSRF protection, and secure token management
+
+### Technical Implementation
+
+#### Phase 1: Better Auth Integration
+1. Install Better Auth in the frontend
+2. Configure social login providers (Google, GitHub, etc.)
+3. Implement email/password authentication
+4. Set up session management with proper expiration
+
+#### Phase 2: Backend Adapter Development
+1. Create FastAPI middleware to validate Better Auth sessions
+2. Develop user profile synchronization between systems
+3. Implement role-based access control (RBAC) integration
+4. Update existing API endpoints to work with new authentication
+
+#### Phase 3: Migration Strategy
+1. Maintain backward compatibility during transition
+2. Gradually migrate existing users to new system
+3. Update all authentication-dependent features
+4. Thorough testing of all authentication flows
+
+### Enhanced Security Features
+
+- Secure session storage with HttpOnly cookies
+- Automatic session refresh
+- Improved password hashing (Argon2 or scrypt)
+- Rate limiting for authentication endpoints
+- Account lockout mechanisms
+- Automatic session rotation
+- Secure token storage
+- Protection against session fixation
+- Improved CSRF protection
+- Stronger password requirements
+- Password strength meter
+- Account recovery mechanisms
+- Two-factor authentication support
+
+### API Contract Updates
+
+#### Authentication Endpoints
+- `/api/v1/auth/login` → Updated to work with Better Auth
+- `/api/v1/auth/register` → Integrated with Better Auth
+- `/api/v1/auth/me` → Enhanced user profile data
+- New endpoints for social login integration
+
+#### Session Management
+- Automatic session synchronization between systems
+- Cross-service session validation
+- Improved error handling for expired sessions
+
+### OAuth Configuration Requirements
+
+#### OAuth Provider Settings (FR-133 to FR-135)
+- **FR-133**: System MUST support configurable OAuth providers (Google, GitHub) via environment variables
+- **FR-134**: System MUST support configurable post-login redirect paths (default: `/learn`)
+- **FR-135**: System MUST support configurable post-logout redirect paths (default: `/login`)
+
+#### OAuth Environment Variables
+```
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+GOOGLE_REDIRECT_URI=http://localhost:3000/api/auth/callback/google
+
+GITHUB_CLIENT_ID=your_github_client_id
+GITHUB_CLIENT_SECRET=your_github_client_secret
+GITHUB_REDIRECT_URI=http://localhost:3000/api/auth/callback/github
+
+POST_LOGIN_REDIRECT_PATH=/learn
+POST_LOGOUT_REDIRECT_PATH=/login
+```
+
+### Frontend Component Updates
+
+#### Authentication Components
+- Modern login/register forms with social login options
+- Enhanced user profile management
+- Improved error handling and user feedback
+- Responsive design for all device sizes
+
+### Testing Strategy
+
+#### Unit Tests
+- Authentication flow validation
+- Session management testing
+- Security vulnerability checks
+- Error condition handling
+
+#### Integration Tests
+- End-to-end authentication workflows
+- Social login functionality
+- Role-based access control
+- Session synchronization
+
+#### Performance Tests
+- Concurrent user authentication
+- Session validation performance
+- Database query optimization
+- API response times
+
+### Rollout Plan
+
+#### Staging Environment
+- Deploy to staging first
+- Internal testing with team members
+- Performance validation
+- Security audit
+
+#### Production Rollout
+- Gradual rollout to users
+- Monitoring and alerting setup
+- Rollback procedures prepared
+- User communication plan
+
+### Migration Considerations
+
+#### Backward Compatibility
+- Support for existing JWT tokens during transition
+- Gradual rollout to minimize disruption
+- Fallback mechanisms for authentication failures
+- Comprehensive testing of all user flows
+
+#### Data Migration
+- User account synchronization
+- Role preservation during migration
+- Session continuity where possible
+- Audit trail for migration activities
+
+---
+
+## Frontend Experience Redesign (v2)
+
+### Overview
+
+Comprehensive redesign of the IntelliStack platform's frontend user experience, focusing on improved aesthetics, usability, accessibility, and learning effectiveness.
+
+### Current State Analysis
+
+- **Technology Stack**: Next.js, Tailwind CSS, Radix UI, Zustand
+- **UI Components**: Basic implementation with standard styling
+- **User Experience**: Functional but lacking modern design principles
+- **Accessibility**: Basic compliance, room for improvement
+
+### Design Philosophy
+
+- **Modern Minimalism**: Clean, uncluttered interfaces that focus on content
+- **Learning-Centric**: Design choices that enhance comprehension and retention
+- **Accessibility First**: Full compliance with WCAG 2.1 AA standards
+- **Responsive Excellence**: Seamless experience across all device sizes
+
+### Color System
+
+#### Primary Palette
+- **Primary**: `#2563eb` (Indigo 600) - Main brand color for CTAs and highlights
+- **Primary Dark**: `#1d4ed8` (Indigo 700) - Hover states and emphasis
+- **Secondary**: `#64748b` (Slate 500) - Supporting elements
+- **Success**: `#10b981` (Emerald 500) - Positive feedback
+- **Warning**: `#f59e0b` (Amber 500) - Warnings and caution
+- **Danger**: `#ef4444` (Red 500) - Errors and destructive actions
+
+#### Neutral Palette
+- **Background**: `#f8fafc` (Gray 50) - Main background
+- **Surface**: `#ffffff` - Card and modal backgrounds
+- **Text Primary**: `#1e293b` (Slate 800) - Main text
+- **Text Secondary**: `#64748b` (Slate 500) - Supporting text
+- **Border**: `#e2e8f0` (Gray 200) - Borders and dividers
+
+#### Dark Mode Palette
+- **Background**: `#0f172a` (Slate 900) - Main background
+- **Surface**: `#1e293b` (Slate 800) - Card and modal backgrounds
+- **Text Primary**: `#f1f5f9` (Slate 100) - Main text
+- **Text Secondary**: `#94a3b8` (Slate 400) - Supporting text
+
+### Typography System
+
+#### Font Stack
+- **Primary**: Inter, system-ui, sans-serif
+- **Monospace**: JetBrains Mono, ui-monospace, monospace
+
+#### Hierarchy
+- **H1**: 2.5rem (40px), Bold, Leading 8
+- **H2**: 2rem (32px), Semi-bold, Leading 7
+- **H3**: 1.5rem (24px), Semi-bold, Leading 6
+- **H4**: 1.25rem (20px), Medium, Leading 6
+- **Body Large**: 1.125rem (18px), Regular, Leading 7
+- **Body**: 1rem (16px), Regular, Leading 6
+- **Small**: 0.875rem (14px), Regular, Leading 5
+- **Caption**: 0.75rem (12px), Regular, Leading 4
+
+#### Code Typography
+- **Inline Code**: 0.875rem, JetBrains Mono, Background: Gray 100
+- **Code Blocks**: 0.875rem, JetBrains Mono, Line height: 1.5
+
+### Layout Structure
+
+#### Grid System
+- **Container**: Max-width 1200px, Centered
+- **Gutters**: 1.5rem (24px) on desktop, 1rem (16px) on mobile
+- **Breakpoints**:
+  - Mobile: 640px
+  - Tablet: 768px
+  - Desktop: 1024px
+  - Large: 1200px
+
+#### Spacing Scale
+- **xs**: 0.25rem (4px)
+- **sm**: 0.5rem (8px)
+- **md**: 1rem (16px)
+- **lg**: 1.5rem (24px)
+- **xl**: 2rem (32px)
+- **2xl**: 3rem (48px)
+- **3xl**: 4rem (64px)
+
+### Component Design
+
+#### Navigation
+- **Top Navigation**: Fixed header with logo, main navigation, user menu
+- **Sidebar**: Collapsible navigation for dashboard sections
+- **Breadcrumbs**: Clear path indication for content hierarchy
+- **Mobile Navigation**: Hamburger menu with slide-out panel
+
+#### Content Areas
+- **Hero Sections**: Full-width banners with clear CTAs
+- **Card Layouts**: Consistent spacing and shadow effects
+- **Content Grids**: Responsive grid for lessons and resources
+- **Progress Indicators**: Visual representation of learning progress
+
+#### Interactive Elements
+- **Buttons**: Primary, secondary, ghost, and danger variants
+- **Inputs**: Consistent styling with validation states
+- **Cards**: Elevated surfaces with subtle shadows
+- **Modals**: Centered overlays with proper focus management
+
+### User Flow Optimization
+
+#### Learning Path
+1. **Dashboard**: Clear overview of progress and next steps
+2. **Stage Selection**: Visual representation of learning stages
+3. **Content Consumption**: Distraction-free reading experience
+4. **Practice Area**: Integrated exercises and simulations
+5. **Assessment**: Clear feedback and progress tracking
+
+#### Content Hierarchy
+- **Clear Headings**: Logical progression from H1 to H4
+- **Visual Separation**: Adequate spacing between content blocks
+- **Progressive Disclosure**: Complex information revealed gradually
+- **Consistent Navigation**: Predictable placement of navigation elements
+
+### Accessibility Features
+
+#### Keyboard Navigation
+- **Focus Indicators**: Visible and consistent focus rings
+- **Logical Tab Order**: Follows visual flow of content
+- **Skip Links**: Direct access to main content
+- **Keyboard Shortcuts**: For common actions
+
+#### Screen Reader Support
+- **Semantic HTML**: Proper heading structure and landmarks
+- **ARIA Labels**: Descriptive labels for interactive elements
+- **Alternative Text**: Descriptive alt text for all images
+- **Live Regions**: Dynamic content updates announced
+
+#### Visual Accessibility
+- **Color Contrast**: Minimum 4.5:1 ratio for normal text
+- **Text Scaling**: Support for browser zoom up to 200%
+- **Motion Reduction**: Respect user preference for reduced motion
+- **High Contrast Mode**: Support for system high contrast
+
+### Learning-Specific UI Patterns
+
+#### Content Presentation
+- **Progressive Disclosure**: Complex concepts broken into digestible parts
+- **Interactive Elements**: Code snippets with copy functionality
+- **Media Integration**: Embedded videos and simulations
+- **Note-Taking**: Integrated highlighting and annotation tools
+
+#### Feedback Systems
+- **Progress Tracking**: Visual indicators of completion
+- **Achievement Recognition**: Badges and milestone celebrations
+- **Constructive Feedback**: Clear guidance for improvement
+- **Self-Assessment**: Built-in knowledge checks
+
+#### Personalization Features
+- **Theme Preferences**: Light/dark mode toggle
+- **Reading Preferences**: Font size and contrast adjustments
+- **Language Options**: Multi-language support (starting with Urdu)
+- **Layout Preferences**: Compact vs spacious layout options
+
+### UI Animation System
+
+#### Animation Requirements (FR-136 to FR-140)
+- **FR-136**: System MUST provide smooth CSS animations for page transitions and component mounting
+- **FR-137**: System MUST support fade-in, slide-in, and scale-in animation variants
+- **FR-138**: System MUST respect user preference for reduced motion (`prefers-reduced-motion`)
+- **FR-139**: System MUST use circular branding elements (logo, avatars) consistently across all pages
+- **FR-140**: System MUST animate auth pages with staggered entrance animations
+
+#### Animation Specifications
+| Animation | Duration | Easing | Use Case |
+|-----------|----------|--------|----------|
+| fade-in | 0.5s | ease-out | Content appearance |
+| fade-in-up | 0.6s | ease-out | Hero sections, panels |
+| slide-in-right | 0.5s | ease-out | Sidebar, navigation |
+| scale-in | 0.3s | ease-out | Modals, cards, forms |
+| pulse-soft | 2s | ease-in-out | Loading indicators |
+| shimmer | 2s | linear | Skeleton loaders |
+| float | 3s | ease-in-out | Floating elements |
+| glow | 2s | ease-in-out | Brand highlights |
+
+#### Logo Design Standard
+- **Shape**: Circular (`rounded-full`) for all logo containers
+- **Desktop Size**: 48px (w-12 h-12)
+- **Mobile Size**: 40px (w-10 h-10)
+- **Background**: White with 20% opacity on brand gradient
+- **Animation**: Glow effect on brand panels
+
+### Performance Considerations
+
+#### Loading States
+- **Skeleton Screens**: Placeholder shapes matching content layout
+- **Progressive Loading**: Content loads in priority order
+- **Smart Caching**: Frequently accessed content cached locally
+- **Image Optimization**: Lazy loading and proper sizing
+
+#### Responsiveness
+- **Touch Targets**: Minimum 44px touch targets
+- **Gesture Support**: Swipe gestures for navigation
+- **Orientation Handling**: Proper layout adjustment for portrait/landscape
+- **Network Resilience**: Offline capability for cached content
+
+### Component Library
+
+#### Core Components
+- **Button**: Primary, secondary, ghost, and danger variants
+- **Card**: Content containers with consistent styling
+- **Input**: Text, password, textarea with validation states
+- **Select**: Dropdown menus with search capability
+- **Modal**: Overlay dialogs with proper focus management
+
+#### Learning Components
+- **Progress Bar**: Visual representation of completion
+- **Badge Display**: Achievement recognition system
+- **Code Block**: Syntax-highlighted code with copy functionality
+- **Quiz Interface**: Interactive assessment components
+- **Simulation Viewer**: Embedded simulation environments
+
+#### Layout Components
+- **Header**: Top navigation with branding and user menu
+- **Sidebar**: Collapsible navigation for dashboard sections
+- **Grid**: Responsive grid system for content organization
+- **Breadcrumb**: Navigation path indicator
+- **Footer**: Site-wide footer with important links
+
+### Implementation Approach
+
+#### Phase 1: Foundation
+- Establish design system and component library
+- Implement new color palette and typography
+- Create reusable component templates
+- Update global styles and layout
+
+#### Phase 2: Component Migration
+- Migrate existing components to new design system
+- Implement new interactive elements
+- Add accessibility features
+- Update layout components
+
+#### Phase 3: Integration & Testing
+- Integrate new components across application
+- Perform accessibility audit
+- Test responsive behavior
+- User acceptance testing
 ```
 
 ---

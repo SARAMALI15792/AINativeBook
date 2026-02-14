@@ -42,6 +42,55 @@
       "plugin": "plugin---docusaurus-debugb-38-ad3"
     }
   },
+  "/forgot-password-c2e": {
+    "__comp": "__comp---site-src-pages-forgot-password-tsxed-3-6c3",
+    "__context": {
+      "plugin": "plugin---forgot-passworda-74-3af"
+    },
+    "config": "config---forgot-password-5-e-9-749"
+  },
+  "/login-f43": {
+    "__comp": "__comp---site-src-pages-login-tsx-34-b-c7d",
+    "__context": {
+      "plugin": "plugin---forgot-passworda-74-3af"
+    },
+    "config": "config---forgot-password-5-e-9-749"
+  },
+  "/onboarding/-e12": {
+    "__comp": "__comp---site-src-pages-onboarding-index-tsx-004-97f",
+    "__context": {
+      "plugin": "plugin---forgot-passworda-74-3af"
+    },
+    "config": "config---forgot-password-5-e-9-749"
+  },
+  "/profile-90e": {
+    "__comp": "__comp---site-src-pages-profile-tsxe-6-e-75e",
+    "__context": {
+      "plugin": "plugin---forgot-passworda-74-3af"
+    },
+    "config": "config---forgot-password-5-e-9-749"
+  },
+  "/register-d3a": {
+    "__comp": "__comp---site-src-pages-register-tsxa-51-f5f",
+    "__context": {
+      "plugin": "plugin---forgot-passworda-74-3af"
+    },
+    "config": "config---forgot-password-5-e-9-749"
+  },
+  "/reset-password-b29": {
+    "__comp": "__comp---site-src-pages-reset-password-tsx-831-855",
+    "__context": {
+      "plugin": "plugin---forgot-passworda-74-3af"
+    },
+    "config": "config---forgot-password-5-e-9-749"
+  },
+  "/settings-b1c": {
+    "__comp": "__comp---site-src-pages-settings-tsxd-3-b-06e",
+    "__context": {
+      "plugin": "plugin---forgot-passworda-74-3af"
+    },
+    "config": "config---forgot-password-5-e-9-749"
+  },
   "/docs-13c": {
     "__comp": "__comp---theme-docs-root-5-e-9-0b6",
     "__context": {
@@ -114,8 +163,8 @@
   "/-e5f": {
     "__comp": "__comp---site-src-pages-index-tsx-1-df-d3e",
     "__context": {
-      "plugin": "plugin---a-74-9d6"
+      "plugin": "plugin---forgot-passworda-74-3af"
     },
-    "config": "config---5-e-9-4f3"
+    "config": "config---forgot-password-5-e-9-749"
   }
 }

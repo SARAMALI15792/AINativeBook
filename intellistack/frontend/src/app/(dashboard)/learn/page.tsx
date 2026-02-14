@@ -1,11 +1,10 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { api, type StageWithStatus } from "@/lib/api";
-import { useLearningStore } from "@/stores/learningStore";
-import { useEffect } from "react";
+import { api, type StageWithStatus } from "@lib/api";
+import BookLayout from "@components/layout/BookLayout";
 import Link from "next/link";
-import { cn, formatPercentage } from "@/lib/utils";
+import { cn } from "@lib/utils";
 
 export default function LearnPage() {
   const { data: learningPath, isLoading, error } = useQuery({
@@ -13,92 +12,152 @@ export default function LearnPage() {
     queryFn: () => api.learning.getLearningPath(),
   });
 
-  const setLearningPath = useLearningStore((s) => s.setLearningPath);
-
-  useEffect(() => {
-    if (learningPath) {
-      setLearningPath(learningPath);
-    }
-  }, [learningPath, setLearningPath]);
+  // Transform stages to chapters format
+  const chapters = learningPath?.stages.map((stage, index) => ({
+    id: stage.id,
+    title: stage.name,
+    slug: stage.slug,
+    order: index + 1,
+    status: stage.status,
+    percentage: stage.percentage_complete,
+    subsections: [],
+  })) || [];
 
   if (isLoading) {
-    return <LoadingSkeleton />;
+    return (
+      <BookLayout
+        title="Learning Path"
+        subtitle="Physical AI & Humanoid Robotics"
+        chapters={[]}
+        showProgress={false}
+      >
+        <LoadingState />
+      </BookLayout>
+    );
   }
 
   if (error) {
     return (
-      <div className="text-center py-12">
-        <p className="text-red-400">Failed to load learning path</p>
-        <button
-          onClick={() => window.location.reload()}
-          className="mt-4 px-4 py-2 bg-blue-600 rounded-lg"
-        >
-          Retry
-        </button>
-      </div>
+      <BookLayout
+        title="Learning Path"
+        subtitle="Physical AI & Humanoid Robotics"
+        chapters={chapters}
+        overallProgress={learningPath?.overall_percentage || 0}
+      >
+        <ErrorState />
+      </BookLayout>
     );
   }
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Your Learning Path</h1>
-          <p className="text-slate-400 mt-1">
+    <BookLayout
+      title="Learning Path"
+      subtitle="Physical AI & Humanoid Robotics"
+      chapters={chapters}
+      overallProgress={learningPath?.overall_percentage || 0}
+    >
+      {/* Right Side Content - Welcome to Learning */}
+      <div className="space-y-8">
+        {/* Header */}
+        <div className="border-b-2 border-[#e8e0d5] pb-6">
+          <p className="text-[#a67c52] text-sm font-medium mb-2">📚 Learning Path</p>
+          <h1 className="text-3xl font-bold text-[#3d3229] font-serif">
             Master Physical AI & Humanoid Robotics
+          </h1>
+          <p className="text-[#6b5a4a] mt-3 leading-relaxed">
+            Welcome to your comprehensive journey through the world of Physical AI. This learning path
+            is structured like a book, with each stage representing a chapter in your education.
+            Navigate through the chapters using the table of contents on the left.
           </p>
         </div>
 
+        {/* Overall Progress */}
         {learningPath && (
-          <div className="flex items-center gap-6">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-blue-400">
-                {formatPercentage(learningPath.overall_percentage)}
+          <div className="bg-gradient-to-r from-[#fefcf8] to-[#faf8f5] rounded-xl p-6 border border-[#e8e0d5]">
+            <div className="flex items-center gap-6 flex-wrap">
+              <div className="text-center">
+                <div className="text-4xl font-bold text-[#8b6914]">
+                  {Math.round(learningPath.overall_percentage)}%
+                </div>
+                <div className="text-xs text-[#8b7355] mt-1">Complete</div>
               </div>
-              <div className="text-xs text-slate-400">Complete</div>
+              <div className="h-12 w-px bg-[#e8e0d5] hidden sm:block" />
+              <div className="text-center">
+                <div className="text-4xl font-bold text-[#a67c52]">
+                  {learningPath.total_badges_earned}
+                </div>
+                <div className="text-xs text-[#8b7355] mt-1">Badges Earned</div>
+              </div>
+              <div className="h-12 w-px bg-[#e8e0d5] hidden sm:block" />
+              <div className="text-center">
+                <div className="text-4xl font-bold text-[#6b5a4a]">
+                  {learningPath.estimated_hours_remaining}h
+                </div>
+                <div className="text-xs text-[#8b7355] mt-1">Remaining</div>
+              </div>
+              <div className="flex-1" />
+              <Link
+                href={learningPath.current_stage ? `/learn/${learningPath.current_stage.id}` : "/learn/stage-1"}
+                className="px-6 py-3 bg-[#8b6914] hover:bg-[#6b5014] text-white rounded-lg font-medium transition-colors shadow-md"
+              >
+                {learningPath.current_stage ? "Continue Reading →" : "Start Learning →"}
+              </Link>
             </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-cyan-400">
-                {learningPath.total_badges_earned}
+
+            {/* Overall Progress Bar */}
+            <div className="mt-4">
+              <div className="h-3 bg-[#e8e0d5] rounded-full overflow-hidden border border-[#d4c5b5]">
+                <div
+                  className="h-full bg-gradient-to-r from-[#8b6914] to-[#a67c52] transition-all duration-500"
+                  style={{ width: `${learningPath.overall_percentage}%` }}
+                />
               </div>
-              <div className="text-xs text-slate-400">Badges</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-emerald-400">
-                {learningPath.estimated_hours_remaining}h
-              </div>
-              <div className="text-xs text-slate-400">Remaining</div>
             </div>
           </div>
         )}
-      </div>
 
-      {/* Overall Progress Bar */}
-      {learningPath && (
-        <div className="bg-slate-800 rounded-lg p-4">
-          <div className="flex justify-between text-sm mb-2">
-            <span className="text-slate-400">Overall Progress</span>
-            <span className="text-white">
-              {formatPercentage(learningPath.overall_percentage)}
-            </span>
-          </div>
-          <div className="h-3 bg-slate-700 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 transition-all duration-500"
-              style={{ width: `${learningPath.overall_percentage}%` }}
-            />
+        {/* Stage Cards - Book Style */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-bold text-[#3d3229] font-serif">Chapters Overview</h2>
+          <div className="grid gap-4">
+            {learningPath?.stages.map((stage, index) => (
+              <StageCard key={stage.id} stage={stage} index={index} />
+            ))}
           </div>
         </div>
-      )}
 
-      {/* Stage Cards */}
-      <div className="grid gap-4">
-        {learningPath?.stages.map((stage, index) => (
-          <StageCard key={stage.id} stage={stage} index={index} />
-        ))}
+        {/* Learning Tips */}
+        <div className="bg-blue-50 rounded-xl p-6 border border-blue-100">
+          <h3 className="font-bold text-blue-800 mb-3 flex items-center gap-2">
+            <span>💡</span> Learning Tips
+          </h3>
+          <ul className="space-y-2 text-sm text-blue-700">
+            <li className="flex items-start gap-2">
+              <span className="text-blue-400">•</span>
+              <span>Complete each chapter sequentially to build a strong foundation</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-blue-400">•</span>
+              <span>Take notes as you read - this helps with retention</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-blue-400">•</span>
+              <span>Practice the exercises at the end of each chapter</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-blue-400">•</span>
+              <span>Use the AI Tutor if you get stuck or need clarification</span>
+            </li>
+          </ul>
+        </div>
+
+        {/* Quote */}
+        <blockquote className="border-l-4 border-[#a67c52] pl-6 py-2 italic text-[#5c4a3d] text-lg">
+          "The best way to predict the future is to invent it."
+          <cite className="block text-sm text-[#8b7355] mt-2 not-italic">— Alan Kay</cite>
+        </blockquote>
       </div>
-    </div>
+    </BookLayout>
   );
 }
 
@@ -116,28 +175,28 @@ function StageCard({
   return (
     <div
       className={cn(
-        "relative rounded-xl border p-6 transition-all",
+        "relative rounded-xl border p-5 transition-all",
         isLocked
-          ? "border-slate-700 bg-slate-800/50 opacity-60"
+          ? "border-[#e8e0d5] bg-[#faf8f5] opacity-60"
           : isCompleted
-          ? "border-emerald-600/50 bg-emerald-950/20"
+          ? "border-emerald-200 bg-emerald-50/30"
           : isInProgress
-          ? "border-blue-600/50 bg-blue-950/20"
-          : "border-slate-700 bg-slate-800 hover:border-slate-600"
+          ? "border-amber-200 bg-amber-50/30 shadow-md"
+          : "border-[#e8e0d5] bg-white hover:shadow-md"
       )}
     >
       <div className="flex items-start gap-4">
-        {/* Stage Number */}
+        {/* Chapter Number */}
         <div
           className={cn(
-            "flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold",
+            "flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold border-2",
             isCompleted
-              ? "bg-emerald-600"
+              ? "bg-emerald-600 border-emerald-600 text-white"
               : isInProgress
-              ? "bg-blue-600"
+              ? "bg-amber-500 border-amber-500 text-white"
               : isLocked
-              ? "bg-slate-700"
-              : "bg-slate-600"
+              ? "bg-[#e8e0d5] border-[#d4c5b5] text-[#a09080]"
+              : "bg-white border-[#c4b5a5] text-[#6b5a4a]"
           )}
         >
           {isCompleted ? "✓" : index + 1}
@@ -145,41 +204,39 @@ function StageCard({
 
         {/* Content */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <h3 className="text-lg font-semibold text-white">{stage.name}</h3>
+          <div className="flex items-center gap-2 flex-wrap">
+            <h3 className="text-lg font-semibold text-[#3d3229]">{stage.name}</h3>
             {isLocked && (
-              <span className="text-xs px-2 py-0.5 bg-slate-700 rounded-full text-slate-400">
+              <span className="text-xs px-2 py-0.5 bg-[#e8e0d5] rounded-full text-[#8b7355]">
                 🔒 Locked
               </span>
             )}
             {isInProgress && (
-              <span className="text-xs px-2 py-0.5 bg-blue-600/20 text-blue-400 rounded-full">
-                In Progress
+              <span className="text-xs px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full font-medium">
+                Reading Now
               </span>
             )}
             {isCompleted && (
-              <span className="text-xs px-2 py-0.5 bg-emerald-600/20 text-emerald-400 rounded-full">
+              <span className="text-xs px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full font-medium">
                 Completed
               </span>
             )}
           </div>
 
-          <p className="text-slate-400 text-sm mt-1 line-clamp-2">
-            {stage.description}
-          </p>
+          <p className="text-[#6b5a4a] text-sm mt-2 line-clamp-2">{stage.description}</p>
 
-          {/* Progress for in-progress stages */}
+          {/* Progress for in-progress chapters */}
           {isInProgress && (
             <div className="mt-3">
               <div className="flex justify-between text-xs mb-1">
-                <span className="text-slate-400">Progress</span>
-                <span className="text-blue-400">
-                  {formatPercentage(stage.percentage_complete)}
+                <span className="text-[#8b7355]">Progress</span>
+                <span className="text-amber-600 font-medium">
+                  {Math.round(stage.percentage_complete)}%
                 </span>
               </div>
-              <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
+              <div className="h-2 bg-[#e8e0d5] rounded-full overflow-hidden border border-[#d4c5b5]">
                 <div
-                  className="h-full bg-blue-500 transition-all"
+                  className="h-full bg-amber-500 transition-all"
                   style={{ width: `${stage.percentage_complete}%` }}
                 />
               </div>
@@ -187,9 +244,9 @@ function StageCard({
           )}
 
           {/* Meta info */}
-          <div className="flex items-center gap-4 mt-3 text-xs text-slate-500">
-            <span>⏱️ {stage.estimated_hours} hours</span>
-            <span>📄 {stage.content_count} lessons</span>
+          <div className="flex items-center gap-4 mt-3 text-xs text-[#8b7355]">
+            <span>⏱️ {stage.estimated_hours} hours to read</span>
+            <span>📄 {stage.content_count} sections</span>
           </div>
         </div>
 
@@ -199,10 +256,10 @@ function StageCard({
             <Link
               href={`/learn/${stage.id}`}
               className={cn(
-                "px-4 py-2 rounded-lg font-medium transition-colors",
+                "px-4 py-2 rounded-lg font-medium text-sm transition-colors",
                 isCompleted
-                  ? "bg-slate-700 text-slate-300 hover:bg-slate-600"
-                  : "bg-blue-600 text-white hover:bg-blue-700"
+                  ? "bg-[#e8e0d5] text-[#5c4a3d] hover:bg-[#ded5c8]"
+                  : "bg-[#8b6914] text-white hover:bg-[#6b5014]"
               )}
             >
               {isCompleted ? "Review" : isInProgress ? "Continue" : "Start"}
@@ -214,14 +271,34 @@ function StageCard({
   );
 }
 
-function LoadingSkeleton() {
+function LoadingState() {
   return (
-    <div className="space-y-8 animate-pulse">
-      <div className="h-8 bg-slate-800 rounded w-64" />
-      <div className="h-16 bg-slate-800 rounded-lg" />
-      {[1, 2, 3, 4, 5].map((i) => (
-        <div key={i} className="h-32 bg-slate-800 rounded-xl" />
-      ))}
+    <div className="space-y-6 animate-pulse">
+      <div className="h-8 bg-[#e8e0d5] rounded w-2/3" />
+      <div className="h-4 bg-[#e8e0d5] rounded w-full" />
+      <div className="h-4 bg-[#e8e0d5] rounded w-4/5" />
+      <div className="h-24 bg-[#e8e0d5] rounded-xl" />
+      <div className="space-y-3">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="h-24 bg-[#e8e0d5] rounded-xl" />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ErrorState() {
+  return (
+    <div className="text-center py-12">
+      <div className="text-6xl mb-4">📚</div>
+      <h2 className="text-xl font-bold text-[#3d3229] mb-2">Failed to Load Learning Path</h2>
+      <p className="text-[#6b5a4a] mb-4">We couldn't fetch your learning progress. Please try again.</p>
+      <button
+        onClick={() => window.location.reload()}
+        className="px-4 py-2 bg-[#8b6914] text-white rounded-lg hover:bg-[#6b5014] transition-colors"
+      >
+        Retry
+      </button>
     </div>
   );
 }

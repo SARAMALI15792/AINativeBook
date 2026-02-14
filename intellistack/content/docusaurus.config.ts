@@ -15,6 +15,17 @@ const config: Config = {
   onBrokenLinks: 'warn',
   onBrokenMarkdownLinks: 'warn',
 
+  // Custom fields for auth and backend integration
+  customFields: {
+    betterAuthUrl: process.env.BETTER_AUTH_URL || 'http://localhost:3001',
+    backendUrl: process.env.BACKEND_URL || 'http://localhost:8000',
+  },
+
+  // Client modules for initialization
+  clientModules: [
+    './src/clientModules/authInit.ts',
+  ],
+
   i18n: {
     defaultLocale: 'en',
     locales: ['en', 'ur'],
@@ -94,6 +105,10 @@ const config: Config = {
         },
         {
           type: 'localeDropdown',
+          position: 'right',
+        },
+        {
+          type: 'custom-authNavbarItem',
           position: 'right',
         },
       ],

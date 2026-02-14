@@ -1,17 +1,23 @@
 """
-Middleware for rate limiting, RBAC, and request processing.
+Middleware for rate limiting, RBAC, request processing, and JWT validation.
 """
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from functools import wraps
-from typing import Callable, List
+from typing import Callable, List, Optional
 
-from fastapi import HTTPException, Request, status
+from fastapi import HTTPException, Request, Response, status
+from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.config.logging import get_logger
+from src.config.settings import get_settings
 from src.core.auth.models import Role, UserRole
+from src.core.auth.jwks import JWKSManager
 from src.shared.exceptions import AuthorizationError
+
+logger = get_logger(__name__)
 
 # Simple in-memory rate limiter (for development)
 # TODO: Replace with Redis-based rate limiter in production
@@ -171,3 +177,172 @@ async def check_permissions(
     user_roles = {row[0] for row in result.all()}
 
     return any(role in user_roles for role in required_roles)
+
+
+class JWKSAuthMiddleware(BaseHTTPMiddleware):
+    """
+    Middleware to extract and validate Better-Auth JWT tokens from Authorization header.
+
+    This middleware:
+    1. Extracts the Bearer token from Authorization header
+    2. Validates the JWT using JWKS public keys (no auth-server call needed)
+    3. Injects user context into request.state for downstream use
+    4. Handles expired/invalid tokens gracefully
+    5. Optional: Also checks cookies for session tokens (backward compatibility)
+
+    JWT Validation:
+    - Uses RS256 public keys from JWKS endpoint
+    - 5-minute cache with exponential backoff for resilience
+    - Falls back to last-known-good keys if endpoint unavailable
+    """
+
+    def __init__(self, app, cookie_name: str = None):
+        super().__init__(app)
+        settings = get_settings()
+        self.cookie_name = cookie_name or settings.better_auth_session_cookie_name
+        self.jwks_manager = JWKSManager(
+            jwks_url=settings.better_auth_jwks_url,
+            cache_ttl_minutes=5,
+        )
+
+    async def dispatch(
+        self, request: Request, call_next: RequestResponseEndpoint
+    ) -> Response:
+        # Extract token from Authorization header (preferred)
+        auth_header = request.headers.get("Authorization", "")
+        token = None
+
+        if auth_header.startswith("Bearer "):
+            token = auth_header[7:]  # Remove "Bearer " prefix
+        else:
+            # Fallback: check for session cookie
+            token = request.cookies.get(self.cookie_name)
+
+        if token:
+            try:
+                # Validate JWT using JWKS
+                import jwt
+
+                # Get unverified header to extract kid (key ID)
+                unverified_header = jwt.get_unverified_header(token)
+                kid = unverified_header.get("kid")
+
+                # Fetch JWKS
+                jwks = await self.jwks_manager.fetch_jwks()
+
+                # Find the key
+                key_data = None
+                if kid:
+                    for key in jwks.get("keys", []):
+                        if key.get("kid") == kid:
+                            key_data = key
+                            break
+
+                if key_data:
+                    # Verify JWT signature
+                    settings = get_settings()
+                    payload = jwt.decode(
+                        token,
+                        key_data,
+                        algorithms=["RS256"],
+                        options={"verify_exp": True},
+                        audience=settings.better_auth_audience or None,
+                        issuer=settings.better_auth_issuer or None,
+                    )
+
+                    # Extract user claims
+                    user_id = payload.get("sub") or payload.get("user_id")
+                    email = payload.get("email")
+
+                    if user_id and email:
+                        # Valid session - inject into request.state
+                        request.state.user = {
+                            "id": user_id,
+                            "email": email,
+                            "name": payload.get("name"),
+                            "email_verified": payload.get("email_verified", False),
+                            "role": payload.get("role", "student"),
+                        }
+                        request.state.user_id = user_id
+                        logger.debug(f"✅ JWT validated for user {email}")
+                    else:
+                        # Missing required claims
+                        request.state.user = None
+                        request.state.user_id = None
+                        logger.warning("JWT missing required claims (sub, email)")
+                else:
+                    # Key not found in JWKS
+                    request.state.user = None
+                    request.state.user_id = None
+                    logger.warning(f"Key ID '{kid}' not found in JWKS")
+
+            except jwt.ExpiredSignatureError:
+                request.state.user = None
+                request.state.user_id = None
+                logger.debug("JWT token expired")
+
+            except jwt.InvalidTokenError as e:
+                request.state.user = None
+                request.state.user_id = None
+                logger.warning(f"JWT validation failed: {e}")
+
+            except Exception as e:
+                request.state.user = None
+                request.state.user_id = None
+                logger.warning(f"Unexpected error during JWT validation: {e}")
+        else:
+            # No token provided
+            request.state.user = None
+            request.state.user_id = None
+
+        # Process the request
+        response = await call_next(request)
+
+        return response
+
+
+class RequestLoggingMiddleware(BaseHTTPMiddleware):
+    """Middleware to log all requests with timing information."""
+
+    async def dispatch(
+        self, request: Request, call_next: RequestResponseEndpoint
+    ) -> Response:
+        import time
+
+        start_time = time.time()
+        client_host = request.client.host if request.client else "unknown"
+
+        # Log request start
+        logger.debug(
+            "Request started",
+            method=request.method,
+            path=request.url.path,
+            client=client_host,
+        )
+
+        response = await call_next(request)
+
+        # Calculate duration
+        duration_ms = (time.time() - start_time) * 1000
+
+        # Log request completion
+        logger.info(
+            "Request completed",
+            method=request.method,
+            path=request.url.path,
+            status_code=response.status_code,
+            duration_ms=round(duration_ms, 2),
+            client=client_host,
+            user_id=getattr(request.state, "user_id", None),
+        )
+
+        return response
+
+
+def get_auth_middleware(app) -> type:
+    """
+    Factory function to get the authentication middleware.
+
+    This provides compatibility with the expected BetterAuth interface.
+    """
+    return BetterAuthSessionMiddleware

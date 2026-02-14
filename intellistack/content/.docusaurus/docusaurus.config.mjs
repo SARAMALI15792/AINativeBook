@@ -12,6 +12,13 @@ export default {
   "organizationName": "intellistack",
   "projectName": "intellistack-content",
   "onBrokenLinks": "warn",
+  "customFields": {
+    "betterAuthUrl": "http://localhost:3001",
+    "backendUrl": "http://localhost:8000"
+  },
+  "clientModules": [
+    "./src/clientModules/authInit.ts"
+  ],
   "i18n": {
     "defaultLocale": "en",
     "locales": [
@@ -108,6 +115,10 @@ export default {
           "position": "right",
           "dropdownItemsBefore": [],
           "dropdownItemsAfter": []
+        },
+        {
+          "type": "custom-authNavbarItem",
+          "position": "right"
         }
       ],
       "hideOnScroll": false
@@ -430,12 +441,10 @@ export default {
   "staticDirectories": [
     "static"
   ],
-  "customFields": {},
   "plugins": [],
   "scripts": [],
   "headTags": [],
   "stylesheets": [],
-  "clientModules": [],
   "titleDelimiter": "|",
   "noIndex": false
 };

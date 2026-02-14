@@ -38,6 +38,41 @@ export default [
     exact: true
   },
   {
+    path: '/forgot-password',
+    component: ComponentCreator('/forgot-password', 'c2e'),
+    exact: true
+  },
+  {
+    path: '/login',
+    component: ComponentCreator('/login', 'f43'),
+    exact: true
+  },
+  {
+    path: '/onboarding/',
+    component: ComponentCreator('/onboarding/', 'e12'),
+    exact: true
+  },
+  {
+    path: '/profile',
+    component: ComponentCreator('/profile', '90e'),
+    exact: true
+  },
+  {
+    path: '/register',
+    component: ComponentCreator('/register', 'd3a'),
+    exact: true
+  },
+  {
+    path: '/reset-password',
+    component: ComponentCreator('/reset-password', 'b29'),
+    exact: true
+  },
+  {
+    path: '/settings',
+    component: ComponentCreator('/settings', 'b1c'),
+    exact: true
+  },
+  {
     path: '/docs',
     component: ComponentCreator('/docs', '13c'),
     routes: [
