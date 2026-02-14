@@ -15,9 +15,12 @@ class ChatKitThread(Base):
     id = Column(String(36), primary_key=True)
     user_id = Column(String(36), ForeignKey("user.id"), nullable=False, index=True)
     course_id = Column(String(36), nullable=True, index=True)  # Associated course/stage
+    lesson_stage = Column(Integer, nullable=True)  # Learning stage (1-5)
     title = Column(String(255), nullable=True)  # Auto-generated or user-provided
+    status = Column(String(20), default="active", nullable=False)  # active, archived
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    enrollment_ended_at = Column(DateTime, nullable=True)  # For retention policy
     metadata = Column(JSON, nullable=True)  # Additional context (page URL, tags, etc.)
 
     # Relationship

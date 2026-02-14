@@ -99,6 +99,31 @@
   border-radius: 0.25rem;
 }
 
+/* Primary RGB variable for alpha colors */
+:root {
+  --ifm-color-primary-rgb: 46, 133, 85;
+}
+
+[data-theme='dark'] {
+  --ifm-color-primary-rgb: 37, 194, 160;
+}
+
+/* Smooth transitions for theme changes */
+html {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Better focus states */
+:focus-visible {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 2px;
+}
+
+/* Navbar auth button area */
+.navbar__item--auth {
+  margin-left: 0.5rem;
+}
+
 [data-theme='dark'] .prerequisites {
   background-color: rgba(255, 193, 7, 0.1);
 }

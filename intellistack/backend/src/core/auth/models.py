@@ -40,10 +40,15 @@ class User(Base):
     bio: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     locale: Mapped[str] = mapped_column(String(10), default="en")
     notification_settings: Mapped[dict] = mapped_column(JSONB, default=dict)
+    preferences: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)  # Onboarding preferences
 
     # Status flags
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     is_verified: Mapped[bool] = mapped_column(Boolean, default=False)
+    email_verified: Mapped[bool] = mapped_column(Boolean, default=False)
+    onboarding_completed: Mapped[bool] = mapped_column(Boolean, default=False)
+    current_stage: Mapped[int] = mapped_column(default=1)  # Learning stage 1-5
+    role: Mapped[Optional[str]] = mapped_column(String(50), default="student")  # Simple role field
 
     # Security fields for account lockout
     failed_login_attempts: Mapped[int] = mapped_column(default=0)

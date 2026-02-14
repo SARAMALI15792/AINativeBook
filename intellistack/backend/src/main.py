@@ -14,9 +14,11 @@ from src.shared.exceptions import IntelliStackError
 
 # Import routers
 from src.ai.rag.routes import router as rag_router
+from src.ai.chatkit.routes import router as chatkit_router
 from src.core.content.routes import router as content_router
 from src.core.institution.routes import router as institution_router
 from src.core.learning.routes import router as learning_router
+from src.core.users.routes import router as users_router
 
 # Import middleware
 from src.shared.middleware import (
@@ -143,6 +145,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(institution_router, prefix="/api/v1")
     app.include_router(learning_router, prefix="/api/v1")
     app.include_router(rag_router, prefix="/api/v1")
+    app.include_router(chatkit_router)  # ChatKit has its own /api/v1/chatkit prefix
+    app.include_router(users_router)  # Users has its own /api/v1/users prefix
 
     return app
 

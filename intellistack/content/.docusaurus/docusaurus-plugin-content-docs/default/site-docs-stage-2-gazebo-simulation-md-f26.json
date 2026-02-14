@@ -1,0 +1,28 @@
+{
+  "id": "stage-2/gazebo-simulation",
+  "title": "Gazebo Simulation Environment",
+  "description": "Gazebo is a powerful 3D robotics simulator that provides realistic physics simulation, sensor simulation, and a rich library of robot models.",
+  "source": "@site/docs/stage-2/gazebo-simulation.md",
+  "sourceDirName": "stage-2",
+  "slug": "/stage-2/gazebo-simulation",
+  "permalink": "/docs/stage-2/gazebo-simulation",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/intellistack/intellistack/tree/main/content/docs/stage-2/gazebo-simulation.md",
+  "tags": [],
+  "version": "current",
+  "lastUpdatedBy": "Author",
+  "lastUpdatedAt": 1539502055000,
+  "sidebarPosition": 4,
+  "frontMatter": {
+    "id": "gazebo-simulation",
+    "title": "Gazebo Simulation Environment",
+    "sidebar_label": "Gazebo Basics",
+    "sidebar_position": 4
+  },
+  "sidebar": "stage2Sidebar",
+  "previous": {
+    "title": "ROS 2 Setup",
+    "permalink": "/docs/stage-2/ros2-setup"
+  }
+}
