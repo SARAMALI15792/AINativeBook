@@ -1,0 +1,28 @@
+{
+  "id": "stage-3/computer-vision",
+  "title": "Computer Vision for Robotics",
+  "description": "Computer vision enables robots to perceive and understand their environment through cameras. This is essential for navigation, object manipulation, and human-robot interaction.",
+  "source": "@site/docs/stage-3/computer-vision.md",
+  "sourceDirName": "stage-3",
+  "slug": "/stage-3/computer-vision",
+  "permalink": "/docs/stage-3/computer-vision",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/intellistack/intellistack/tree/main/content/docs/stage-3/computer-vision.md",
+  "tags": [],
+  "version": "current",
+  "lastUpdatedBy": "Author",
+  "lastUpdatedAt": 1539502055000,
+  "sidebarPosition": 2,
+  "frontMatter": {
+    "id": "computer-vision",
+    "title": "Computer Vision for Robotics",
+    "sidebar_label": "Computer Vision",
+    "sidebar_position": 2
+  },
+  "sidebar": "stage3Sidebar",
+  "previous": {
+    "title": "Introduction",
+    "permalink": "/docs/stage-3/intro"
+  }
+}
