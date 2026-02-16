@@ -1,77 +1,38 @@
 ---
 id: intro
-title: Stage 2 - ROS 2 & Simulation
-sidebar_label: Introduction
+title: "Stage 2 - The Graph"
+sidebar_label: "Introduction"
 sidebar_position: 1
 ---
 
-# Stage 2: ROS 2 & Simulation
+# Stage 2: The Graph (Information Flow)
 
 <div className="stage-badge stage-2">Stage 2</div>
 
-Welcome to Stage 2! Now that you have strong foundations, you'll learn to work with ROS 2 (Robot Operating System) and simulation environments.
+> "Before a robot can perceive, it must communicate. We build the nervous system before the eyes."
+
+## The Philosophy of Stage II
+
+In Stage I, we built the **Substrate**—the ability to execute code (Processes) and define math (Linear Algebra).
+In Stage II, we solve the **Distributed State Problem**.
+
+A robot is not a single program. It is a distributed system of independent nodes—sensors, actuators, planners—that must agree on a shared reality in real-time.
+This agreement is mediated by **The Graph**.
 
 ## Learning Objectives
 
-<div className="learning-objectives">
+In this Deep Dive, you will master:
 
-By the end of this stage, you will be able to:
+1.  **The Distributed Mind**: Understanding Nodes as independent cognitive units in a graph.
+2.  **The Pub/Sub Ontology**: The physics of Middleware (DDS), Quality of Service (QoS), and Serialization.
+3.  **Service & Action Theory**: Synchronous vs. Asynchronous patterns for robot behavior invocation.
+4.  **The Relativity of Space (TF2)**: Managing the geometric relationship between sensor frames and world frames using the Transform Tree.
 
-- Set up and configure ROS 2 development environments
-- Create and manage ROS 2 nodes, topics, services, and actions
-- Work with Gazebo simulation environment
-- Navigate robots in simulated environments
-- Use URDF/XACRO for robot modeling
+## Chapter Map
 
-</div>
+*   **2.1 The Distributed Mind**: Graph Theory & CAP Theorem.
+*   **2.2 The Pub/Sub Ontology**: Middleware & QoS.
+*   **2.3 The Request/Response**: Services & Actions.
+*   **2.4 The Relativity of Space**: TF2 & Transforms.
 
-## Prerequisites
-
-<div className="prerequisites">
-
-**You must complete Stage 1 before starting this stage.**
-
-Required knowledge:
-- Python programming
-- Linux command line proficiency
-- Basic mathematics and physics
-
-</div>
-
-## Topics Covered
-
-1. **ROS 2 Basics**
-   - ROS 2 architecture and concepts
-   - Nodes and communication patterns
-   - Launch files and parameters
-
-2. **Gazebo Simulation**
-   - Setting up Gazebo Harmonic
-   - Creating simulation worlds
-   - Sensor integration
-
-3. **Robot Navigation**
-   - SLAM (Simultaneous Localization and Mapping)
-   - Path planning algorithms
-   - Obstacle avoidance
-
-4. **Robot Modeling**
-   - URDF/XACRO syntax
-   - Creating custom robot models
-   - Physical properties and collision geometries
-
-## Time Estimate
-
-**Expected completion time**: 50-70 hours
-
-## Simulation Environment
-
-All exercises in this stage use **Gazebo simulation**. You don't need physical hardware. The platform provides cloud-based simulation instances with a 25 hrs/month quota.
-
-## Next Steps
-
-After mastering Stage 2, you'll move to **Stage 3: Perception & Planning**, where you'll add sensors and intelligent decision-making to your robots.
-
----
-
-Ready to start? Begin with [ROS 2 Installation](./ros2-setup)!
+Prepare to abandon the idea of a "Main Loop". Welcome to the Event-Driven World.

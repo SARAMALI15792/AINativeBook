@@ -13,7 +13,7 @@ class ChatKitThread(Base):
     __tablename__ = "chatkit_thread"
 
     id = Column(String(36), primary_key=True)
-    user_id = Column(String(36), ForeignKey("user.id"), nullable=False, index=True)
+    user_id = Column(String(36), ForeignKey("users.id"), nullable=False, index=True)
     course_id = Column(String(36), nullable=True, index=True)  # Associated course/stage
     lesson_stage = Column(Integer, nullable=True)  # Learning stage (1-5)
     title = Column(String(255), nullable=True)  # Auto-generated or user-provided
@@ -21,7 +21,7 @@ class ChatKitThread(Base):
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
     enrollment_ended_at = Column(DateTime, nullable=True)  # For retention policy
-    metadata = Column(JSON, nullable=True)  # Additional context (page URL, tags, etc.)
+    meta = Column("metadata", JSON, nullable=True)  # Additional context (page URL, tags, etc.)
 
     # Relationship
     items = relationship("ChatKitThreadItem", back_populates="thread", cascade="all, delete-orphan")
@@ -39,7 +39,7 @@ class ChatKitThreadItem(Base):
     role = Column(String(20), nullable=False)  # 'user' or 'assistant'
     content = Column(Text, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    metadata = Column(JSON, nullable=True)  # Message metadata (page context, token count, etc.)
+    meta_data = Column("metadata", JSON, nullable=True)  # Message metadata (page context, token count, etc.)
 
     # Relationship
     thread = relationship("ChatKitThread", back_populates="items")
@@ -53,7 +53,7 @@ class ChatKitRateLimit(Base):
     __tablename__ = "chatkit_rate_limit"
 
     id = Column(String(36), primary_key=True)
-    user_id = Column(String(36), ForeignKey("user.id"), nullable=False, unique=True, index=True)
+    user_id = Column(String(36), ForeignKey("users.id"), nullable=False, unique=True, index=True)
     message_count = Column(Integer, default=0, nullable=False)
     window_start = Column(DateTime, default=datetime.utcnow, nullable=False)
     last_reset = Column(DateTime, default=datetime.utcnow, nullable=False)
@@ -66,7 +66,7 @@ class AiUsageMetric(Base):
     __tablename__ = "ai_usage_metric"
 
     id = Column(String(36), primary_key=True)
-    user_id = Column(String(36), ForeignKey("user.id"), nullable=False, index=True)
+    user_id = Column(String(36), ForeignKey("users.id"), nullable=False, index=True)
     message_count = Column(Integer, default=0, nullable=False)
     total_tokens = Column(Integer, default=0, nullable=False)
     input_tokens = Column(Integer, default=0, nullable=False)
@@ -88,7 +88,7 @@ class AuthEventLog(Base):
     ip_address = Column(String(45), nullable=True)  # Supports IPv4 and IPv6
     user_agent = Column(Text, nullable=True)
     reason = Column(String(255), nullable=True)  # For failed attempts: wrong_password, account_locked, etc.
-    metadata = Column(JSON, nullable=True)  # Additional event data
+    meta_data = Column("metadata", JSON, nullable=True)  # Additional event data
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
 
     __table_args__ = (

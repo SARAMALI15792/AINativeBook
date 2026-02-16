@@ -6,6 +6,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import { useLocation } from '@docusaurus/router';
+import { ChatKitErrorBoundary } from './ChatKitErrorBoundary';
 import styles from './ChatKitWidget.module.css';
 
 interface Message {
@@ -45,9 +46,12 @@ export default function ChatKitWidget(): JSX.Element | null {
   const pageContext = usePageContext();
   const location = useLocation();
 
+  console.log('ChatKitWidget: Component rendering'); // Debug log
+
   // State
   const [isOpen, setIsOpen] = useState(false);
   const [session, setSession] = useState<any>(null);
+  const [userStage, setUserStage] = useState<number>(1); // Store user's actual stage
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
@@ -63,17 +67,62 @@ export default function ChatKitWidget(): JSX.Element | null {
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const backendUrl = (siteConfig.customFields?.backendUrl as string) || 'http://localhost:8000';
+  console.log('ChatKitWidget: Backend URL:', backendUrl); // Debug log
 
-  // Initialize auth
+  // Cached JWT token for backend API calls
+  const jwtTokenRef = useRef<string | null>(null);
+
+  // Initialize auth and fetch user stage
   useEffect(() => {
-    import('@site/src/lib/auth-client').then((mod) => {
-      mod.authClient.getSession().then((result) => {
+    console.log('ChatKitWidget: Initializing auth...');
+    import('@site/src/lib/auth-client').then(async (mod) => {
+      console.log('ChatKitWidget: Auth client imported');
+      try {
+        const result = await mod.authClient.getSession();
+        console.log('ChatKitWidget: Session result:', result);
         if (result.data?.user) {
+          console.log('ChatKitWidget: User authenticated, setting session');
           setSession(result.data);
+
+          // Get JWT token for backend API calls
+          const jwt = await mod.getJwtToken();
+          if (jwt) {
+            jwtTokenRef.current = jwt;
+            console.log('ChatKitWidget: JWT token obtained');
+
+            // Fetch user's current stage using JWT
+            try {
+              const response = await fetch(`${backendUrl}/api/v1/users/stage`, {
+                headers: {
+                  'Authorization': `Bearer ${jwt}`,
+                  'Content-Type': 'application/json',
+                },
+              });
+
+              if (response.ok) {
+                const data = await response.json();
+                setUserStage(data.stage);
+                console.log('ChatKitWidget: User stage fetched:', data.stage);
+              } else {
+                console.error('ChatKitWidget: Failed to fetch user stage:', response.status);
+              }
+            } catch (err) {
+              console.error('ChatKitWidget: Failed to fetch user stage:', err);
+              setUserStage(1);
+            }
+          } else {
+            console.warn('ChatKitWidget: Could not obtain JWT token');
+          }
+        } else {
+          console.log('ChatKitWidget: User not authenticated');
         }
-      });
+      } catch (err) {
+        console.error('ChatKitWidget: Error getting session:', err);
+      }
+    }).catch((err) => {
+      console.error('ChatKitWidget: Error importing auth-client:', err);
     });
-  }, []);
+  }, [backendUrl]);
 
   // Listen for text selection
   useEffect(() => {
@@ -108,17 +157,29 @@ export default function ChatKitWidget(): JSX.Element | null {
   }, [location.pathname]);
 
   const getAuthHeaders = useCallback(async () => {
-    const token = session?.session?.token;
+    // Refresh JWT if needed (tokens expire)
+    if (!jwtTokenRef.current) {
+      try {
+        const mod = await import('@site/src/lib/auth-client');
+        const jwt = await mod.getJwtToken();
+        if (jwt) jwtTokenRef.current = jwt;
+      } catch {
+        // Ignore — will use whatever we have
+      }
+    }
+
+    // Encode values that may contain non-ASCII characters.
+    // HTTP headers only allow ISO-8859-1; use encodeURIComponent for safety.
     return {
-      'Authorization': `Bearer ${token}`,
+      'Authorization': `Bearer ${jwtTokenRef.current || ''}`,
       'Content-Type': 'application/json',
-      'X-Page-Url': pageContext.url,
-      'X-Page-Title': pageContext.title,
-      'X-Page-Headings': JSON.stringify(pageContext.headings),
-      'X-Selected-Text': selectedText || '',
-      'X-User-Stage': '1', // TODO: Get from user profile
+      'X-Page-Url': encodeURIComponent(pageContext.url),
+      'X-Page-Title': encodeURIComponent(pageContext.title),
+      'X-Page-Headings': encodeURIComponent(JSON.stringify(pageContext.headings)),
+      'X-Selected-Text': encodeURIComponent(selectedText || ''),
+      'X-User-Stage': userStage.toString(),
     };
-  }, [session, pageContext, selectedText]);
+  }, [pageContext, selectedText, userStage]);
 
   const loadThreads = async () => {
     try {
@@ -185,6 +246,9 @@ export default function ChatKitWidget(): JSX.Element | null {
     };
     setMessages(prev => [...prev, tempUserMsg]);
 
+    let assistantContent = '';
+    let completed = false;
+
     try {
       const headers = await getAuthHeaders();
       const response = await fetch(`${backendUrl}/api/v1/chatkit/stream`, {
@@ -202,63 +266,87 @@ export default function ChatKitWidget(): JSX.Element | null {
 
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
-      let assistantContent = '';
+      let buffer = '';
 
       if (reader) {
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
 
-          const chunk = decoder.decode(value);
-          const lines = chunk.split('\n');
+          buffer += decoder.decode(value, { stream: true });
 
-          for (const line of lines) {
-            if (line.startsWith('event: ')) {
-              const eventType = line.slice(7);
+          // SSE events separated by double newlines
+          const parts = buffer.split('\n\n');
+          buffer = parts.pop() || '';
+
+          for (const part of parts) {
+            if (!part.trim()) continue;
+
+            // Extract data line from the SSE event block
+            let eventData: string | null = null;
+            for (const line of part.split('\n')) {
+              if (line.startsWith('data: ')) {
+                eventData = line.slice(6);
+              }
+            }
+            if (!eventData) continue;
+
+            let data: any;
+            try {
+              data = JSON.parse(eventData);
+            } catch {
               continue;
             }
-            if (line.startsWith('data: ')) {
-              try {
-                const data = JSON.parse(line.slice(6));
 
-                if (data.code === 'RATE_LIMITED') {
-                  setError(data.message);
-                  setIsLoading(false);
-                  return;
-                }
+            if (data.code === 'RATE_LIMITED') {
+              setError(data.message);
+              return;
+            }
 
-                if (data.id && !currentThreadId) {
-                  setCurrentThreadId(data.id);
-                }
+            if (data.id && !currentThreadId) {
+              setCurrentThreadId(data.id);
+            }
 
-                if (data.text) {
-                  assistantContent += data.text;
-                  setStreamingContent(assistantContent);
-                }
+            // Accumulate streaming text
+            if (data.text) {
+              assistantContent += data.text;
+              setStreamingContent(assistantContent);
+            }
 
-                if (data.rate_limit) {
-                  setRateLimit(data.rate_limit);
-                }
+            if (data.rate_limit) {
+              setRateLimit(data.rate_limit);
+            }
 
-                if (data.message_id) {
-                  // Response complete
-                  setMessages(prev => [
-                    ...prev,
-                    {
-                      id: data.message_id,
-                      role: 'assistant',
-                      content: assistantContent,
-                      created_at: new Date().toISOString(),
-                    },
-                  ]);
-                  setStreamingContent('');
-                }
-              } catch {
-                // Ignore parse errors
-              }
+            // Stream complete — add final message
+            if (data.message_id) {
+              completed = true;
+              setMessages(prev => [
+                ...prev,
+                {
+                  id: data.message_id,
+                  role: 'assistant',
+                  content: assistantContent,
+                  created_at: new Date().toISOString(),
+                },
+              ]);
+              setStreamingContent('');
             }
           }
         }
+      }
+
+      // If stream ended without a message_id but we have content, add it
+      if (!completed && assistantContent) {
+        setMessages(prev => [
+          ...prev,
+          {
+            id: `assistant-${Date.now()}`,
+            role: 'assistant',
+            content: assistantContent,
+            created_at: new Date().toISOString(),
+          },
+        ]);
+        setStreamingContent('');
       }
     } catch (err: any) {
       setError(err.message || 'Failed to send message');
@@ -290,31 +378,13 @@ export default function ChatKitWidget(): JSX.Element | null {
     }
   };
 
-  // Don't render if not authenticated
-  if (!session?.user) {
-    return null;
-  }
-
-  return (
-    <>
-      {/* Text Selection Popup */}
-      {selectedText && !isOpen && (
-        <button
-          className={styles.selectionPopup}
-          onClick={askAboutSelection}
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-          </svg>
-          Ask AI
-        </button>
-      )}
-
-      {/* Floating Button */}
+    // Always render the button to ensure it shows regardless of session status
+    const renderButton = () => (
       <button
-        className={styles.fab}
+        className={session?.user ? styles.fab : `${styles.fab} ${styles.fabUnauthenticated}`}
         onClick={() => setIsOpen(!isOpen)}
         aria-label={isOpen ? 'Close AI Tutor' : 'Open AI Tutor'}
+        style={{ display: 'flex' }} // Ensuring the button is visible
       >
         {isOpen ? (
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -327,158 +397,240 @@ export default function ChatKitWidget(): JSX.Element | null {
           </svg>
         )}
       </button>
+    );
 
-      {/* Chat Panel */}
-      {isOpen && (
-        <div className={styles.panel}>
-          {/* Header */}
-          <div className={styles.header}>
-            <div className={styles.headerLeft}>
-              <button
-                className={styles.headerButton}
-                onClick={() => setShowThreads(!showThreads)}
-                title="Conversation history"
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <line x1="3" y1="6" x2="21" y2="6"/>
-                  <line x1="3" y1="12" x2="21" y2="12"/>
-                  <line x1="3" y1="18" x2="21" y2="18"/>
-                </svg>
-              </button>
-              <h3 className={styles.headerTitle}>AI Tutor</h3>
-            </div>
-            <div className={styles.headerRight}>
-              <button
-                className={styles.headerButton}
-                onClick={startNewThread}
-                title="New conversation"
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <line x1="12" y1="5" x2="12" y2="19"/>
-                  <line x1="5" y1="12" x2="19" y2="12"/>
-                </svg>
-              </button>
-            </div>
-          </div>
-
-          {/* Rate Limit Banner */}
-          {rateLimit && rateLimit.remaining <= 5 && (
-            <div className={styles.rateLimitBanner}>
-              {rateLimit.remaining === 0 ? (
-                `Daily limit reached. Resets ${rateLimit.reset_at ? new Date(rateLimit.reset_at).toLocaleTimeString() : 'tomorrow'}`
-              ) : (
-                `${rateLimit.remaining}/${rateLimit.limit} messages remaining today`
-              )}
-            </div>
-          )}
-
-          {/* Thread List */}
-          {showThreads && (
-            <div className={styles.threadList}>
-              <div className={styles.threadListHeader}>
-                <span>Recent Conversations</span>
-              </div>
-              {threads.length === 0 ? (
-                <div className={styles.emptyThreads}>No conversations yet</div>
-              ) : (
-                threads.map(thread => (
-                  <button
-                    key={thread.id}
-                    className={`${styles.threadItem} ${thread.id === currentThreadId ? styles.active : ''}`}
-                    onClick={() => loadThread(thread.id)}
-                  >
-                    <span className={styles.threadTitle}>{thread.title || 'Untitled'}</span>
-                    <span className={styles.threadDate}>
-                      {new Date(thread.updated_at).toLocaleDateString()}
-                    </span>
-                  </button>
-                ))
-              )}
-            </div>
-          )}
-
-          {/* Messages */}
-          <div className={styles.messages}>
-            {messages.length === 0 && !streamingContent && (
-              <div className={styles.welcome}>
-                <div className={styles.welcomeIcon}>
-                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <circle cx="12" cy="12" r="10"/>
-                    <path d="M12 16v-4"/>
-                    <path d="M12 8h.01"/>
-                  </svg>
-                </div>
-                <h4>How can I help you learn?</h4>
-                <p>Ask questions about the current lesson, get help debugging code, or explore concepts.</p>
-                <div className={styles.suggestions}>
-                  <button onClick={() => setInputValue("Explain this concept in simpler terms")}>
-                    Explain this concept
-                  </button>
-                  <button onClick={() => setInputValue("What should I learn next?")}>
-                    What's next?
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {messages.map(msg => (
-              <div
-                key={msg.id}
-                className={`${styles.message} ${styles[msg.role]}`}
-              >
-                <div className={styles.messageContent}>
-                  {msg.content}
-                </div>
-              </div>
-            ))}
-
-            {streamingContent && (
-              <div className={`${styles.message} ${styles.assistant}`}>
-                <div className={styles.messageContent}>
-                  {streamingContent}
-                  <span className={styles.cursor}>|</span>
-                </div>
-              </div>
-            )}
-
-            {error && (
-              <div className={styles.errorMessage}>
-                {error}
-              </div>
-            )}
-
-            <div ref={messagesEndRef} />
-          </div>
-
-          {/* Input */}
-          <div className={styles.inputArea}>
-            <textarea
-              ref={inputRef}
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Ask a question..."
-              className={styles.input}
-              rows={1}
-              disabled={isLoading || (rateLimit?.remaining === 0)}
-            />
+    return (
+      <ChatKitErrorBoundary>
+        <>
+          {/* Text Selection Popup */}
+          {selectedText && !isOpen && (
             <button
-              onClick={sendMessage}
-              className={styles.sendButton}
-              disabled={!inputValue.trim() || isLoading || (rateLimit?.remaining === 0)}
+              className={styles.selectionPopup}
+              onClick={askAboutSelection}
             >
-              {isLoading ? (
-                <span className={styles.spinner} />
-              ) : (
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <line x1="22" y1="2" x2="11" y2="13"/>
-                  <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-                </svg>
-              )}
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              </svg>
+              Ask AI
             </button>
-          </div>
-        </div>
-      )}
-    </>
-  );
+          )}
+
+          {/* Floating Button - Always rendered regardless of session status */}
+          {renderButton()}
+
+          {/* Panel - Conditionally rendered based on open state and session */}
+          {isOpen && (
+            session?.user ? (
+              /* Authenticated User Panel */
+              <div className={styles.panel}>
+                {/* Header */}
+                <div className={styles.header}>
+                  <div className={styles.headerLeft}>
+                    <button
+                      className={styles.headerButton}
+                      onClick={() => setShowThreads(!showThreads)}
+                      title="Conversation history"
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <line x1="3" y1="6" x2="21" y2="6"/>
+                        <line x1="3" y1="12" x2="21" y2="12"/>
+                        <line x1="3" y1="18" x2="21" y2="18"/>
+                      </svg>
+                    </button>
+                    <h3 className={styles.headerTitle}>AI Tutor</h3>
+                  </div>
+                  <div className={styles.headerRight}>
+                    <button
+                      className={styles.headerButton}
+                      onClick={startNewThread}
+                      title="New conversation"
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <line x1="12" y1="5" x2="12" y2="19"/>
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Rate Limit Banner */}
+                {rateLimit && rateLimit.remaining <= 5 && (
+                  <div className={styles.rateLimitBanner}>
+                    {rateLimit.remaining === 0 ? (
+                      `Daily limit reached. Resets ${rateLimit.reset_at ? new Date(rateLimit.reset_at).toLocaleTimeString() : 'tomorrow'}`
+                    ) : (
+                      `${rateLimit.remaining}/${rateLimit.limit} messages remaining today`
+                    )}
+                  </div>
+                )}
+
+                {/* Thread List */}
+                {showThreads && (
+                  <div className={styles.threadList}>
+                    <div className={styles.threadListHeader}>
+                      <span>Recent Conversations</span>
+                    </div>
+                    {threads.length === 0 ? (
+                      <div className={styles.emptyThreads}>No conversations yet</div>
+                    ) : (
+                      threads.map(thread => (
+                        <button
+                          key={thread.id}
+                          className={`${styles.threadItem} ${thread.id === currentThreadId ? styles.active : ''}`}
+                          onClick={() => loadThread(thread.id)}
+                        >
+                          <span className={styles.threadTitle}>{thread.title || 'Untitled'}</span>
+                          <span className={styles.threadDate}>
+                            {new Date(thread.updated_at).toLocaleDateString()}
+                          </span>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                )}
+
+                {/* Messages */}
+                <div className={styles.messages}>
+                  {messages.length === 0 && !streamingContent && (
+                    <div className={styles.welcome}>
+                      <div className={styles.welcomeIcon}>
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                          <circle cx="12" cy="12" r="10"/>
+                          <path d="M12 16v-4"/>
+                          <path d="M12 8h.01"/>
+                        </svg>
+                      </div>
+                      <h4>How can I help you learn?</h4>
+                      <p>Ask questions about the current lesson, get help debugging code, or explore concepts.</p>
+                      <div className={styles.suggestions}>
+                        <button onClick={() => setInputValue("Explain this concept in simpler terms")}>
+                          Explain this concept
+                        </button>
+                        <button onClick={() => setInputValue("What should I learn next?")}>
+                          What's next?
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {messages.map(msg => (
+                    <div
+                      key={msg.id}
+                      className={`${styles.message} ${styles[msg.role]}`}
+                    >
+                      <div className={styles.messageContent}>
+                        {msg.content}
+                      </div>
+                    </div>
+                  ))}
+
+                  {/* Streaming response bubble */}
+                  {streamingContent && (
+                    <div className={`${styles.message} ${styles.assistant}`}>
+                      <div className={styles.messageContent}>
+                        {streamingContent}
+                        <span className={styles.cursor}>|</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Thinking indicator while waiting for first chunk */}
+                  {isLoading && !streamingContent && (
+                    <div className={`${styles.message} ${styles.assistant}`}>
+                      <div className={styles.messageContent}>
+                        <span className={styles.thinking}>
+                          <span className={styles.dot} />
+                          <span className={styles.dot} />
+                          <span className={styles.dot} />
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {error && (
+                    <div className={styles.errorMessage}>
+                      {error}
+                    </div>
+                  )}
+
+                  <div ref={messagesEndRef} />
+                </div>
+
+                {/* Input */}
+                <div className={styles.inputArea}>
+                  <textarea
+                    ref={inputRef}
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder="Ask a question..."
+                    className={styles.input}
+                    rows={1}
+                    disabled={isLoading || (rateLimit?.remaining === 0)}
+                  />
+                  <button
+                    onClick={sendMessage}
+                    className={styles.sendButton}
+                    disabled={!inputValue.trim() || isLoading || (rateLimit?.remaining === 0)}
+                  >
+                    {isLoading ? (
+                      <span className={styles.spinner} />
+                    ) : (
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <line x1="22" y1="2" x2="11" y2="13"/>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                      </svg>
+                    )}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              /* Unauthenticated User Panel */
+              <div className={styles.panel}>
+                <div className={styles.header}>
+                  <h3 className={styles.headerTitle}>AI Tutor</h3>
+                  <button
+                    className={styles.headerButton}
+                    onClick={() => setIsOpen(false)}
+                    title="Close"
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <line x1="18" y1="6" x2="6" y2="18"/>
+                      <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                  </button>
+                </div>
+                <div className={styles.loginPrompt}>
+                  <div className={styles.welcomeIcon}>
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                      <circle cx="12" cy="12" r="10"/>
+                      <path d="M12 16v-4"/>
+                      <path d="M12 8h.01"/>
+                    </svg>
+                  </div>
+                  <h4>Unlock AI Learning Support</h4>
+                  <p>Sign up or log in to access personalized AI tutoring, interactive exercises, and progress tracking.</p>
+                  <button
+                    className={styles.loginButton}
+                    onClick={async () => {
+                      try {
+                        const authMod = await import('@site/src/lib/auth-client');
+                        // Use the exported signIn method which is a wrapper around authClient.signIn
+                        await authMod.signIn('credentials'); // This will trigger the sign-in flow
+                      } catch (err) {
+                        console.error('Auth client import failed:', err);
+                        // Fallback: redirect to login page
+                        window.location.href = '/auth/signin';
+                      }
+                    }}
+                  >
+                    Sign In to Continue Learning
+                  </button>
+                </div>
+              </div>
+            )
+          )}
+        </>
+      </ChatKitErrorBoundary>
+    );
 }

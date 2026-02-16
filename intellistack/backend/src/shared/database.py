@@ -27,6 +27,13 @@ _engine = None
 _async_session_factory = None
 
 
+def _get_connect_args(database_url: str) -> dict:
+    """Return connect_args based on whether the database is cloud or local."""
+    if "neon.tech" in database_url or "sslmode=require" in database_url:
+        return {"ssl": "require"}
+    return {}
+
+
 def init_db(settings: Settings) -> None:
     """Initialize database engine and session factory."""
     global _engine, _async_session_factory
@@ -38,6 +45,7 @@ def init_db(settings: Settings) -> None:
         max_overflow=settings.db_max_overflow,
         pool_timeout=settings.db_pool_timeout,
         pool_pre_ping=True,  # Verify connections before use
+        connect_args=_get_connect_args(settings.database_url),
     )
 
     _async_session_factory = async_sessionmaker(

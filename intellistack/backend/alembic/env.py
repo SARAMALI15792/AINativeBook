@@ -49,8 +49,18 @@ def get_url() -> str:
 
     url = os.getenv("DATABASE_URL")
     if url:
-        # Convert to async URL if needed
-        return url.replace("postgresql://", "postgresql+asyncpg://")
+        # Handle PostgreSQL URLs
+        if url.startswith("postgresql://"):
+            url = url.replace("postgresql://", "postgresql+asyncpg://")
+            # Strip sslmode param — SSL is handled via connect_args
+            if "?sslmode=" in url:
+                url = url.split("?sslmode=")[0]
+            elif "&sslmode=" in url:
+                url = url.split("&sslmode=")[0]
+        # Handle SQLite URLs
+        elif url.startswith("sqlite://"):
+            url = url.replace("sqlite://", "sqlite+aiosqlite://")
+        return url
 
     # Fallback to config
     return config.get_main_option("sqlalchemy.url", "")

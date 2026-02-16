@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.auth.models import User
-from src.core.auth.routes import get_current_active_user
+from src.core.auth.dependencies import get_current_active_user
 from src.core.institution import service
 from src.core.institution.schemas import (
     InstitutionCreate,

@@ -12,9 +12,10 @@ from dataclasses import dataclass
 from datetime import datetime
 
 from fastapi import Depends, HTTPException, Request, status
-from fastapi.security import HTTPBearer, HTTPAuthCredential
+from fastapi.security import HTTPBearer
+from fastapi.security.http import HTTPAuthorizationCredentials as HTTPAuthCredential
 import jwt
-from jwt import PyJWTError
+from jwt import PyJWK, PyJWTError
 
 from src.config.settings import get_settings
 from src.core.auth.jwks import JWKSManager
@@ -106,13 +107,27 @@ async def get_current_user(
                 detail="Invalid token: key not found",
             )
 
+        # Build a PyJWK from the key data to handle all key types
+        # (RSA, EC, OKP/Ed25519) automatically
+        jwk = PyJWK.from_dict(key_data)
+        algorithm = jwk.algorithm_name  # e.g. "RS256", "EdDSA"
+
         # Verify JWT signature using the key
+        decode_options = {}
+        # EdDSA tokens from Better-Auth may use issuer/audience differently
+        aud = settings.better_auth_audience or None
+        iss = settings.better_auth_issuer or None
+
         payload = jwt.decode(
             token,
-            key_data,
-            algorithms=["RS256"],
-            audience=settings.better_auth_audience or None,
-            issuer=settings.better_auth_issuer or None,
+            jwk.key,
+            algorithms=[algorithm],
+            audience=aud,
+            issuer=iss,
+            options={
+                "verify_aud": aud is not None,
+                "verify_iss": iss is not None,
+            },
         )
 
         # Extract user claims
@@ -230,3 +245,11 @@ async def optional_user(
         return user
     except HTTPException:
         return None
+
+
+# Alias for backward compatibility
+get_current_active_user = get_current_user
+
+
+# Alias for backward compatibility
+get_current_active_user = get_current_user

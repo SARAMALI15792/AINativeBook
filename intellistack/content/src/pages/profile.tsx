@@ -19,27 +19,84 @@ interface UserProfile {
   onboardingCompleted: boolean;
 }
 
+interface BackendProfile {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+  email_verified: boolean;
+  preferences?: {
+    theme?: string;
+    notifications?: boolean;
+  };
+  current_stage: number;
+}
+
 export default function ProfilePage(): JSX.Element {
   const history = useHistory();
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [backendProfile, setBackendProfile] = useState<BackendProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [authClient, setAuthClient] = useState<any>(null);
 
+  const [backendUrl, setBackendUrl] = useState<string>('');
+
   useEffect(() => {
-    import('@site/src/lib/auth-client').then((mod) => {
+    import('@site/src/lib/auth-client').then(async (mod) => {
       setAuthClient(mod.authClient);
-      mod.authClient.getSession().then((result) => {
+      setBackendUrl(mod.getBackendUrl());
+      try {
+        const result = await mod.authClient.getSession();
         if (result.data?.user) {
-          setProfile(result.data.user as UserProfile);
+          // Create a proper UserProfile from the auth result
+          setProfile({
+            id: result.data.user.id,
+            name: result.data.user.name || '',
+            email: result.data.user.email || '',
+            role: result.data.user.role || 'student',
+            emailVerified: result.data.user.emailVerified || false,
+            image: result.data.user.image,
+            onboardingCompleted: (result.data.user as any).onboardingCompleted || false
+          });
+
+          // Get JWT for backend API calls
+          const jwt = await mod.getJwtToken();
+          if (jwt) {
+            fetch(`${mod.getBackendUrl()}/api/v1/users/me`, {
+              headers: {
+                'Authorization': `Bearer ${jwt}`,
+                'Content-Type': 'application/json',
+              },
+            })
+              .then(res => res.json())
+              .then(data => setBackendProfile(data))
+              .catch(err => console.error('Failed to fetch backend profile:', err))
+              .finally(() => setIsLoading(false));
+          } else {
+            setIsLoading(false);
+          }
         } else {
           history.push('/login');
+          setIsLoading(false);
         }
-        setIsLoading(false);
-      }).catch(() => {
+      } catch {
         history.push('/login');
-      });
+        setIsLoading(false);
+      }
     });
   }, []);
+
+  // Get stage name from stage number
+  const getStageName = (stage: number): string => {
+    const stageNames: Record<number, string> = {
+      1: 'Foundations',
+      2: 'ROS 2 & Simulation',
+      3: 'Perception & Planning',
+      4: 'AI Integration',
+      5: 'Capstone',
+    };
+    return stageNames[stage] || 'Unknown';
+  };
 
   const handleSignOut = async () => {
     if (!authClient) return;
@@ -176,6 +233,27 @@ export default function ProfilePage(): JSX.Element {
                   Pending
                 </span>
               )}
+            </div>
+
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: '1rem',
+              background: 'var(--ifm-color-emphasis-100)',
+              borderRadius: '8px',
+            }}>
+              <span style={{ fontWeight: '500' }}>Learning Stage</span>
+              <span style={{
+                padding: '0.25rem 0.75rem',
+                background: 'var(--ifm-color-primary)',
+                color: '#ffffff',
+                borderRadius: '9999px',
+                fontSize: '0.8125rem',
+                fontWeight: '500',
+              }}>
+                {backendProfile?.current_stage || 1} - {getStageName(backendProfile?.current_stage || 1)}
+              </span>
             </div>
 
             <div style={{

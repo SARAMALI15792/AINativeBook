@@ -9,6 +9,9 @@ import postgres from 'postgres';
 const databaseUrl = process.env.DATABASE_URL;
 
 if (!databaseUrl) {
+  console.error('❌ DATABASE_URL environment variable is missing!');
+  console.error('💡 Make sure your .env file is in the auth-server directory and contains DATABASE_URL');
+  console.error('📋 Example: DATABASE_URL=postgresql://username:password@localhost:5432/database_name');
   throw new Error('DATABASE_URL environment variable is required');
 }
 

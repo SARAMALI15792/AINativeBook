@@ -86,30 +86,9 @@ class RAGService:
         Returns:
             List of accessible stage IDs
         """
-        # Get user's progress to determine unlocked stages
-        result = await db.execute(
-            select(Progress).where(Progress.user_id == user_id)
-        )
-        progress = result.scalar_one_or_none()
+        from .utils import get_accessible_stage_ids as get_util_accessible_stage_ids
 
-        if not progress:
-            # New user - only access to Stage 1
-            from src.core.learning.models import Stage
-            result = await db.execute(
-                select(Stage.id).where(Stage.number == 1)
-            )
-            stage_1_id = result.scalar_one_or_none()
-            return [stage_1_id] if stage_1_id else []
-
-        # TODO: Implement proper stage unlocking logic based on completion
-        # For now, return all stages up to current stage
-        from src.core.learning.models import Stage
-        result = await db.execute(
-            select(Stage.id).where(Stage.number <= (progress.current_stage_number or 1))
-        )
-        accessible_ids = [row[0] for row in result.all()]
-
-        return accessible_ids
+        return await get_util_accessible_stage_ids(db, user_id)
 
     async def query_stream(
         self,

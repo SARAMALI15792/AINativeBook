@@ -62,7 +62,7 @@ class Settings(BaseSettings):
     rate_limit_unauth: int = 10  # requests per minute for unauthenticated
 
     # CORS
-    cors_origins: list[str] | str = Field(default=["http://localhost:3001"])
+    cors_origins: list[str] | str = Field(default=["http://localhost:3000", "http://localhost:3001"])
     cors_allow_credentials: bool = True
 
     # OAuth Providers
@@ -113,8 +113,12 @@ class Settings(BaseSettings):
         url = str(self.database_url)
         # Convert PostgreSQL URL to use asyncpg driver
         if "postgresql://" in url:
-            return url.replace("postgresql://", "postgresql+asyncpg://")
-        # If already has driver prefix, return as-is
+            url = url.replace("postgresql://", "postgresql+asyncpg://")
+        # Remove sslmode from URL as it's handled via connect_args in database.py
+        if "?sslmode=" in url:
+            url = url.split("?sslmode=")[0]
+        elif "&sslmode=" in url:
+            url = url.split("&sslmode=")[0]
         return url
 
 

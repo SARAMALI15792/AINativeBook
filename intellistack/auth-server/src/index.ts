@@ -3,15 +3,29 @@
  * Provides JWT-based authentication with OIDC discovery and JWKS endpoints
  */
 
+// Load environment variables BEFORE any other imports
+// Use absolute path resolution to handle different execution contexts
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Get directory name for absolute path resolution
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Load .env file with absolute path for reliability across different environments
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
+
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import dotenv from 'dotenv';
 import { toNodeHandler } from 'better-auth/node';
-import { auth } from './auth';
 
-// Load environment variables
-dotenv.config();
+// Dynamic import so env vars are loaded before auth/db modules initialize
+const { auth } = await import('./auth.js');
+
+// Import database connection check function
+const { checkDatabaseConnection } = await import('./db.js');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -25,7 +39,7 @@ app.use(helmet());
 
 // CORS configuration
 const corsOptions = {
-  origin: process.env.CORS_ORIGINS?.split(',') || ['http://localhost:3001'],
+  origin: process.env.CORS_ORIGINS?.split(',') || ['http://localhost:3000', 'http://localhost:3001'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
@@ -50,7 +64,7 @@ app.use(express.urlencoded({ extended: true }));
 // Health Check
 // ==========================================
 
-app.get('/health', (req: Request, res: Response) => {
+app.get('/health', (_req: Request, res: Response) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
@@ -58,7 +72,7 @@ app.get('/health', (req: Request, res: Response) => {
 // OIDC Discovery & JWKS Endpoints
 // ==========================================
 
-app.get('/.well-known/openid-configuration', async (req: Request, res: Response) => {
+app.get('/.well-known/openid-configuration', async (_req: Request, res: Response) => {
   const issuer = process.env.BETTER_AUTH_URL || 'http://localhost:3001';
   const oidcConfig = {
     issuer,
@@ -75,16 +89,16 @@ app.get('/.well-known/openid-configuration', async (req: Request, res: Response)
   res.json(oidcConfig);
 });
 
-app.get('/.well-known/jwks.json', async (req: Request, res: Response) => {
+app.get('/.well-known/jwks.json', async (_req: Request, res: Response) => {
   try {
-    // Better-Auth provides JWKS data - this will be populated after better-auth migrate
-    const jwksData = {
-      keys: [
-        // Will be populated by Better-Auth
-        // RS256 public key for token verification
-      ],
-    };
-    res.json(jwksData);
+    // Proxy to Better-Auth's internal JWKS endpoint (mounted at basePath + jwksPath)
+    const jwksUrl = `http://localhost:${PORT}/api/auth/.well-known/jwks.json`;
+    const response = await fetch(jwksUrl);
+    if (!response.ok) {
+      throw new Error(`JWKS fetch failed: ${response.status}`);
+    }
+    const jwks = await response.json();
+    res.json(jwks);
   } catch (error) {
     console.error('Error fetching JWKS:', error);
     res.status(500).json({ error: 'Failed to fetch JWKS' });
@@ -102,7 +116,7 @@ app.all('/api/auth/*', toNodeHandler(auth));
 // Error Handling
 // ==========================================
 
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   console.error('Error:', err);
   res.status(500).json({
     error: 'Internal server error',
@@ -110,7 +124,7 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   });
 });
 
-app.use((req: Request, res: Response) => {
+app.use((_req: Request, res: Response) => {
   res.status(404).json({ error: 'Not found' });
 });
 
@@ -120,6 +134,17 @@ app.use((req: Request, res: Response) => {
 
 async function start() {
   try {
+    // Check database connectivity before starting server
+    console.log('🔍 Checking database connection...');
+    const dbConnected = await checkDatabaseConnection();
+
+    if (!dbConnected) {
+      console.error('❌ Database connection failed. Server cannot start.');
+      process.exit(1);
+    }
+
+    console.log('✅ Database connection successful. Starting server...');
+
     app.listen(PORT, () => {
       console.log(`✅ Auth server running on http://localhost:${PORT}`);
       console.log(`📋 OIDC Discovery: http://localhost:${PORT}/.well-known/openid-configuration`);

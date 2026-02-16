@@ -131,7 +131,7 @@ export const authHooks = {
  * Middleware to attach request context to Express
  * Allows hooks to access request details
  */
-export function createAuthHooksMiddleware(req: Request, res: any, next: any) {
+export function createAuthHooksMiddleware(req: Request, _res: any, next: any) {
   // Attach logging utilities to request
   (req as any).authHooks = authHooks;
   (req as any).logAuthEvent = logAuthEvent;

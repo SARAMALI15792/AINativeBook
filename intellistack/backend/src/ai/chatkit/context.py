@@ -36,19 +36,20 @@ class PageContext:
         - X-User-Stage
         """
         import json
+        from urllib.parse import unquote
 
         headings = []
         if headings_json := headers.get("x-page-headings"):
             try:
-                headings = json.loads(headings_json)
-            except json.JSONDecodeError:
+                headings = json.loads(unquote(headings_json))
+            except (json.JSONDecodeError, ValueError):
                 pass
 
         return cls(
-            url=headers.get("x-page-url", ""),
-            title=headers.get("x-page-title", ""),
+            url=unquote(headers.get("x-page-url", "")),
+            title=unquote(headers.get("x-page-title", "")),
             headings=headings,
-            selected_text=headers.get("x-selected-text") or None,
+            selected_text=unquote(headers.get("x-selected-text", "")) or None,
             course_id=headers.get("x-course-id") or None,
             lesson_id=headers.get("x-lesson-id") or None,
             stage=int(headers.get("x-user-stage", "1")),

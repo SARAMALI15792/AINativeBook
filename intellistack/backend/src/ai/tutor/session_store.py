@@ -31,7 +31,7 @@ class TutorSessionItem(Base):
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     role = Column(String(50), nullable=False)  # 'user' or 'assistant'
     content = Column(Text, nullable=False)
-    metadata = Column(JSONB, default=dict)
+    item_metadata = Column("metadata", JSONB, default=dict)
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow)
 
     __table_args__ = (
@@ -74,7 +74,7 @@ class PostgresSession:
                     "id": str(item.id),
                     "role": item.role,
                     "content": item.content,
-                    "metadata": item.metadata or {},
+                    "metadata": item.item_metadata or {},
                     "created_at": item.created_at.isoformat() if item.created_at else None,
                 }
                 for item in items
@@ -95,7 +95,7 @@ class PostgresSession:
             user_id=self.user_id,
             role=role,
             content=content,
-            metadata=metadata or {},
+            item_metadata=metadata or {},
         )
         self.db.add(item)
         await self.db.commit()

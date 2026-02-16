@@ -7,7 +7,8 @@ import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { jwt } from 'better-auth/plugins';
 import { oidcProvider } from 'better-auth/plugins';
-import { db } from './db';
+import { db } from './db.js';
+import * as schema from './auth-schema.js';
 
 // Validate required environment variables
 const validateEnv = () => {
@@ -15,6 +16,9 @@ const validateEnv = () => {
   const missing = required.filter((key) => !process.env[key]);
 
   if (missing.length > 0) {
+    console.error('❌ Missing required environment variables:', missing.join(', '));
+    console.error('💡 Make sure your .env file contains all required variables');
+    console.error('📋 Required variables:', required.join(', '));
     throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
   }
 };
@@ -34,12 +38,7 @@ export const auth = betterAuth({
   // Database adapter
   database: drizzleAdapter(db, {
     provider: 'pg',
-    schema: {
-      user: 'user',
-      session: 'session',
-      verification: 'verification',
-      account: 'account',
-    },
+    schema,
   }),
 
   // Base URL for OIDC discovery and callbacks
@@ -50,11 +49,15 @@ export const auth = betterAuth({
   // Trust proxy headers (for reverse proxy deployment)
   trustHost: process.env.BETTER_AUTH_TRUST_HOST === 'true',
 
+  // Trusted origins for cross-origin requests (frontend → auth server)
+  trustedOrigins: process.env.CORS_ORIGINS?.split(',') || ['http://localhost:3000', 'http://localhost:3001'],
+
   // Email configuration
   emailAndPassword: {
     enabled: true,
-    autoSignInAfterVerification: false, // Require email verification before login
-    minPasswordLength: 12,
+    autoSignInAfterVerification: true, // For development - auto sign in after email verification
+    requireEmailVerification: false, // Disable email verification for development
+    minPasswordLength: 8,
     maxPasswordLength: 128,
   },
 
@@ -81,24 +84,21 @@ export const auth = betterAuth({
 
   // Plugins for extended functionality
   plugins: [
-    // JWT Plugin: RS256 signing for token verification at JWKS endpoint
+    // JWT Plugin: EdDSA (Ed25519) signing for token verification at JWKS endpoint
     jwt({
-      name: 'jwt', // Name for the plugin
       jwks: {
         jwksPath: '/.well-known/jwks.json', // Standard OIDC JWKS endpoint
-      },
-      alg: 'RS256', // RS256 (asymmetric) - can be verified without calling auth server
-      iss: 'iss', // Issuer claim
-      aud: 'aud', // Audience claim
-      keyPairConfig: {
-        alg: 'RS256',
-        crv: 'P-256', // NIST P-256 elliptic curve
+        keyPairConfig: {
+          alg: 'EdDSA', // EdDSA (Ed25519) - Better-Auth default, asymmetric
+          crv: 'Ed25519',
+        },
       },
     }),
 
     // OIDC Provider Plugin: OpenID Connect discovery endpoint
     oidcProvider({
       useJWTPlugin: true, // Integrate with JWT plugin
+      loginPage: `${process.env.BETTER_AUTH_URL || 'http://localhost:3001'}/login`,
       metadata: {
         issuer: process.env.BETTER_AUTH_URL || 'http://localhost:3001',
         authorization_endpoint: `${process.env.BETTER_AUTH_URL}/api/auth/authorize`,
@@ -106,22 +106,22 @@ export const auth = betterAuth({
         userinfo_endpoint: `${process.env.BETTER_AUTH_URL}/api/auth/userinfo`,
         jwks_uri: `${process.env.BETTER_AUTH_URL}/.well-known/jwks.json`,
         scopes_supported: ['openid', 'profile', 'email'],
-        response_types_supported: ['code', 'token', 'id_token'],
+        response_types_supported: ['code', 'id_token'] as any,
         subject_types_supported: ['public'],
-        id_token_signing_alg_values_supported: ['RS256'],
+        id_token_signing_alg_values_supported: ['EdDSA'],
       },
     }),
   ],
 
   // Callbacks for auth events (logging, analytics, etc.)
   callbacks: {
-    async signIn({ user, account, profile, isNewUser }) {
+    async signIn({ user, account, isNewUser }: any) {
       // Log sign-in event
       console.log(`Sign in: user=${user.email}, provider=${account?.provider}, new=${isNewUser}`);
       return true; // Allow sign-in
     },
 
-    async jwt({ token, user, account }) {
+    async jwt({ token, user }: any) {
       // Add custom claims to JWT
       if (user) {
         token.id = user.id;
@@ -131,7 +131,7 @@ export const auth = betterAuth({
       return token;
     },
 
-    async session({ session, user, token }) {
+    async session({ session, user }: any) {
       // Add custom fields to session
       session.user.role = user.role || 'student';
       return session;
@@ -147,5 +147,5 @@ export const auth = betterAuth({
 });
 
 export type Session = typeof auth.$Infer.Session;
-export type User = typeof auth.$Infer.User;
+export type User = typeof auth.$Infer.Session.user;
 export type Auth = typeof auth;

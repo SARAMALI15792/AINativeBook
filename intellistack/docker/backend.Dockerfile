@@ -3,23 +3,25 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install system dependencies
+# Install system dependencies (as root)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies
-COPY backend/pyproject.toml backend/requirements*.txt* ./
-RUN pip install --no-cache-dir -e . || pip install --no-cache-dir -r requirements.txt 2>/dev/null || true
+# Create non-root user
+RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
 
-# Copy application code
+# Install Python dependencies (as root to ensure they install globally)
+COPY backend/requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code (as root)
 COPY backend/src ./src
 COPY backend/alembic ./alembic
 COPY backend/alembic.ini ./
 
-# Create non-root user
-RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
+# Switch to non-root user
 USER appuser
 
 # Expose port

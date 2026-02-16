@@ -53,9 +53,9 @@ class AIConversation(Base):
     expires_at = Column(DateTime, nullable=True)  # FR-033: 30-day retention
 
     # Relationships
-    user = relationship("User", back_populates="ai_conversations")
-    stage = relationship("Stage", back_populates="ai_conversations")
-    content = relationship("ContentItem", back_populates="ai_conversations")
+    user = relationship("User")
+    stage = relationship("Stage")
+    content = relationship("ContentItem")
     messages = relationship("AIMessage", back_populates="conversation", cascade="all, delete-orphan")
     guardrail_events = relationship("GuardrailEvent", back_populates="conversation", cascade="all, delete-orphan")
 

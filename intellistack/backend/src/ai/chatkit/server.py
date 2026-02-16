@@ -134,7 +134,7 @@ class IntelliStackChatKitServer:
                     "id": t.id,
                     "title": t.title or "New conversation",
                     "updated_at": t.updated_at.isoformat(),
-                    "message_count": len(t.items) if hasattr(t, 'items') else 0,
+                    "message_count": 0,  # Avoid lazy-loading items in list view
                 }
                 for t in threads
             ]

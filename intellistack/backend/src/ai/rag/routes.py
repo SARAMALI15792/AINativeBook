@@ -17,7 +17,7 @@ from src.ai.rag.schemas import (
 )
 from src.ai.rag.service import RAGService
 from src.core.auth.models import User
-from src.core.auth.routes import get_current_active_user
+from src.core.auth.dependencies import get_current_user
 from src.shared.database import get_session
 
 logger = logging.getLogger(__name__)
@@ -33,7 +33,7 @@ def get_rag_service() -> RAGService:
 @router.post("/conversations", status_code=status.HTTP_201_CREATED)
 async def create_conversation(
     conversation_data: ConversationCreate,
-    current_user: Annotated[User, Depends(get_current_active_user)],
+    current_user: Annotated[User, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_session)],
     rag_service: Annotated[RAGService, Depends(get_rag_service)],
 ):
@@ -64,7 +64,7 @@ async def create_conversation(
 @router.post("/query", response_model=RAGQueryResponse)
 async def query_rag(
     query_request: RAGQueryRequest,
-    current_user: Annotated[User, Depends(get_current_active_user)],
+    current_user: Annotated[User, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_session)],
     rag_service: Annotated[RAGService, Depends(get_rag_service)],
 ):
@@ -100,7 +100,7 @@ async def query_rag(
 @router.post("/query/stream")
 async def query_rag_stream(
     query_request: RAGQueryRequest,
-    current_user: Annotated[User, Depends(get_current_active_user)],
+    current_user: Annotated[User, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_session)],
     rag_service: Annotated[RAGService, Depends(get_rag_service)],
 ):
@@ -161,7 +161,7 @@ async def query_rag_stream(
 @router.post("/highlight-query")
 async def highlight_query(
     query_request: RAGQueryRequest,
-    current_user: Annotated[User, Depends(get_current_active_user)],
+    current_user: Annotated[User, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_session)],
     rag_service: Annotated[RAGService, Depends(get_rag_service)],
 ):
@@ -196,7 +196,7 @@ async def highlight_query(
 @router.get("/sources/{message_id}")
 async def get_message_sources(
     message_id: str,
-    current_user: Annotated[User, Depends(get_current_active_user)],
+    current_user: Annotated[User, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_session)],
     rag_service: Annotated[RAGService, Depends(get_rag_service)],
 ):

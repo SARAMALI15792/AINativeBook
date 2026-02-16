@@ -13,6 +13,8 @@ from src.shared.database import Base
 
 if TYPE_CHECKING:
     from src.core.learning.models import Progress, UserBadge
+    from src.ai.tutor.models import AIConversation
+    from src.ai.tutor.models import AIConversation
 
 
 class RoleName(str, Enum):
