@@ -64,12 +64,14 @@ graph TB
         subgraph "Frontend Layer"
             D{Docusaurus}
             R{React Components}
+            CK[ChatKit Widget]
         end
 
         subgraph "Backend Layer"
             A[FastAPI Server]
             B[Better-Auth]
             C[Qdrant Vector DB]
+            CKS[ChatKit Server]
         end
 
         subgraph "Infrastructure"
@@ -87,14 +89,21 @@ graph TB
 
     D --> A
     R --> A
+    CK --> A
     A --> B
     A --> C
     A --> P
     A --> R
     A --> O
     A --> CO
+    A --> CKS
     DP --> A
     CT --> A
+    CKS --> A
+    CKS --> C
+    CKS --> P
+    CKS --> O
+    CKS --> CO
 ```
 
 ### Component Breakdown
@@ -104,6 +113,7 @@ graph TB
    - **ORM**: SQLAlchemy 2.0 (async)
    - **Database**: PostgreSQL (Neon)
    - **API Documentation**: Automatic OpenAPI/Swagger generation
+   - **ChatKit Integration**: AI tutoring with streaming responses
 
 2. **Auth Server** (`intellistack/auth-server/`)
    - **Framework**: Better-Auth (TypeScript)
@@ -114,6 +124,13 @@ graph TB
    - **Framework**: Docusaurus (React-based)
    - **Format**: MDX content with interactive elements
    - **Search**: Built-in search capabilities
+   - **ChatKit Widget**: AI tutoring interface with text selection support
+
+4. **ChatKit AI Tutor**
+   - **Frontend**: Floating chat widget with context awareness
+   - **Backend**: Server with SSE streaming and rate limiting
+   - **Features**: RAG integration, stage-based access control, conversation history
+   - **API**: `/api/v1/chatkit` endpoints with streaming support
 
 ### Technology Stack
 
@@ -273,6 +290,19 @@ The Retrieval-Augmented Generation (RAG) chatbot provides:
 - **Stage-Based Access**: Only searches content that students have unlocked
 - **Text Selection Queries**: Context-aware searching
 
+### ChatKit AI Tutor
+
+The ChatKit AI Tutor provides an advanced learning experience with:
+
+- **Socratic Method**: Guides students without giving direct answers
+- **Floating Widget**: Context-aware chat interface in Docusaurus content
+- **Text Selection Integration**: Students can select text and ask about specific content
+- **Conversation History**: Thread management with message persistence
+- **Rate Limiting**: Usage control with daily message limits
+- **Stage-Based Access**: Context-aware responses based on student progression
+- **Real-time Streaming**: Server-Sent Events for smooth conversational flow
+- **RAG Integration**: Full access to the knowledge base with citations
+
 ### Content Authoring System
 
 Content creation tools include:
@@ -379,6 +409,9 @@ docker-compose -f docker-compose.test.yml up --build
 | `GET` | `/api/chat/stream` | Stream RAG chat responses |
 | `GET` | `/api/institutions/cohorts` | Get institution cohorts |
 | `POST` | `/api/content/create` | Create new content |
+| `POST` | `/api/chatkit/stream` | Stream AI tutor responses |
+| `GET/POST/DELETE` | `/api/chatkit/threads` | Manage conversation threads |
+| `GET` | `/api/chatkit/usage` | Get rate limit usage |
 
 ### Authentication
 
