@@ -588,4 +588,4 @@ MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-<p align="center">Built with ❤️ for the future of robotics education</p>
+<p align="center">Built with for the future of robotics education</p>
