@@ -46,12 +46,15 @@ export default function ChatKitWidget(): JSX.Element | null {
   const pageContext = usePageContext();
   const location = useLocation();
 
-  // Only render on Docusaurus learning routes (stage-1, stage-2, etc.)
-  if (!location.pathname.startsWith('/stage-1/') &&
-      !location.pathname.startsWith('/stage-2/') &&
-      !location.pathname.startsWith('/stage-3/') &&
-      !location.pathname.startsWith('/stage-4/') &&
-      !location.pathname.startsWith('/stage-5/')) {
+  // Only render on Docusaurus learning routes
+  // The paths are like /AINativeBook/docs/stage-1/intro/, so check if they contain the stage paths
+  const isStageRoute = location.pathname.includes('/stage-1/') ||
+                       location.pathname.includes('/stage-2/') ||
+                       location.pathname.includes('/stage-3/') ||
+                       location.pathname.includes('/stage-4/') ||
+                       location.pathname.includes('/stage-5/');
+
+  if (!isStageRoute) {
     return null;
   }
 
