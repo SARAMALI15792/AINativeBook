@@ -83,7 +83,7 @@ export default function ChatKitWidget(): JSX.Element | null {
 
     const checkAuth = async () => {
       try {
-        const mod = await import('../../lib/auth-client');
+        const mod = await import('@site/src/lib/auth-client');
         console.log('ChatKitWidget: Auth client imported');
 
         const result = await mod.authClient.getSession();
@@ -187,7 +187,7 @@ export default function ChatKitWidget(): JSX.Element | null {
     // Refresh JWT if needed (tokens expire)
     if (!jwtTokenRef.current) {
       try {
-        const mod = await import('../../lib/auth-client');
+        const mod = await import('@site/src/lib/auth-client');
         const jwt = await mod.getJwtToken();
         if (jwt) jwtTokenRef.current = jwt;
       } catch {
@@ -660,7 +660,7 @@ export default function ChatKitWidget(): JSX.Element | null {
                     className={styles.loginButton}
                     onClick={async () => {
                       try {
-                        const authMod = await import('../../lib/auth-client');
+                        const authMod = await import('@site/src/lib/auth-client');
                         // Use the exported signIn method which is a wrapper around authClient.signIn
                         await authMod.signIn('credentials'); // This will trigger the sign-in flow
 

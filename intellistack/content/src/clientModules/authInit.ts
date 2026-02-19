@@ -8,7 +8,7 @@ import ExecutionEnvironment from '@docusaurus/ExecutionEnvironment';
 // Only run on client side
 if (ExecutionEnvironment.canUseDOM) {
   // Initialize auth client when module loads
-  import('../lib/auth-client')
+  import('@site/src/lib/auth-client')
     .then(async ({ getAuthClient }) => {
       try {
         const client = getAuthClient();
