@@ -63,7 +63,7 @@ export function Hero({ className = '' }: HeroProps) {
                 Start Learning Free
               </Link>
               <Link
-                href="/docs"
+                href="/docs/stage-1/intro"
                 className="inline-flex items-center justify-center rounded-md font-semibold transition-all duration-normal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan focus-visible:ring-offset-2 px-6 py-3 text-lg border-2 border-accent-cyan text-accent-cyan hover:bg-accent-cyan hover:text-bg-primary w-full sm:w-auto"
               >
                 Explore Curriculum
