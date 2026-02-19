@@ -1,0 +1,7 @@
+{
+  "buildCommand": "cd intellistack/frontend && npm install && npm run build",
+  "devCommand": "cd intellistack/frontend && npm run dev",
+  "installCommand": "cd intellistack/frontend && npm install",
+  "framework": "nextjs",
+  "outputDirectory": "intellistack/frontend/.next"
+}
