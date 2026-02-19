@@ -80,6 +80,11 @@ const config: Config = {
       },
       items: [
         {
+          label: 'Home',
+          href: '/AINativeBook/',
+          position: 'left',
+        },
+        {
           type: 'docSidebar',
           sidebarId: 'stage1Sidebar',
           position: 'left',
