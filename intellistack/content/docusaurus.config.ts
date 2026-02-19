@@ -57,6 +57,7 @@ const config: Config = {
       'classic',
       {
         docs: {
+          routeBasePath: '/',
           sidebarPath: './sidebars.ts',
           editUrl: 'https://github.com/intellistack/intellistack/tree/main/content/',
           showLastUpdateAuthor: true,
