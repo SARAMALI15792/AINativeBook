@@ -38,3 +38,16 @@ htmlcov/
 
 # Docker
 *.pid
+
+# Next.js
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
+
+# TypeScript
+*.tsbuildinfo
+
+# Testing
+.nyc_output/
+*.lcov

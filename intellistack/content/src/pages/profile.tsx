@@ -16,7 +16,6 @@ interface UserProfile {
   role: string;
   emailVerified: boolean;
   image?: string;
-  onboardingCompleted: boolean;
 }
 
 interface BackendProfile {
@@ -56,7 +55,6 @@ export default function ProfilePage(): JSX.Element {
             role: result.data.user.role || 'student',
             emailVerified: result.data.user.emailVerified || false,
             image: result.data.user.image,
-            onboardingCompleted: (result.data.user as any).onboardingCompleted || false
           });
 
           // Get JWT for backend API calls
@@ -265,7 +263,7 @@ export default function ProfilePage(): JSX.Element {
               borderRadius: '8px',
             }}>
               <span style={{ fontWeight: '500' }}>Onboarding</span>
-              {profile.onboardingCompleted ? (
+              {backendProfile?.preferences ? (
                 <span style={{ color: '#22c55e' }}>Complete</span>
               ) : (
                 <Link to="/onboarding" style={{ color: 'var(--ifm-color-primary)', textDecoration: 'none' }}>

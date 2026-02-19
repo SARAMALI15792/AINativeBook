@@ -212,13 +212,20 @@ class JWKSAuthMiddleware(BaseHTTPMiddleware):
         auth_header = request.headers.get("Authorization", "")
         token = None
 
+        print(f"[MIDDLEWARE DEBUG] Path: {request.url.path}")
+        print(f"[MIDDLEWARE DEBUG] Cookie name to check: {self.cookie_name}")
+        print(f"[MIDDLEWARE DEBUG] Available cookies: {list(request.cookies.keys())}")
+
         if auth_header.startswith("Bearer "):
             token = auth_header[7:]  # Remove "Bearer " prefix
+            print(f"[MIDDLEWARE DEBUG] Found Bearer token")
         else:
             # Fallback: check for session cookie
             token = request.cookies.get(self.cookie_name)
+            print(f"[MIDDLEWARE DEBUG] Checking cookie '{self.cookie_name}': {'found' if token else 'not found'}")
 
         if token:
+            print(f"[MIDDLEWARE DEBUG] Token found, attempting validation (length: {len(token)})")
             try:
                 # Validate JWT using JWKS
                 import jwt
@@ -241,11 +248,25 @@ class JWKSAuthMiddleware(BaseHTTPMiddleware):
                 if key_data:
                     # Verify JWT signature
                     settings = get_settings()
+
+                    # Extract algorithm from JWT header to support EdDSA and RS256
+                    from jwt import PyJWK
+
+                    unverified_header = jwt.get_unverified_header(token)
+                    algorithm = unverified_header.get("alg", "RS256")
+
+                    # Convert JWKS key data to PyJWK object
+                    jwk = PyJWK.from_dict(key_data)
+
                     payload = jwt.decode(
                         token,
-                        key_data,
-                        algorithms=["RS256"],
-                        options={"verify_exp": True},
+                        jwk.key,
+                        algorithms=[algorithm],
+                        options={
+                            "verify_exp": True,
+                            "verify_aud": settings.better_auth_audience is not None,
+                            "verify_iss": settings.better_auth_issuer is not None,
+                        },
                         audience=settings.better_auth_audience or None,
                         issuer=settings.better_auth_issuer or None,
                     )
@@ -282,9 +303,39 @@ class JWKSAuthMiddleware(BaseHTTPMiddleware):
                 logger.debug("JWT token expired")
 
             except jwt.InvalidTokenError as e:
+                # Not a JWT - might be a session token, try validating with auth server
                 request.state.user = None
                 request.state.user_id = None
-                logger.warning(f"JWT validation failed: {e}")
+                logger.debug(f"Not a valid JWT ({e}), trying session token validation")
+
+                # Try session token validation
+                try:
+                    import httpx
+                    settings = get_settings()
+                    auth_server_url = settings.better_auth_jwks_url.replace('/.well-known/jwks.json', '')
+
+                    async with httpx.AsyncClient() as client:
+                        response = await client.get(
+                            f"{auth_server_url}/api/auth/get-session",
+                            cookies={self.cookie_name: token},
+                            timeout=5.0
+                        )
+
+                        if response.status_code == 200:
+                            data = response.json()
+                            if data and data.get('user'):
+                                user = data['user']
+                                request.state.user = {
+                                    "id": user.get('id'),
+                                    "email": user.get('email'),
+                                    "name": user.get('name'),
+                                    "email_verified": user.get('emailVerified', False),
+                                    "role": user.get('role', 'student'),
+                                }
+                                request.state.user_id = user.get('id')
+                                logger.debug(f"✅ Session token validated for user {user.get('email')}")
+                except Exception as session_error:
+                    logger.debug(f"Session token validation also failed: {session_error}")
 
             except Exception as e:
                 request.state.user = None
@@ -345,4 +396,4 @@ def get_auth_middleware(app) -> type:
 
     This provides compatibility with the expected BetterAuth interface.
     """
-    return BetterAuthSessionMiddleware
+    return JWKSAuthMiddleware

@@ -5,7 +5,7 @@ from enum import Enum
 from typing import TYPE_CHECKING, Optional
 from uuid import uuid4
 
-from sqlalchemy import DateTime, Enum as SQLEnum, ForeignKey, Integer, String, Text, func
+from sqlalchemy import Boolean, DateTime, Enum as SQLEnum, ForeignKey, Integer, String, Text, func
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -98,6 +98,13 @@ class Content(Base):
     published_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
+
+    # Enhanced content attributes (used by enhanced_routes)
+    difficulty_level: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    estimated_reading_time: Mapped[Optional[int]] = mapped_column(nullable=True)
+    tags: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
+    has_summary: Mapped[bool] = mapped_column(Boolean, default=False)
+    has_interactive_code: Mapped[bool] = mapped_column(Boolean, default=False)
 
     # Relationships
     # Note: Stage relationship handled via foreign key only (avoid circular import)

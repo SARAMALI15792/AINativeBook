@@ -26,12 +26,16 @@ class LLMClient:
         """
         self.api_key = api_key or os.getenv("OPENAI_API_KEY")
         if not self.api_key:
-            raise ValueError("OpenAI API key is required")
+            logger.warning("OpenAI API key not set — LLM features will fail at runtime")
 
-        self.client = AsyncOpenAI(api_key=self.api_key)
+        self.client = AsyncOpenAI(api_key=self.api_key) if self.api_key else None
         self.embedding_model = "text-embedding-3-small"
         self.chat_model = "gpt-4o"
         self.embedding_dimensions = 1536
+
+    def _ensure_client(self):
+        if self.client is None:
+            raise ValueError("OpenAI API key is required. Set OPENAI_API_KEY environment variable.")
 
     async def create_embedding(self, text: str) -> List[float]:
         """
@@ -43,6 +47,7 @@ class LLMClient:
         Returns:
             List[float]: Embedding vector (1536 dimensions)
         """
+        self._ensure_client()
         try:
             response = await self.client.embeddings.create(
                 model=self.embedding_model,
@@ -63,6 +68,7 @@ class LLMClient:
         Returns:
             List of embedding vectors
         """
+        self._ensure_client()
         try:
             response = await self.client.embeddings.create(
                 model=self.embedding_model,
@@ -92,6 +98,7 @@ class LLMClient:
         Yields:
             Content delta strings as they arrive
         """
+        self._ensure_client()
         try:
             async with self.client.chat.completions.stream(
                 model=self.chat_model,
@@ -106,6 +113,11 @@ class LLMClient:
         except Exception as e:
             logger.error(f"Error in streaming chat completion: {e}")
             raise
+
+    async def generate(self, prompt: str, temperature: float = 0.7, max_tokens: int = 1000) -> str:
+        """Generate text from a single prompt string. Convenience wrapper around chat_completion."""
+        messages = [{"role": "user", "content": prompt}]
+        return await self.chat_completion(messages, temperature=temperature, max_tokens=max_tokens)
 
     async def chat_completion(
         self,
@@ -124,6 +136,7 @@ class LLMClient:
         Returns:
             Complete response text
         """
+        self._ensure_client()
         try:
             response = await self.client.chat.completions.create(
                 model=self.chat_model,

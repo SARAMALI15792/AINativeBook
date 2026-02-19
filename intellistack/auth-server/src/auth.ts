@@ -50,7 +50,7 @@ export const auth = betterAuth({
   trustHost: process.env.BETTER_AUTH_TRUST_HOST === 'true',
 
   // Trusted origins for cross-origin requests (frontend → auth server)
-  trustedOrigins: process.env.CORS_ORIGINS?.split(',') || ['http://localhost:3000', 'http://localhost:3001'],
+  trustedOrigins: process.env.CORS_ORIGINS?.split(',') || ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002', 'http://localhost:3004', 'http://localhost:8000'],
 
   // Email configuration
   emailAndPassword: {
@@ -63,9 +63,25 @@ export const auth = betterAuth({
 
   // Session configuration
   session: {
-    expiresIn: 6 * 60 * 60, // 6 hours for access token
-    updateAgeSession: 60 * 60, // Refresh token after 1 hour
+    expiresIn: 24 * 60 * 60, // 24 hours for session token
+    updateAgeSession: 60 * 60, // Refresh session after 1 hour of activity
     absoluteExpiresIn: 7 * 24 * 60 * 60, // 7 days absolute expiry
+    cookieCache: {
+      enabled: true,
+      maxAge: 5 * 60, // 5 minutes
+    },
+  },
+
+  // Advanced configuration for cookie handling across localhost ports
+  advanced: {
+    // Apply domain to ALL cookies (session_token, session_data, etc.)
+    // so they are shared across localhost:3000, :3001, :3002, :3004
+    defaultCookieAttributes: {
+      sameSite: 'lax' as const,
+      secure: process.env.NODE_ENV === 'production',
+      path: '/',
+      domain: process.env.COOKIE_DOMAIN || (process.env.NODE_ENV === 'production' ? undefined : 'localhost'),
+    },
   },
 
   // Social OAuth providers
@@ -93,6 +109,7 @@ export const auth = betterAuth({
           crv: 'Ed25519',
         },
       },
+      expiresIn: 24 * 60 * 60, // JWT expires in 24 hours (matches session)
     }),
 
     // OIDC Provider Plugin: OpenID Connect discovery endpoint

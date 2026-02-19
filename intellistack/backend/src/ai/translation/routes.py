@@ -11,7 +11,7 @@ from sqlalchemy import select
 from pydantic import BaseModel
 import structlog
 
-from src.shared.database import get_db
+from src.shared.database import get_session as get_db
 from src.core.auth.dependencies import get_current_user
 from src.core.auth.models import User
 from src.core.content.models import Content

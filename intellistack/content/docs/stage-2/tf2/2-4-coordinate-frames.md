@@ -21,7 +21,7 @@ Every sensor measures data in its own coordinate frame.
 **The Problem**: If the Camera sees an obstacle at (3, 0, 1), where is that obstacle relative to the Wheels?
 **The Solution**: The Transform Tree. A distributed graph of frame relationships published by `robot_state_publisher`.
 
-$$ ^{base}P = ^{base}T_{camera} \times ^{camera}P $$
+$$ ^\{base\}P = ^\{base\}T_\{camera\} \times ^\{camera\}P $$
 
 ---
 

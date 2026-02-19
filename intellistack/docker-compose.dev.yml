@@ -30,7 +30,7 @@ services:
       - BETTER_AUTH_SECRET=dev-secret-key-min32-chars-for-jwt-signing
       - BETTER_AUTH_URL=http://localhost:3001
       - BETTER_AUTH_TRUST_HOST=true
-      - CORS_ORIGINS=http://localhost:3000,http://localhost:3001,http://localhost:8000
+      - CORS_ORIGINS=http://localhost:3000,http://localhost:3001,http://localhost:3002,http://localhost:3004,http://localhost:8000
       - NODE_ENV=development
       - RESEND_API_KEY=${RESEND_API_KEY:-sk-placeholder}
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}

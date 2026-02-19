@@ -1,30 +1,36 @@
-/**
- * Global Root Component
- * Wraps the entire application to inject ChatKit widget on all pages
- */
 import React, { useEffect } from 'react';
-import { ChatKitErrorBoundary } from '../components/ai/ChatKitErrorBoundary';
+import { AuthProvider } from '../contexts/AuthContext';
 import ChatKitWidget from '../components/ai/ChatKitWidget';
 
-interface Props {
-  children: React.ReactNode;
-}
-
-export default function Root({ children }: Props): JSX.Element {
-  // Add body class for proper positioning when widget is present
+// Root wrapper for Docusaurus to provide auth context
+export default function Root({ children }) {
   useEffect(() => {
-    document.body.classList.add('has-chatkit-widget');
-    return () => {
-      document.body.classList.remove('has-chatkit-widget');
-    };
+    // Check if coming from personalization
+    const params = new URLSearchParams(window.location.search);
+    const from = params.get('from');
+    if (from === 'personalization' || from === 'login') {
+      // Verify session is active
+      import('@site/src/lib/auth-client').then(async (mod) => {
+        const session = await mod.authClient.getSession();
+        if (session.data?.user) {
+          console.log('Session verified after personalization redirect');
+          // Dispatch event to refresh ChatKit widget
+          window.dispatchEvent(new Event('auth-state-changed'));
+          // Clean URL
+          window.history.replaceState({}, '', window.location.pathname);
+        } else {
+          console.warn('No session found after personalization redirect');
+        }
+      }).catch(err => {
+        console.error('Failed to verify session:', err);
+      });
+    }
   }, []);
 
   return (
-    <>
+    <AuthProvider>
       {children}
-      <ChatKitErrorBoundary>
-        <ChatKitWidget />
-      </ChatKitErrorBoundary>
-    </>
+      <ChatKitWidget />
+    </AuthProvider>
   );
 }

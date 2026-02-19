@@ -11,7 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_
 from sqlalchemy.orm import selectinload
 
-from ...shared.database import get_db
+from ...shared.database import get_session as get_db
 from ...core.auth.models import User
 from ...core.learning.models import Stage, ContentItem
 from .models import AIConversation, AIMessage, GuardrailEvent, IntentType, GuardrailType

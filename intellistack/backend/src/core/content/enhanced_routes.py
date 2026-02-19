@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 import structlog
 
-from src.shared.database import get_db
+from src.shared.database import get_session as get_db
 from src.core.auth.dependencies import get_current_user
 from src.core.auth.models import User
 from src.core.content.models import Content
@@ -27,7 +27,7 @@ from src.ai.shared.llm_client import LLMClient
 
 logger = structlog.get_logger()
 
-router = APIRouter(prefix="/api/v1/content", tags=["Enhanced Content"])
+router = APIRouter(prefix="/api/v1/enhanced-content", tags=["Enhanced Content"])
 
 # Initialize services (in production, use dependency injection)
 llm_client = LLMClient()

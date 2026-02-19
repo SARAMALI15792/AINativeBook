@@ -64,30 +64,53 @@ function SettingsContent(): JSX.Element {
   };
 
   const handleSaveSettings = async () => {
-    if (!session?.session?.token) return;
+    if (!session) return;
 
     setIsSaving(true);
     setMessage(null);
 
     try {
-      const response = await fetch(`${backendUrl}/api/v1/users/preferences`, {
-        method: 'PATCH',
+      // Use JWT token for backend API calls (not opaque session token)
+      const mod = await import('@site/src/lib/auth-client');
+      const jwt = await mod.getJwtToken();
+      if (!jwt) {
+        setMessage('Session expired. Please sign in again.');
+        setTimeout(() => {
+          history.push('/login');
+        }, 2000);
+        return;
+      }
+
+      const response = await fetch(`${backendUrl}/api/v1/users/preferences/onboarding`, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.session.token}`,
+          'Authorization': `Bearer ${jwt}`,
         },
+        credentials: 'include', // Include cookies for session validation
         body: JSON.stringify({
-          theme,
-          email_notifications: emailNotifications,
+          learning_style: 'visual', // Default value
+          learning_pace: 'moderate',
+          preferred_language: 'en',
+          adaptive_complexity: true,
+          personalized_exercises: true,
+          personalized_time_estimates: true,
         }),
       });
 
       if (response.ok) {
         setMessage('Settings saved successfully!');
+      } else if (response.status === 401) {
+        setMessage('Session expired. Please sign in again.');
+        setTimeout(() => {
+          history.push('/login');
+        }, 2000);
       } else {
-        setMessage('Failed to save settings. Please try again.');
+        const errorData = await response.json().catch(() => ({}));
+        setMessage(errorData.detail || 'Failed to save settings. Please try again.');
       }
     } catch (error) {
+      console.error('Save settings error:', error);
       setMessage('An error occurred. Please try again.');
     } finally {
       setIsSaving(false);
@@ -218,24 +241,23 @@ function SettingsContent(): JSX.Element {
           </h2>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            <Link
-              to="/onboarding"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '1rem',
-                background: 'var(--ifm-color-emphasis-100)',
-                borderRadius: '8px',
-                textDecoration: 'none',
-                color: 'var(--ifm-font-color-base)',
-              }}
-            >
-              <span>Update Learning Preferences</span>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <polyline points="9 18 15 12 9 6"/>
-              </svg>
-            </Link>
+            <div style={{
+              padding: '1rem',
+              background: 'var(--ifm-color-emphasis-100)',
+              borderRadius: '8px',
+            }}>
+              <p style={{ fontSize: '0.875rem', color: 'var(--ifm-color-emphasis-700)', margin: 0 }}>
+                To update your learning preferences, visit your account dashboard at{' '}
+                <a
+                  href={process.env.FRONTEND_URL || 'http://localhost:3000'}
+                  style={{ color: 'var(--ifm-color-primary)', textDecoration: 'underline' }}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  IntelliStack Dashboard
+                </a>
+              </p>
+            </div>
 
             <Link
               to="/profile"

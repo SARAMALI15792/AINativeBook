@@ -3,56 +3,24 @@
  * Shows Sign In button or user dropdown based on auth state
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Link from '@docusaurus/Link';
 import { useColorMode } from '@docusaurus/theme-common';
+import { useAuth } from '@site/src/contexts/AuthContext';
 import styles from './AuthNavbarItem.module.css';
 
-// Import auth client dynamically to avoid SSR issues
-let authModule: typeof import('@site/src/lib/auth-client') | null = null;
-
 export default function AuthNavbarItem(): JSX.Element {
-  const [session, setSession] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { user, loading, logout } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const { colorMode } = useColorMode();
 
-  useEffect(() => {
-    // Dynamic import for client-side only
-    import('@site/src/lib/auth-client').then(async (mod) => {
-      authModule = mod;
-      try {
-        const client = mod.getAuthClient();
-        const result = await client.getSession();
-        if (result?.data) {
-          setSession(result.data);
-        }
-      } catch {
-        // Auth server unreachable — user is simply not logged in
-      } finally {
-        setIsLoading(false);
-      }
-    }).catch(() => {
-      setIsLoading(false);
-    });
-  }, []);
-
   const handleSignOut = async () => {
-    if (!authModule) return;
-    try {
-      const client = authModule.getAuthClient();
-      await client.signOut();
-      setSession(null);
-      setIsDropdownOpen(false);
-      // Redirect to home
-      window.location.href = '/';
-    } catch (error) {
-      console.error('Sign out failed:', error);
-    }
+    setIsDropdownOpen(false);
+    await logout();
   };
 
   // Loading state
-  if (isLoading) {
+  if (loading) {
     return (
       <div className={styles.authNavbarItem}>
         <span className={styles.loadingDot}>...</span>
@@ -61,8 +29,7 @@ export default function AuthNavbarItem(): JSX.Element {
   }
 
   // Authenticated state
-  if (session?.user) {
-    const user = session.user;
+  if (user) {
     const initials = user.name
       ? user.name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)
       : user.email[0].toUpperCase();
