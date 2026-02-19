@@ -7,7 +7,7 @@ const config: Config = {
   favicon: 'img/favicon.ico',
 
   url: 'https://saramali15792.github.io',
-  baseUrl: '/AINativeBook/',
+  baseUrl: '/AINativeBook/docs/',
   projectName: 'AINativeBook',
   organizationName: 'SARAMALI15792',
 
