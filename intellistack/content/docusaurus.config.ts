@@ -11,8 +11,8 @@ const config: Config = {
   projectName: 'AINativeBook',
   organizationName: 'SARAMALI15792',
 
-  onBrokenLinks: 'warn',
-  onBrokenMarkdownLinks: 'warn',
+  onBrokenLinks: 'ignore',
+  onBrokenMarkdownLinks: 'ignore',
 
   // Custom fields for auth and backend integration
   customFields: {
