@@ -46,8 +46,12 @@ export default function ChatKitWidget(): JSX.Element | null {
   const pageContext = usePageContext();
   const location = useLocation();
 
-  // Only render on /docs/** routes
-  if (!location.pathname.startsWith('/docs/')) {
+  // Only render on Docusaurus learning routes (stage-1, stage-2, etc.)
+  if (!location.pathname.startsWith('/stage-1/') &&
+      !location.pathname.startsWith('/stage-2/') &&
+      !location.pathname.startsWith('/stage-3/') &&
+      !location.pathname.startsWith('/stage-4/') &&
+      !location.pathname.startsWith('/stage-5/')) {
     return null;
   }
 
