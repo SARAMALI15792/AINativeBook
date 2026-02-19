@@ -1,7 +1,8 @@
 {
-  "buildCommand": "cd intellistack/frontend && npm run build",
-  "devCommand": "cd intellistack/frontend && npm run dev",
-  "installCommand": "cd intellistack/frontend && npm install --legacy-peer-deps",
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install --legacy-peer-deps",
   "framework": "nextjs",
-  "outputDirectory": "intellistack/frontend/.next"
+  "outputDirectory": ".next",
+  "cwd": "intellistack/frontend"
 }
