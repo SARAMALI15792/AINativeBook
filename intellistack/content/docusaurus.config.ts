@@ -6,11 +6,10 @@ const config: Config = {
   tagline: 'AI-Native Learning Platform for Physical AI & Humanoid Robotics',
   favicon: 'img/favicon.ico',
 
-  url: 'https://intellistack.example.com',
-  baseUrl: '/',
-
-  organizationName: 'intellistack',
-  projectName: 'intellistack-content',
+  url: 'https://saramali15792.github.io',
+  baseUrl: '/AINativeBook/',
+  projectName: 'AINativeBook',
+  organizationName: 'SARAMALI15792',
 
   onBrokenLinks: 'warn',
   onBrokenMarkdownLinks: 'warn',
