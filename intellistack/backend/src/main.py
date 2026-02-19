@@ -19,6 +19,12 @@ from src.core.content.routes import router as content_router
 from src.core.institution.routes import router as institution_router
 from src.core.learning.routes import router as learning_router
 from src.core.users.routes import router as users_router
+from src.core.users.preferences_routes import router as preferences_router
+from src.ai.personalization.routes import router as personalization_router
+from src.ai.translation.routes import router as translation_router
+from src.ai.code_execution.routes import router as code_execution_router
+from src.ai.tutor.routes import router as tutor_router
+from src.core.content.enhanced_routes import router as enhanced_content_router
 
 # Import middleware
 from src.shared.middleware import (
@@ -147,6 +153,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(rag_router, prefix="/api/v1")
     app.include_router(chatkit_router)  # ChatKit has its own /api/v1/chatkit prefix
     app.include_router(users_router)  # Users has its own /api/v1/users prefix
+    app.include_router(preferences_router)  # Preferences has its own /api/v1/users/preferences prefix
+    app.include_router(personalization_router)
+    app.include_router(translation_router)
+    app.include_router(code_execution_router)
+    app.include_router(tutor_router)
+    app.include_router(enhanced_content_router)
 
     return app
 
@@ -165,3 +177,4 @@ if __name__ == "__main__":
         port=settings.port,
         reload=settings.debug,
     )
+

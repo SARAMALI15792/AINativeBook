@@ -1,0 +1,110 @@
+@import './tokens.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-bg-primary text-text-secondary;
+    font-family: var(--font-sans);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply text-text-primary font-bold;
+  }
+
+  h1 {
+    @apply text-5xl;
+  }
+
+  h2 {
+    @apply text-4xl;
+  }
+
+  h3 {
+    @apply text-3xl;
+  }
+
+  h4 {
+    @apply text-2xl;
+  }
+
+  h5 {
+    @apply text-xl;
+  }
+
+  h6 {
+    @apply text-lg;
+  }
+
+  /* Accessibility: Focus indicators for all interactive elements */
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible,
+  [role="button"]:focus-visible,
+  [role="link"]:focus-visible,
+  [tabindex]:not([tabindex="-1"]):focus-visible {
+    outline: 2px solid var(--color-accent-cyan);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Remove default focus outline (replaced with custom above) */
+  *:focus {
+    outline: none;
+  }
+
+  /* Ensure focus-visible works correctly */
+  *:focus:not(:focus-visible) {
+    outline: none;
+  }
+}
+
+@layer utilities {
+  /* Glass effect utility class */
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: var(--blur-md) saturate(180%);
+    -webkit-backdrop-filter: var(--blur-md) saturate(180%);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-md);
+  }
+
+  /* Fallback for unsupported browsers */
+  @supports not (backdrop-filter: blur(12px)) {
+    .glass {
+      background: rgba(26, 26, 46, 0.95);
+    }
+  }
+
+  /* Glass variants */
+  .glass-sm {
+    backdrop-filter: var(--blur-sm) saturate(180%);
+    -webkit-backdrop-filter: var(--blur-sm) saturate(180%);
+  }
+
+  .glass-lg {
+    backdrop-filter: var(--blur-lg) saturate(180%);
+    -webkit-backdrop-filter: var(--blur-lg) saturate(180%);
+  }
+
+  /* Glass with hover effect */
+  .glass-hover {
+    transition: all var(--duration-normal) var(--ease-out);
+  }
+
+  .glass-hover:hover {
+    background: var(--glass-highlight);
+    border-color: var(--color-accent-cyan);
+    box-shadow: var(--shadow-lg), var(--shadow-glow-cyan);
+  }
+
+  /* Focus visible styles */
+  .focus-visible:focus-visible {
+    outline: 2px solid var(--color-accent-cyan);
+    outline-offset: 2px;
+  }
+}

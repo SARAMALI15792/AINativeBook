@@ -1,7 +1,7 @@
 """FastAPI dependencies for JWT authentication.
 
 Provides:
-- get_current_user: Extract and validate JWT from Authorization header
+- get_current_user: Extract and validate JWT from Authorization header or session token from cookie
 - require_role: Check user has required role(s)
 - require_verified_email: Check email is verified
 """
@@ -16,9 +16,13 @@ from fastapi.security import HTTPBearer
 from fastapi.security.http import HTTPAuthorizationCredentials as HTTPAuthCredential
 import jwt
 from jwt import PyJWK, PyJWTError
+import httpx
 
 from src.config.settings import get_settings
 from src.core.auth.jwks import JWKSManager
+from src.shared.database import get_session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 
 logger = logging.getLogger(__name__)
 
@@ -52,14 +56,126 @@ class AuthenticatedUser:
     role: str = "student"  # Default role
 
 
-async def get_current_user(
-    credentials: Optional[HTTPAuthCredential] = Depends(security),
-) -> AuthenticatedUser:
+async def validate_session_token(session_token: str) -> Optional[AuthenticatedUser]:
     """
-    Extract and validate JWT token from Authorization header.
+    Validate a Better-Auth session token by calling the auth server.
 
     Args:
-        credentials: Bearer token from Authorization header
+        session_token: The session token from the cookie
+
+    Returns:
+        AuthenticatedUser if valid, None if invalid
+    """
+    settings = get_settings()
+    auth_server_url = settings.better_auth_jwks_url.replace('/.well-known/jwks.json', '')
+
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                f"{auth_server_url}/api/auth/get-session",
+                cookies={settings.better_auth_session_cookie_name: session_token},
+                timeout=5.0
+            )
+
+            if response.status_code == 200:
+                data = response.json()
+                if data and data.get('user'):
+                    user = data['user']
+                    return AuthenticatedUser(
+                        id=user.get('id'),
+                        email=user.get('email'),
+                        name=user.get('name'),
+                        email_verified=user.get('emailVerified', False),
+                        role=user.get('role', 'student')
+                    )
+            return None
+    except Exception as e:
+        logger.error(f"Failed to validate session token: {e}")
+        return None
+
+
+async def sync_user_from_jwt(
+    user_id: str,
+    email: str,
+    name: Optional[str],
+    email_verified: bool,
+    role: str,
+    db: AsyncSession
+) -> None:
+    """
+    Ensure user exists in backend database, syncing from JWT claims if needed.
+
+    This prevents foreign key violations when saving preferences or other user data.
+    Better-Auth manages users in its own tables, but backend needs a copy for relationships.
+
+    Args:
+        user_id: User ID from JWT
+        email: Email from JWT
+        name: Name from JWT
+        email_verified: Email verification status
+        role: User role
+        db: Database session
+    """
+    from src.core.auth.models import User
+
+    try:
+        # Check if user exists
+        result = await db.execute(select(User).where(User.id == user_id))
+        user = result.scalar_one_or_none()
+
+        if not user:
+            # Create user in backend database
+            user = User(
+                id=user_id,
+                email=email,
+                name=name or email.split('@')[0],  # Fallback to email prefix
+                password_hash='',  # Empty - managed by Better-Auth
+                email_verified=email_verified,
+                role=role,
+                is_active=True,
+                onboarding_completed=False,
+                current_stage=1,
+            )
+            db.add(user)
+            await db.commit()
+            logger.info(f"✅ Synced user {email} (id={user_id}) to backend database")
+        else:
+            # Update user info if changed
+            updated = False
+            if user.email != email:
+                user.email = email
+                updated = True
+            if user.name != name and name:
+                user.name = name
+                updated = True
+            if user.email_verified != email_verified:
+                user.email_verified = email_verified
+                updated = True
+            if user.role != role:
+                user.role = role
+                updated = True
+
+            if updated:
+                await db.commit()
+                logger.debug(f"Updated user {email} info in backend database")
+
+    except Exception as e:
+        logger.error(f"Failed to sync user {email}: {e}")
+        await db.rollback()
+        # Don't raise - allow request to continue even if sync fails
+
+
+async def get_current_user(
+    request: Request,
+    credentials: Optional[HTTPAuthCredential] = Depends(security),
+    db: AsyncSession = Depends(get_session),
+) -> AuthenticatedUser:
+    """
+    Extract and validate JWT token from Authorization header or session token from cookie.
+
+    Args:
+        request: FastAPI request object
+        credentials: Bearer token from Authorization header (optional)
 
     Returns:
         AuthenticatedUser with claims
@@ -67,16 +183,47 @@ async def get_current_user(
     Raises:
         HTTPException: 401 if token missing or invalid
     """
-    if not credentials or not credentials.credentials:
+    settings = get_settings()
+
+    # First, check if middleware already validated the user
+    if hasattr(request.state, 'user') and request.state.user:
+        user_data = request.state.user
+        user = AuthenticatedUser(
+            id=user_data['id'],
+            email=user_data['email'],
+            name=user_data.get('name'),
+            email_verified=user_data.get('email_verified', False),
+            role=user_data.get('role', 'student'),
+        )
+
+        # Sync user to backend database
+        await sync_user_from_jwt(
+            user_id=user.id,
+            email=user.email,
+            name=user.name,
+            email_verified=user.email_verified,
+            role=user.role,
+            db=db,
+        )
+
+        return user
+
+    # If middleware didn't validate, do it here
+    # Try Authorization header first (JWT)
+    token = credentials.credentials if credentials else None
+
+    # Fallback to cookie (could be JWT or session token)
+    if not token:
+        token = request.cookies.get(settings.better_auth_session_cookie_name)
+
+    if not token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Missing authorization token",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    token = credentials.credentials
-    settings = get_settings()
-
+    # Try to decode as JWT first
     try:
         # Get JWKS for verification
         jwks_manager = get_jwks_manager()
@@ -87,11 +234,8 @@ async def get_current_user(
         kid = unverified_header.get("kid")
 
         if not kid:
-            logger.warning("JWT missing 'kid' in header")
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid token: missing key ID",
-            )
+            # Not a JWT, try session token validation
+            raise jwt.DecodeError("Not a JWT")
 
         # Find the key in JWKS
         key_data = None
@@ -108,13 +252,10 @@ async def get_current_user(
             )
 
         # Build a PyJWK from the key data to handle all key types
-        # (RSA, EC, OKP/Ed25519) automatically
         jwk = PyJWK.from_dict(key_data)
-        algorithm = jwk.algorithm_name  # e.g. "RS256", "EdDSA"
+        algorithm = jwk.algorithm_name
 
         # Verify JWT signature using the key
-        decode_options = {}
-        # EdDSA tokens from Better-Auth may use issuer/audience differently
         aud = settings.better_auth_audience or None
         iss = settings.better_auth_issuer or None
 
@@ -150,11 +291,39 @@ async def get_current_user(
             role=payload.get("role", "student"),
         )
 
+        # Sync user to backend database
+        await sync_user_from_jwt(
+            user_id=user.id,
+            email=user.email,
+            name=user.name,
+            email_verified=user.email_verified,
+            role=user.role,
+            db=db,
+        )
+
         logger.debug(f"✅ JWT validated for user {user.email} (role={user.role})")
         return user
 
-    except PyJWTError as e:
-        logger.warning(f"JWT validation failed: {e}")
+    except (PyJWTError, jwt.DecodeError) as e:
+        # JWT validation failed, try session token validation
+        logger.debug(f"JWT validation failed ({e}), trying session token validation")
+
+        user = await validate_session_token(token)
+        if user:
+            # Sync user to backend database
+            await sync_user_from_jwt(
+                user_id=user.id,
+                email=user.email,
+                name=user.name,
+                email_verified=user.email_verified,
+                role=user.role,
+                db=db,
+            )
+            logger.debug(f"✅ Session token validated for user {user.email} (role={user.role})")
+            return user
+
+        # Both JWT and session token validation failed
+        logger.warning(f"Authentication failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired token",
@@ -230,19 +399,15 @@ async def require_verified_email(
 
 
 async def optional_user(
+    request: Request,
     credentials: Optional[HTTPAuthCredential] = Depends(security),
+    db: AsyncSession = Depends(get_session),
 ) -> Optional[AuthenticatedUser]:
-    """
-    Optional authentication - returns user if valid token present, None otherwise.
-
-    Does not raise HTTPException like get_current_user.
-    """
-    if not credentials:
+    """Optional authentication - returns user if valid token present, None otherwise."""
+    if not credentials and not request.cookies.get(get_settings().better_auth_session_cookie_name):
         return None
-
     try:
-        user = await get_current_user(credentials)
-        return user
+        return await get_current_user(request, credentials, db)
     except HTTPException:
         return None
 
@@ -250,6 +415,3 @@ async def optional_user(
 # Alias for backward compatibility
 get_current_active_user = get_current_user
 
-
-# Alias for backward compatibility
-get_current_active_user = get_current_user

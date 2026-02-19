@@ -19,6 +19,7 @@ const config: Config = {
   customFields: {
     betterAuthUrl: process.env.BETTER_AUTH_URL || 'http://localhost:3001',
     backendUrl: process.env.BACKEND_URL || 'http://localhost:8000',
+    frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
   },
 
   // Client modules for initialization
@@ -77,31 +78,31 @@ const config: Config = {
           type: 'docSidebar',
           sidebarId: 'stage1Sidebar',
           position: 'left',
-          label: 'Stage 1: Foundations',
+          label: 'Stage 1',
         },
         {
           type: 'docSidebar',
           sidebarId: 'stage2Sidebar',
           position: 'left',
-          label: 'Stage 2: ROS & Simulation',
+          label: 'Stage 2',
         },
         {
           type: 'docSidebar',
           sidebarId: 'stage3Sidebar',
           position: 'left',
-          label: 'Stage 3: Perception',
+          label: 'Stage 3',
         },
         {
           type: 'docSidebar',
           sidebarId: 'stage4Sidebar',
           position: 'left',
-          label: 'Stage 4: AI Integration',
+          label: 'Stage 4',
         },
         {
           type: 'docSidebar',
           sidebarId: 'stage5Sidebar',
           position: 'left',
-          label: 'Stage 5: Capstone',
+          label: 'Stage 5',
         },
         {
           type: 'localeDropdown',

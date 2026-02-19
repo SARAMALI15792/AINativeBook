@@ -7,11 +7,11 @@ Sprint 3: Personalization Engine
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import func, select
 from pydantic import BaseModel, Field
 import structlog
 
-from src.shared.database import get_db
+from src.shared.database import get_session as get_db
 from src.core.auth.dependencies import get_current_user
 from src.core.auth.models import User
 from src.ai.personalization.models import (
@@ -35,8 +35,8 @@ class OnboardingPreferencesRequest(BaseModel):
     shell: Optional[str] = Field(None, description="bash/zsh/fish")
 
     # Learning style
-    learning_style: LearningStyle = Field(..., description="visual/auditory/kinesthetic/reading")
-    learning_pace: LearningPace = Field(LearningPace.MODERATE, description="slow/moderate/fast")
+    learning_style: Optional[str] = Field(None, description="visual/auditory/kinesthetic/reading")
+    learning_pace: Optional[str] = Field("moderate", description="slow/moderate/fast")
     goal_timeframe: Optional[str] = Field(None, description="3/6/12 months")
 
     # Background
@@ -109,8 +109,19 @@ async def complete_onboarding(
 
         if profile:
             # Update existing profile
-            profile.learning_style = preferences.learning_style
-            profile.learning_pace = preferences.learning_pace
+            # Convert string values to enum types
+            if preferences.learning_style:
+                try:
+                    profile.learning_style = LearningStyle(preferences.learning_style.lower())
+                except ValueError:
+                    pass  # Keep existing value
+
+            if preferences.learning_pace:
+                try:
+                    profile.learning_pace = LearningPace(preferences.learning_pace.lower())
+                except ValueError:
+                    pass  # Keep existing value
+
             profile.preferred_language = preferences.preferred_language
             profile.preferred_examples_domain = preferences.domain_preference
             profile.interest_areas = preferences.focus_areas
@@ -147,10 +158,25 @@ async def complete_onboarding(
 
         else:
             # Create new profile
+            # Convert string values to enum types
+            learning_style_enum = None
+            if preferences.learning_style:
+                try:
+                    learning_style_enum = LearningStyle(preferences.learning_style.lower())
+                except ValueError:
+                    learning_style_enum = None
+
+            learning_pace_enum = LearningPace.MODERATE
+            if preferences.learning_pace:
+                try:
+                    learning_pace_enum = LearningPace(preferences.learning_pace.lower())
+                except ValueError:
+                    learning_pace_enum = LearningPace.MODERATE
+
             profile = PersonalizationProfile(
                 user_id=str(current_user.id),
-                learning_style=preferences.learning_style,
-                learning_pace=preferences.learning_pace,
+                learning_style=learning_style_enum,
+                learning_pace=learning_pace_enum,
                 preferred_language=preferences.preferred_language,
                 preferred_examples_domain=preferences.domain_preference,
                 interest_areas=preferences.focus_areas,

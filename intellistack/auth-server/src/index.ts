@@ -39,7 +39,13 @@ app.use(helmet());
 
 // CORS configuration
 const corsOptions = {
-  origin: process.env.CORS_ORIGINS?.split(',') || ['http://localhost:3000', 'http://localhost:3001'],
+  origin: process.env.CORS_ORIGINS?.split(',') || [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://localhost:3002',
+    'http://localhost:3004',
+    'http://localhost:8000',
+  ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
@@ -83,7 +89,7 @@ app.get('/.well-known/openid-configuration', async (_req: Request, res: Response
     scopes_supported: ['openid', 'profile', 'email'],
     response_types_supported: ['code', 'token', 'id_token', 'code id_token'],
     subject_types_supported: ['public'],
-    id_token_signing_alg_values_supported: ['RS256'],
+    id_token_signing_alg_values_supported: ['EdDSA'],
     token_endpoint_auth_methods_supported: ['client_secret_basic', 'client_secret_post'],
   };
   res.json(oidcConfig);

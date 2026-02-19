@@ -7,7 +7,6 @@ import uuid
 from datetime import datetime
 from sqlalchemy import Column, String, Text, DateTime, ForeignKey, JSON, Boolean, Enum as SQLEnum
 from sqlalchemy.orm import relationship
-from sqlalchemy.dialects.postgresql import UUID
 import enum
 
 from ...shared.database import Base
@@ -36,8 +35,8 @@ class PersonalizationProfile(Base):
     """
     __tablename__ = "personalization_profiles"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, unique=True)
+    id = Column(String(255), primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id = Column(String(255), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, unique=True)
 
     # Background information (FR-081)
     educational_background = Column(String(255), nullable=True)  # e.g., "Computer Science degree"
@@ -88,9 +87,9 @@ class ChapterPersonalization(Base):
     """
     __tablename__ = "chapter_personalizations"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    profile_id = Column(UUID(as_uuid=True), ForeignKey("personalization_profiles.id", ondelete="CASCADE"), nullable=False)
-    content_id = Column(UUID(as_uuid=True), ForeignKey("content_items.id", ondelete="CASCADE"), nullable=False)
+    id = Column(String(255), primary_key=True, default=lambda: str(uuid.uuid4()))
+    profile_id = Column(String(255), ForeignKey("personalization_profiles.id", ondelete="CASCADE"), nullable=False)
+    content_id = Column(String(255), ForeignKey("content.id", ondelete="CASCADE"), nullable=False)
 
     # Personalization state
     is_enabled = Column(Boolean, default=True)
@@ -107,7 +106,7 @@ class ChapterPersonalization(Base):
 
     # Relationships
     profile = relationship("PersonalizationProfile", back_populates="chapter_personalizations")
-    content = relationship("ContentItem")
+    content = relationship("Content")
 
     def __repr__(self):
         return f"<ChapterPersonalization(profile_id={self.profile_id}, content_id={self.content_id})>"
@@ -120,14 +119,14 @@ class TranslationCache(Base):
     """
     __tablename__ = "translation_cache"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(String(255), primary_key=True, default=lambda: str(uuid.uuid4()))
 
     source_language = Column(String(10), nullable=False, default="en")
     target_language = Column(String(10), nullable=False)  # 'ur' for Urdu
 
     # Content identification
     content_type = Column(String(50), nullable=False)  # 'chapter', 'exercise', 'quiz_question'
-    content_id = Column(UUID(as_uuid=True), nullable=False)
+    content_id = Column(String(255), nullable=False)
 
     # Translation
     original_text = Column(Text, nullable=False)

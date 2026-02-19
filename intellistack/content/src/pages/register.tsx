@@ -126,8 +126,11 @@ export default function RegisterPage(): JSX.Element {
     try {
       await authClient.signIn.social({
         provider,
-        callbackURL: window.location.origin + '/onboarding',
+        callbackURL: window.location.origin + '/docs/stage-1/intro',
       });
+
+      // Dispatch auth state change event for ChatKit widget
+      window.dispatchEvent(new Event('auth-state-changed'));
     } catch (err: any) {
       setError(err.message || `Failed to sign up with ${provider}`);
       setIsLoading(false);

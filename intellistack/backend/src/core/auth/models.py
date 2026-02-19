@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Optional
 from uuid import uuid4
 
 from sqlalchemy import Boolean, DateTime, ForeignKey, String, Text, func
-from sqlalchemy.dialects.postgresql import JSONB, UUID
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.shared.database import Base
@@ -14,7 +14,7 @@ from src.shared.database import Base
 if TYPE_CHECKING:
     from src.core.learning.models import Progress, UserBadge
     from src.ai.tutor.models import AIConversation
-    from src.ai.tutor.models import AIConversation
+    from src.ai.personalization.models import PersonalizationProfile
 
 
 class RoleName(str, Enum):
@@ -33,7 +33,7 @@ class User(Base):
     __tablename__ = "users"
 
     id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False), primary_key=True, default=lambda: str(uuid4())
+        String(255), primary_key=True, default=lambda: str(uuid4())
     )
     email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
@@ -84,6 +84,9 @@ class User(Base):
         "Progress", back_populates="user", uselist=False
     )
     badges: Mapped[list["UserBadge"]] = relationship("UserBadge", back_populates="user")
+    personalization_profile: Mapped[Optional["PersonalizationProfile"]] = relationship(
+        "PersonalizationProfile", back_populates="user", uselist=False
+    )
 
     @property
     def is_deleted(self) -> bool:
@@ -105,7 +108,7 @@ class Role(Base):
     __tablename__ = "roles"
 
     id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False), primary_key=True, default=lambda: str(uuid4())
+        String(255), primary_key=True, default=lambda: str(uuid4())
     )
     name: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
@@ -121,16 +124,16 @@ class UserRole(Base):
     __tablename__ = "user_roles"
 
     id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False), primary_key=True, default=lambda: str(uuid4())
+        String(255), primary_key=True, default=lambda: str(uuid4())
     )
     user_id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False), ForeignKey("users.id"), nullable=False
+        String(255), ForeignKey("users.id"), nullable=False
     )
     role_id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False), ForeignKey("roles.id"), nullable=False
+        String(255), ForeignKey("roles.id"), nullable=False
     )
     granted_by: Mapped[Optional[str]] = mapped_column(
-        UUID(as_uuid=False), ForeignKey("users.id"), nullable=True
+        String(255), ForeignKey("users.id"), nullable=True
     )
     granted_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
@@ -150,10 +153,10 @@ class Session(Base):
     __tablename__ = "sessions"
 
     id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False), primary_key=True, default=lambda: str(uuid4())
+        String(255), primary_key=True, default=lambda: str(uuid4())
     )
     user_id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False), ForeignKey("users.id"), nullable=False, index=True
+        String(255), ForeignKey("users.id"), nullable=False, index=True
     )
     token: Mapped[str] = mapped_column(String(1000), nullable=False, index=True)
     user_agent: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
@@ -173,10 +176,10 @@ class OAuthAccount(Base):
     __tablename__ = "oauth_accounts"
 
     id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False), primary_key=True, default=lambda: str(uuid4())
+        String(255), primary_key=True, default=lambda: str(uuid4())
     )
     user_id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False), ForeignKey("users.id"), nullable=False, index=True
+        String(255), ForeignKey("users.id"), nullable=False, index=True
     )
     provider: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
     provider_account_id: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
@@ -205,10 +208,10 @@ class PasswordResetToken(Base):
     __tablename__ = "password_reset_tokens"
 
     id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False), primary_key=True, default=lambda: str(uuid4())
+        String(255), primary_key=True, default=lambda: str(uuid4())
     )
     user_id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+        String(255), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
     )
     token_hash: Mapped[str] = mapped_column(String(255), nullable=False, unique=True, index=True)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
@@ -241,7 +244,7 @@ class LoginAttempt(Base):
     __tablename__ = "login_attempts"
 
     id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False), primary_key=True, default=lambda: str(uuid4())
+        String(255), primary_key=True, default=lambda: str(uuid4())
     )
     email: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     ip_address: Mapped[str] = mapped_column(String(45), nullable=False, index=True)

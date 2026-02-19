@@ -1,129 +1,303 @@
 /**
- * IntelliStack Custom Styles
+ * IntelliStack Custom Styles - AI Neural Network Theme
  *
- * This file contains custom CSS for the IntelliStack learning platform.
+ * This file applies the AI Neural Network theme to Docusaurus
  */
 
+/* Import design tokens */
+@import './tokens.css';
+
+/* ===== AI Neural Network Theme Variables ===== */
+
 :root {
-  --ifm-color-primary: #2e8555;
-  --ifm-color-primary-dark: #29784c;
-  --ifm-color-primary-darker: #277148;
-  --ifm-color-primary-darkest: #205d3b;
-  --ifm-color-primary-light: #33925d;
-  --ifm-color-primary-lighter: #359962;
-  --ifm-color-primary-lightest: #3cad6e;
+  /* Primary colors - AI Neural Network theme */
+  --ifm-color-primary: var(--color-accent-cyan);
+  --ifm-color-primary-dark: #00d6e6;
+  --ifm-color-primary-darker: #00c8d9;
+  --ifm-color-primary-darkest: #00a5b3;
+  --ifm-color-primary-light: #1af2ff;
+  --ifm-color-primary-lighter: #33f4ff;
+  --ifm-color-primary-lightest: #66f7ff;
+
+  /* Background colors */
+  --ifm-background-color: var(--color-bg-primary);
+  --ifm-background-surface-color: var(--color-bg-secondary);
+  --ifm-navbar-background-color: rgba(26, 26, 46, 0.95);
+  --ifm-footer-background-color: var(--color-bg-secondary);
+
+  /* Text colors */
+  --ifm-font-color-base: var(--color-text-primary);
+  --ifm-font-color-secondary: var(--color-text-secondary);
+  --ifm-heading-color: var(--color-text-primary);
+
+  /* Code blocks */
   --ifm-code-font-size: 95%;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+  --ifm-code-background: var(--color-bg-tertiary);
+  --ifm-code-color: var(--color-accent-cyan);
+  --docusaurus-highlighted-code-line-bg: rgba(0, 239, 255, 0.1);
+
+  /* Links */
+  --ifm-link-color: var(--color-accent-cyan);
+  --ifm-link-hover-color: var(--color-accent-teal);
+
+  /* Borders */
+  --ifm-global-border-width: 1px;
+  --ifm-hr-border-color: var(--glass-border);
+
+  /* Shadows */
+  --ifm-global-shadow-lw: var(--shadow-md);
+  --ifm-global-shadow-md: var(--shadow-lg);
+  --ifm-global-shadow-tl: var(--shadow-xl);
+
+  /* Font family */
+  --ifm-font-family-base: var(--font-sans);
+  --ifm-font-family-monospace: var(--font-mono);
+
+  /* Primary RGB for alpha colors */
+  --ifm-color-primary-rgb: 0, 239, 255;
 }
 
-[data-theme='dark'] {
-  --ifm-color-primary: #25c2a0;
-  --ifm-color-primary-dark: #21af90;
-  --ifm-color-primary-darker: #1fa588;
-  --ifm-color-primary-darkest: #1a8870;
-  --ifm-color-primary-light: #29d5b0;
-  --ifm-color-primary-lighter: #32d8b4;
-  --ifm-color-primary-lightest: #4fddbf;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+/* ===== Neural Network Background ===== */
+
+body {
+  background: var(--color-bg-primary);
+  position: relative;
 }
 
-/* Stage-specific styling */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url('/img/neural-network-pattern.svg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.05;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* ===== Glassmorphism Effects ===== */
+
+/* Navbar glassmorphism with sticky positioning */
+.navbar {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 1000 !important;
+  backdrop-filter: var(--blur-md) saturate(180%);
+  -webkit-backdrop-filter: var(--blur-md) saturate(180%);
+  border-bottom: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-md);
+}
+
+/* Ensure navbar items are clickable */
+.navbar__inner {
+  z-index: 1001;
+}
+
+.navbar__items {
+  pointer-events: auto;
+}
+
+.navbar__link {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+/* Ensure main content doesn't overlap navbar */
+.main-wrapper {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+/* Sidebar glassmorphism */
+.theme-doc-sidebar-container {
+  background: var(--glass-bg) !important;
+  backdrop-filter: var(--blur-md) saturate(180%);
+  -webkit-backdrop-filter: var(--blur-md) saturate(180%);
+  border-right: 1px solid var(--glass-border);
+}
+
+/* Cards and containers */
+.card,
+.markdown > .admonition {
+  background: var(--glass-bg);
+  backdrop-filter: var(--blur-md) saturate(180%);
+  -webkit-backdrop-filter: var(--blur-md) saturate(180%);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+/* Code blocks */
+.prism-code,
+pre[class*='language-'] {
+  background: var(--glass-bg) !important;
+  backdrop-filter: var(--blur-sm) saturate(180%);
+  -webkit-backdrop-filter: var(--blur-sm) saturate(180%);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+}
+
+/* Fallback for browsers without backdrop-filter */
+@supports not (backdrop-filter: blur(12px)) {
+  .navbar,
+  .theme-doc-sidebar-container,
+  .card,
+  .markdown > .admonition,
+  .prism-code,
+  pre[class*='language-'] {
+    background: rgba(26, 26, 46, 0.95) !important;
+  }
+}
+
+/* ===== Stage-specific styling ===== */
+
 .stage-badge {
   display: inline-block;
   padding: 0.25rem 0.75rem;
-  border-radius: 0.25rem;
-  font-size: 0.875rem;
-  font-weight: 600;
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
   margin-right: 0.5rem;
+  backdrop-filter: var(--blur-sm);
+  -webkit-backdrop-filter: var(--blur-sm);
 }
 
 .stage-1 {
-  background-color: #e3f2fd;
-  color: #1565c0;
+  background: linear-gradient(135deg, var(--color-accent-cyan), var(--color-accent-teal));
+  color: white;
 }
 
 .stage-2 {
-  background-color: #f3e5f5;
-  color: #6a1b9a;
+  background: linear-gradient(135deg, var(--color-accent-teal), #10b981);
+  color: white;
 }
 
 .stage-3 {
-  background-color: #fff3e0;
-  color: #e65100;
+  background: linear-gradient(135deg, #10b981, var(--color-accent-violet));
+  color: white;
 }
 
 .stage-4 {
-  background-color: #e8f5e9;
-  color: #2e7d32;
+  background: linear-gradient(135deg, var(--color-accent-violet), #ec4899);
+  color: white;
 }
 
 .stage-5 {
-  background-color: #fce4ec;
-  color: #c2185b;
+  background: linear-gradient(135deg, #ec4899, var(--color-accent-cyan));
+  color: white;
 }
 
-/* Code block enhancements */
-.prism-code {
-  font-size: 0.9rem;
-  line-height: 1.5;
-}
+/* ===== Enhanced Components ===== */
 
-/* Simulation embed styling */
+/* Simulation container */
 .simulation-container {
-  border: 2px solid var(--ifm-color-primary);
-  border-radius: 0.5rem;
-  padding: 1rem;
-  margin: 2rem 0;
-  background-color: var(--ifm-background-surface-color);
+  border: 2px solid var(--color-accent-cyan);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  margin: var(--space-2xl) 0;
+  background: var(--glass-bg);
+  backdrop-filter: var(--blur-md);
+  -webkit-backdrop-filter: var(--blur-md);
+  box-shadow: var(--shadow-glow-cyan);
 }
 
-/* Learning objective boxes */
+/* Learning objectives */
 .learning-objectives {
-  background-color: var(--ifm-color-primary-lightest);
-  border-left: 4px solid var(--ifm-color-primary);
-  padding: 1rem 1.5rem;
-  margin: 1.5rem 0;
-  border-radius: 0.25rem;
-}
-
-[data-theme='dark'] .learning-objectives {
-  background-color: rgba(37, 194, 160, 0.1);
+  background: linear-gradient(135deg, rgba(0, 239, 255, 0.1), rgba(168, 85, 247, 0.1));
+  border-left: 4px solid var(--color-accent-cyan);
+  padding: var(--space-lg) var(--space-xl);
+  margin: var(--space-xl) 0;
+  border-radius: var(--radius-md);
+  backdrop-filter: var(--blur-sm);
+  -webkit-backdrop-filter: var(--blur-sm);
 }
 
 /* Prerequisites section */
 .prerequisites {
-  background-color: #fff3cd;
-  border-left: 4px solid #ffc107;
-  padding: 1rem 1.5rem;
-  margin: 1.5rem 0;
-  border-radius: 0.25rem;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(251, 191, 36, 0.1));
+  border-left: 4px solid var(--color-warning);
+  padding: var(--space-lg) var(--space-xl);
+  margin: var(--space-xl) 0;
+  border-radius: var(--radius-md);
+  backdrop-filter: var(--blur-sm);
+  -webkit-backdrop-filter: var(--blur-sm);
 }
 
-/* Primary RGB variable for alpha colors */
-:root {
-  --ifm-color-primary-rgb: 46, 133, 85;
-}
+/* ===== Smooth Transitions ===== */
 
-[data-theme='dark'] {
-  --ifm-color-primary-rgb: 37, 194, 160;
-}
-
-/* Smooth transitions for theme changes */
 html {
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: background-color var(--duration-normal) var(--ease-in-out),
+              color var(--duration-normal) var(--ease-in-out);
 }
 
-/* Better focus states */
+/* ===== Focus States ===== */
+
 :focus-visible {
-  outline: 2px solid var(--ifm-color-primary);
+  outline: 2px solid var(--color-accent-cyan);
   outline-offset: 2px;
+  border-radius: var(--radius-sm);
 }
 
-/* Navbar auth button area */
+/* ===== Navbar Enhancements ===== */
+
 .navbar__item--auth {
-  margin-left: 0.5rem;
+  margin-left: var(--space-sm);
 }
 
-[data-theme='dark'] .prerequisites {
-  background-color: rgba(255, 193, 7, 0.1);
+.navbar__link {
+  transition: color var(--duration-normal) var(--ease-in-out);
 }
+
+.navbar__link:hover {
+  color: var(--color-accent-cyan);
+}
+
+/* ===== Footer Enhancements ===== */
+
+.footer {
+  background: var(--color-bg-secondary);
+  border-top: 1px solid var(--glass-border);
+}
+
+.footer__link-item:hover {
+  color: var(--color-accent-cyan);
+  transition: color var(--duration-normal) var(--ease-in-out);
+}
+
+/* ===== Scrollbar Styling ===== */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--glass-border);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-accent-cyan);
+}
+
+/* ===== Reduced Motion Support ===== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+

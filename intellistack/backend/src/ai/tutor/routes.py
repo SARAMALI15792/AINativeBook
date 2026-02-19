@@ -8,8 +8,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 import uuid
 
-from ...shared.database import get_db
-from ...shared.middleware import require_role
+from ...shared.database import get_session as get_db
+from ...core.auth.dependencies import get_current_user
 from .service import AITutorService
 from .schemas import (
     CreateTutorConversationRequest,
@@ -30,7 +30,7 @@ router = APIRouter(prefix="/ai/tutor", tags=["AI Tutor"])
 @router.post("/conversations", response_model=AIConversationResponse, status_code=status.HTTP_201_CREATED)
 async def create_tutor_conversation(
     request: CreateTutorConversationRequest,
-    current_user = Depends(require_role("student")),
+    current_user = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     """
@@ -69,7 +69,7 @@ async def create_tutor_conversation(
 @router.get("/conversations/{conversation_id}", response_model=AIConversationResponse)
 async def get_tutor_conversation(
     conversation_id: uuid.UUID,
-    current_user = Depends(require_role("student")),
+    current_user = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     """
@@ -88,7 +88,7 @@ async def get_tutor_conversation(
 async def send_tutor_message(
     conversation_id: uuid.UUID,
     request: SendTutorMessageRequest,
-    current_user = Depends(require_role("student")),
+    current_user = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     """
@@ -119,7 +119,7 @@ async def send_tutor_message(
 @router.post("/debugging-help", response_model=DebuggingGuidanceDTO)
 async def request_debugging_help(
     request: DebuggingHelpRequest,
-    current_user = Depends(require_role("student")),
+    current_user = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     """
@@ -161,7 +161,7 @@ async def request_debugging_help(
 @router.post("/code-review", response_model=CodeReviewDTO)
 async def request_code_review(
     request: CodeReviewRequest,
-    current_user = Depends(require_role("student")),
+    current_user = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     """
@@ -204,7 +204,7 @@ async def request_code_review(
 async def escalate_to_instructor(
     conversation_id: uuid.UUID,
     request: EscalateToInstructorRequest,
-    current_user = Depends(require_role("student")),
+    current_user = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     """

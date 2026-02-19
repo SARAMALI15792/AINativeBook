@@ -6,11 +6,14 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '@theme/Layout';
 import Link from '@docusaurus/Link';
-import { useHistory } from '@docusaurus/router';
+import { useHistory, useLocation } from '@docusaurus/router';
 import styles from './auth.module.css';
+
+const DEFAULT_REDIRECT = '/docs/stage-1/intro';
 
 export default function LoginPage(): JSX.Element {
   const history = useHistory();
+  const location = useLocation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -18,13 +21,34 @@ export default function LoginPage(): JSX.Element {
   const [showPassword, setShowPassword] = useState(false);
   const [authClient, setAuthClient] = useState<any>(null);
 
+  // Read returnUrl from query params (set by ProtectedRoute)
+  const params = new URLSearchParams(location.search);
+  const rawReturnUrl = params.get('returnUrl');
+  // ProtectedRoute encodes the full href (e.g. http://localhost:3002/profile)
+  // Extract just the pathname for history.push — only allow same-origin paths
+  let redirectTarget = DEFAULT_REDIRECT;
+  if (rawReturnUrl) {
+    const decoded = decodeURIComponent(rawReturnUrl);
+    try {
+      const url = new URL(decoded, window.location.origin);
+      if (url.origin === window.location.origin) {
+        redirectTarget = url.pathname + url.search + url.hash;
+      }
+    } catch {
+      // If it's already a relative path, use it directly
+      if (decoded.startsWith('/')) {
+        redirectTarget = decoded;
+      }
+    }
+  }
+
   useEffect(() => {
     import('@site/src/lib/auth-client').then((mod) => {
       setAuthClient(mod.authClient);
       // Check if already logged in
       mod.authClient.getSession().then((result) => {
         if (result.data?.user) {
-          history.push('/');
+          history.push(redirectTarget);
         }
       });
     });
@@ -54,13 +78,11 @@ export default function LoginPage(): JSX.Element {
         return;
       }
 
-      // Check if onboarding completed
-      const session = await authClient.getSession();
-      if (session.data?.user && !session.data.user.onboardingCompleted) {
-        history.push('/onboarding');
-      } else {
-        history.push('/');
-      }
+      // Dispatch auth state change event for ChatKit widget
+      window.dispatchEvent(new Event('auth-state-changed'));
+
+      // Redirect to return URL or docs content
+      history.push(redirectTarget);
     } catch (err: any) {
       setError(err.message || 'An error occurred during login');
     } finally {
@@ -77,8 +99,11 @@ export default function LoginPage(): JSX.Element {
     try {
       await authClient.signIn.social({
         provider,
-        callbackURL: window.location.origin + '/onboarding',
+        callbackURL: window.location.origin + redirectTarget,
       });
+
+      // Dispatch auth state change event for ChatKit widget
+      window.dispatchEvent(new Event('auth-state-changed'));
     } catch (err: any) {
       setError(err.message || `Failed to sign in with ${provider}`);
       setIsLoading(false);

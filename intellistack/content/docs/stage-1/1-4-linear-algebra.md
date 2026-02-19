@@ -13,19 +13,19 @@ description: "Vector Spaces, Rotation Matrices (SO3), Quaternions, and Eigenvalu
 ## 1. Vector Spaces & Basis Vectors
 
 A point $(3, 2)$ means nothing without a reference frame.
-It is an instruction: "Go 3 steps along Basis $\hat{i}$ and 2 steps along Basis $\hat{j}$."
+It is an instruction: "Go 3 steps along Basis $\hat\{i\}$ and 2 steps along Basis $\hat\{j\}$."
 
 In robotics, every joint, wheel, and camera has its own Basis Vectors.
 The core problem of robotics is translating "My Hand's Reality" to "The World's Reality".
 
 ### The Dot Product (Projection)
-$\vec{a} \cdot \vec{b} = ||a|| ||b|| \cos(\theta)$
-*   **Intuition**: How much of $\vec{a}$ goes in the direction of $\vec{b}$?
+$\vec\{a\} \cdot \vec\{b\} = ||a|| ||b|| \cos(\theta)$
+*   **Intuition**: How much of $\vec\{a\}$ goes in the direction of $\vec\{b\}$?
 *   **Use Case**: Is the robot facing the goal? (Dot product of Heading and Goal Vector).
 
 ### The Cross Product (Normal)
-$\vec{a} \times \vec{b} = \vec{n}$
-*   **Intuition**: The vector perpendicular to the plane formed by $\vec{a}$ and $\vec{b}$.
+$\vec\{a\} \times \vec\{b\} = \vec\{n\}$
+*   **Intuition**: The vector perpendicular to the plane formed by $\vec\{a\}$ and $\vec\{b\}$.
 *   **Use Case**: Finding the axis of rotation for a wheel or joint.
 
 ---
@@ -74,7 +74,7 @@ This is the "fundamental theorem" of data compression and noise reduction. It al
 
 ## Deep FAQ
 
-> **Q: Why $\hat{k}$ for Z?**
+> **Q: Why $\hat\{k\}$ for Z?**
 > A: Convention. In ROS (REP-103), we use:
 > *   **X**: Forward (Red)
 > *   **Y**: Left (Green)

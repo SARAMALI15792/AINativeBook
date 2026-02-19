@@ -46,6 +46,11 @@ export default function ChatKitWidget(): JSX.Element | null {
   const pageContext = usePageContext();
   const location = useLocation();
 
+  // Only render on /docs/** routes
+  if (!location.pathname.startsWith('/docs/')) {
+    return null;
+  }
+
   console.log('ChatKitWidget: Component rendering'); // Debug log
 
   // State
@@ -75,11 +80,15 @@ export default function ChatKitWidget(): JSX.Element | null {
   // Initialize auth and fetch user stage
   useEffect(() => {
     console.log('ChatKitWidget: Initializing auth...');
-    import('@site/src/lib/auth-client').then(async (mod) => {
-      console.log('ChatKitWidget: Auth client imported');
+
+    const checkAuth = async () => {
       try {
+        const mod = await import('@site/src/lib/auth-client');
+        console.log('ChatKitWidget: Auth client imported');
+
         const result = await mod.authClient.getSession();
         console.log('ChatKitWidget: Session result:', result);
+
         if (result.data?.user) {
           console.log('ChatKitWidget: User authenticated, setting session');
           setSession(result.data);
@@ -115,13 +124,31 @@ export default function ChatKitWidget(): JSX.Element | null {
           }
         } else {
           console.log('ChatKitWidget: User not authenticated');
+          setSession(null);
         }
       } catch (err) {
         console.error('ChatKitWidget: Error getting session:', err);
+        setSession(null);
       }
-    }).catch((err) => {
-      console.error('ChatKitWidget: Error importing auth-client:', err);
-    });
+    };
+
+    checkAuth();
+
+    // Listen for auth state changes (triggered by login/logout)
+    const handleAuthChange = () => {
+      console.log('ChatKitWidget: Auth state changed, refreshing session');
+      checkAuth();
+    };
+
+    window.addEventListener('auth-state-changed', handleAuthChange);
+
+    // Also poll every 3 seconds as fallback
+    const interval = setInterval(checkAuth, 3000);
+
+    return () => {
+      window.removeEventListener('auth-state-changed', handleAuthChange);
+      clearInterval(interval);
+    };
   }, [backendUrl]);
 
   // Listen for text selection
@@ -249,8 +276,12 @@ export default function ChatKitWidget(): JSX.Element | null {
     let assistantContent = '';
     let completed = false;
 
+    console.log('Sending message to:', `${backendUrl}/api/v1/chatkit/stream`);
+
     try {
       const headers = await getAuthHeaders();
+      console.log('Request headers:', headers);
+
       const response = await fetch(`${backendUrl}/api/v1/chatkit/stream`, {
         method: 'POST',
         headers,
@@ -260,8 +291,12 @@ export default function ChatKitWidget(): JSX.Element | null {
         }),
       });
 
+      console.log('Response status:', response.status, response.statusText);
+
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
+        const errorText = await response.text();
+        console.error('Response error:', errorText);
+        throw new Error(`HTTP ${response.status}: ${errorText}`);
       }
 
       const reader = response.body?.getReader();
@@ -284,19 +319,28 @@ export default function ChatKitWidget(): JSX.Element | null {
 
             // Extract data line from the SSE event block
             let eventData: string | null = null;
+            let eventType: string | null = null;
+
             for (const line of part.split('\n')) {
+              if (line.startsWith('event: ')) {
+                eventType = line.slice(7);
+              }
               if (line.startsWith('data: ')) {
                 eventData = line.slice(6);
               }
             }
+
             if (!eventData) continue;
 
             let data: any;
             try {
               data = JSON.parse(eventData);
             } catch {
+              console.warn('Failed to parse SSE data:', eventData);
               continue;
             }
+
+            console.log('SSE event received:', eventType, data);
 
             if (data.code === 'RATE_LIMITED') {
               setError(data.message);
@@ -309,6 +353,7 @@ export default function ChatKitWidget(): JSX.Element | null {
 
             // Accumulate streaming text
             if (data.text) {
+              console.log('Streaming chunk:', data.text);
               assistantContent += data.text;
               setStreamingContent(assistantContent);
             }
@@ -319,6 +364,7 @@ export default function ChatKitWidget(): JSX.Element | null {
 
             // Stream complete — add final message
             if (data.message_id) {
+              console.log('Stream complete, message_id:', data.message_id);
               completed = true;
               setMessages(prev => [
                 ...prev,
@@ -617,10 +663,13 @@ export default function ChatKitWidget(): JSX.Element | null {
                         const authMod = await import('@site/src/lib/auth-client');
                         // Use the exported signIn method which is a wrapper around authClient.signIn
                         await authMod.signIn('credentials'); // This will trigger the sign-in flow
+
+                        // After sign-in, dispatch event to refresh widget state
+                        window.dispatchEvent(new Event('auth-state-changed'));
                       } catch (err) {
                         console.error('Auth client import failed:', err);
                         // Fallback: redirect to login page
-                        window.location.href = '/auth/signin';
+                        window.location.href = '/login';
                       }
                     }}
                   >
