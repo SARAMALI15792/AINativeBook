@@ -6,7 +6,7 @@
 import React, { useState } from 'react';
 import Link from '@docusaurus/Link';
 import { useColorMode } from '@docusaurus/theme-common';
-import { useAuth } from '@site/src/contexts/AuthContext';
+import { useAuth } from '../../contexts/AuthContext';
 import styles from './AuthNavbarItem.module.css';
 
 export default function AuthNavbarItem(): JSX.Element {
