@@ -10,7 +10,7 @@ export default function Root({ children }) {
     const from = params.get('from');
     if (from === 'personalization' || from === 'login') {
       // Verify session is active
-      import('@site/src/lib/auth-client').then(async (mod) => {
+      import('@site/src/lib/auth-client.ts').then(async (mod) => {
         const session = await mod.authClient.getSession();
         if (session.data?.user) {
           console.log('Session verified after personalization redirect');

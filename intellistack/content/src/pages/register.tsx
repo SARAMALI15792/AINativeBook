@@ -66,7 +66,7 @@ export default function RegisterPage(): JSX.Element {
   const passwordStrength = calculatePasswordStrength(password);
 
   useEffect(() => {
-    import('@site/src/lib/auth-client').then((mod) => {
+    import('@site/src/lib/auth-client.ts').then((mod) => {
       setAuthClient(mod.authClient);
       // Check if already logged in
       mod.authClient.getSession().then((result) => {

@@ -69,7 +69,7 @@ export default function ResetPasswordPage(): JSX.Element {
   const token = params.get('token');
 
   useEffect(() => {
-    import('@site/src/lib/auth-client').then((mod) => {
+    import('@site/src/lib/auth-client.ts').then((mod) => {
       setAuthClient(mod.authClient);
     });
 

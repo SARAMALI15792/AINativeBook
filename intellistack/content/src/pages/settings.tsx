@@ -41,7 +41,7 @@ function SettingsContent(): JSX.Element {
   }, [colorMode]);
 
   useEffect(() => {
-    import('@site/src/lib/auth-client').then((mod) => {
+    import('@site/src/lib/auth-client.ts').then((mod) => {
       setAuthClient(mod.authClient);
       setBackendUrl(mod.getBackendUrl());
 
@@ -71,7 +71,7 @@ function SettingsContent(): JSX.Element {
 
     try {
       // Use JWT token for backend API calls (not opaque session token)
-      const mod = await import('@site/src/lib/auth-client');
+      const mod = await import('@site/src/lib/auth-client.ts');
       const jwt = await mod.getJwtToken();
       if (!jwt) {
         setMessage('Session expired. Please sign in again.');
