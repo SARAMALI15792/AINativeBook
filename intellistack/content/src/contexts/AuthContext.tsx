@@ -25,7 +25,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const loadSession = async () => {
     try {
       // Use the Better-Auth client (same one used by login/register/navbar)
-      const mod = await import('@site/src/lib/auth-client.ts');
+      const mod = await import('@site/src/lib/auth-client.tsx');
       const client = mod.getAuthClient();
       const result = await client.getSession();
       if (result?.data?.user) {
@@ -60,7 +60,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     try {
-      const mod = await import('@site/src/lib/auth-client.ts');
+      const mod = await import('@site/src/lib/auth-client.tsx');
       const client = mod.getAuthClient();
       await client.signOut();
       setUser(null);
