@@ -57,7 +57,7 @@ export function Hero({ className = '' }: HeroProps) {
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
               <Link
-                href="/auth/register"
+                href="/docs/stage-1/intro"
                 className="inline-flex items-center justify-center rounded-md font-semibold transition-all duration-normal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-cyan focus-visible:ring-offset-2 px-6 py-3 text-lg bg-accent-cyan text-bg-primary hover:shadow-glow-cyan hover:scale-105 active:scale-95 w-full sm:w-auto"
               >
                 Start Learning Free
