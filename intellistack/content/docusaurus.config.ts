@@ -12,7 +12,13 @@ const config: Config = {
   organizationName: 'SARAMALI15792',
 
   onBrokenLinks: 'ignore',
-  onBrokenMarkdownLinks: 'ignore',
+  markdown: {
+    format: 'mdx',
+    mermaid: true,
+    hooks: {
+      onBrokenMarkdownLinks: 'ignore',
+    },
+  },
 
   // Custom fields for auth and backend integration
   customFields: {

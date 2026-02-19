@@ -41,7 +41,7 @@ export default function ProfilePage(): JSX.Element {
   const [backendUrl, setBackendUrl] = useState<string>('');
 
   useEffect(() => {
-    import('../lib/auth-client').then(async (mod) => {
+    import('@site/src/lib/auth-client').then(async (mod) => {
       setAuthClient(mod.authClient);
       setBackendUrl(mod.getBackendUrl());
       try {
