@@ -43,7 +43,7 @@ export default function LoginPage(): JSX.Element {
   }
 
   useEffect(() => {
-    import('@site/src/lib/auth-client').then((mod) => {
+    import('../../lib/auth-client').then((mod) => {
       setAuthClient(mod.authClient);
       // Check if already logged in
       mod.authClient.getSession().then((result) => {
