@@ -1,5 +1,15 @@
 {
-  "buildCommand": "cd intellistack/frontend && npm run build",
-  "devCommand": "cd intellistack/frontend && npm run dev",
-  "installCommand": "cd intellistack/frontend && npm ci --legacy-peer-deps || npm install --legacy-peer-deps"
+  "version": 2,
+  "builds": [
+    {
+      "src": "intellistack/frontend/package.json",
+      "use": "@vercel/next"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "intellistack/frontend/$1"
+    }
+  ]
 }
