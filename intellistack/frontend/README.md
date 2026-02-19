@@ -2,6 +2,8 @@
 
 Next.js 14 frontend for the IntelliStack AI-Native Learning Platform.
 
+<!-- Deployed on Vercel -->
+
 ## Prerequisites
 
 - Node.js 18+
