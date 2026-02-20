@@ -22,14 +22,31 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
+    # Import necessary modules for enum handling
+    from sqlalchemy import text
+
     # Create enum types if they don't already exist using raw SQL
     # This avoids SQLAlchemy's enum creation conflicts
     conn = op.get_bind()
-    conn.execute("DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'hierarchytype') THEN CREATE TYPE hierarchytype AS ENUM ('stage', 'chapter', 'section', 'subsection'); END IF; END $$;")
-    conn.execute("DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'varianttype') THEN CREATE TYPE varianttype AS ENUM ('simplified', 'standard', 'advanced', 'language'); END IF; END $$;")
-    conn.execute("DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'complexitylevel') THEN CREATE TYPE complexitylevel AS ENUM ('beginner', 'intermediate', 'advanced'); END IF; END $$;")
-    conn.execute("DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'summarytype') THEN CREATE TYPE summarytype AS ENUM ('brief', 'detailed', 'key_points'); END IF; END $$;")
-    conn.execute("DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'executionenvironment') THEN CREATE TYPE executionenvironment AS ENUM ('pyodide', 'docker', 'wasm', 'local'); END IF; END $$;")
+
+    # Create enum types with conditional checks to prevent duplicate errors
+    enum_definitions = [
+        ("hierarchytype", ["'stage'", "'chapter'", "'section'", "'subsection'"]),
+        ("varianttype", ["'simplified'", "'standard'", "'advanced'", "'language'"]),
+        ("complexitylevel", ["'beginner'", "'intermediate'", "'advanced'"]),
+        ("summarytype", ["'brief'", "'detailed'", "'key_points'"]),
+        ("executionenvironment", ["'pyodide'", "'docker'", "'wasm'", "'local'"])
+    ]
+
+    for enum_name, enum_values in enum_definitions:
+        # Check if enum type exists
+        result = conn.execute(text(f"SELECT 1 FROM pg_type WHERE typname = '{enum_name}'"))
+        enum_exists = result.fetchone() is not None
+
+        if not enum_exists:
+            values_str = ", ".join(enum_values)
+            conn.execute(text(f"CREATE TYPE {enum_name} AS ENUM ({values_str})"))
+            conn.commit()  # Commit after each enum creation to ensure it's visible
 
     # ContentHierarchy table
     op.create_table(
