@@ -22,12 +22,14 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    # Create enum types if they don't already exist
-    op.execute("DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'hierarchytype') THEN CREATE TYPE hierarchytype AS ENUM ('stage', 'chapter', 'section', 'subsection'); END IF; END $$;")
-    op.execute("DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'varianttype') THEN CREATE TYPE varianttype AS ENUM ('simplified', 'standard', 'advanced', 'language'); END IF; END $$;")
-    op.execute("DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'complexitylevel') THEN CREATE TYPE complexitylevel AS ENUM ('beginner', 'intermediate', 'advanced'); END IF; END $$;")
-    op.execute("DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'summarytype') THEN CREATE TYPE summarytype AS ENUM ('brief', 'detailed', 'key_points'); END IF; END $$;")
-    op.execute("DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'executionenvironment') THEN CREATE TYPE executionenvironment AS ENUM ('pyodide', 'docker', 'wasm', 'local'); END IF; END $$;")
+    # Create enum types if they don't already exist using raw SQL
+    # This avoids SQLAlchemy's enum creation conflicts
+    conn = op.get_bind()
+    conn.execute("DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'hierarchytype') THEN CREATE TYPE hierarchytype AS ENUM ('stage', 'chapter', 'section', 'subsection'); END IF; END $$;")
+    conn.execute("DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'varianttype') THEN CREATE TYPE varianttype AS ENUM ('simplified', 'standard', 'advanced', 'language'); END IF; END $$;")
+    conn.execute("DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'complexitylevel') THEN CREATE TYPE complexitylevel AS ENUM ('beginner', 'intermediate', 'advanced'); END IF; END $$;")
+    conn.execute("DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'summarytype') THEN CREATE TYPE summarytype AS ENUM ('brief', 'detailed', 'key_points'); END IF; END $$;")
+    conn.execute("DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'executionenvironment') THEN CREATE TYPE executionenvironment AS ENUM ('pyodide', 'docker', 'wasm', 'local'); END IF; END $$;")
 
     # ContentHierarchy table
     op.create_table(
