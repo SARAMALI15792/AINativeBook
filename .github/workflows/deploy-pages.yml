@@ -1,0 +1,95 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'intellistack/frontend/**'
+      - 'intellistack/content/**'
+      - '.github/workflows/deploy-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build static sites
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: |
+            intellistack/frontend/package-lock.json
+            intellistack/content/package-lock.json
+
+      # ── Build Next.js Frontend (static export) ──
+      - name: Install frontend dependencies
+        working-directory: intellistack/frontend
+        run: npm ci --legacy-peer-deps
+
+      - name: Build Next.js static export
+        working-directory: intellistack/frontend
+        env:
+          NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL || 'https://intellistack-backend.up.railway.app' }}
+          NEXT_PUBLIC_AUTH_URL: ${{ vars.NEXT_PUBLIC_AUTH_URL || 'https://intellistack-auth.up.railway.app' }}
+          NEXT_PUBLIC_DOCUSAURUS_URL: '/docs/'
+        run: npm run build
+
+      # ── Build Docusaurus Content ──
+      - name: Install content dependencies
+        working-directory: intellistack/content
+        run: npm ci
+
+      - name: Build Docusaurus
+        working-directory: intellistack/content
+        env:
+          FRONTEND_URL: ${{ vars.FRONTEND_URL || 'https://saramali15792.github.io' }}
+          BETTER_AUTH_URL: ${{ vars.NEXT_PUBLIC_AUTH_URL || 'https://intellistack-auth.up.railway.app' }}
+          BACKEND_URL: ${{ vars.NEXT_PUBLIC_API_URL || 'https://intellistack-backend.up.railway.app' }}
+        run: npm run build
+
+      # ── Combine builds into single site ──
+      - name: Combine static outputs
+        run: |
+          mkdir -p combined-site
+
+          # Copy Next.js static export to root
+          cp -r intellistack/frontend/out/* combined-site/
+
+          # Copy Docusaurus build to /docs/ subdirectory
+          mkdir -p combined-site/docs
+          cp -r intellistack/content/build/* combined-site/docs/
+
+          # Prevent Jekyll processing
+          touch combined-site/.nojekyll
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: combined-site
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

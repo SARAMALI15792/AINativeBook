@@ -166,13 +166,17 @@ export default function HomePage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
               <a
-                href="/docs/stage-1/intro"
+                href={`${process.env.NEXT_PUBLIC_DOCUSAURUS_URL || 'http://localhost:3002'}/stage-1/intro`}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-block px-8 py-4 bg-gradient-to-r from-accent-cyan to-accent-violet rounded-lg text-white font-semibold text-lg hover:shadow-glow-cyan transition-all duration-normal focus:outline-none focus:ring-2 focus:ring-accent-cyan"
               >
                 Get Started Free
               </a>
               <a
-                href="/docs/stage-1/intro"
+                href={`${process.env.NEXT_PUBLIC_DOCUSAURUS_URL || 'http://localhost:3002'}/stage-1/intro`}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-block px-8 py-4 glass backdrop-blur-md rounded-lg text-text-primary font-semibold text-lg border border-accent-cyan hover:bg-glass-highlight transition-all duration-normal focus:outline-none focus:ring-2 focus:ring-accent-cyan"
               >
                 Learn More

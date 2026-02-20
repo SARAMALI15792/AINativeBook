@@ -45,6 +45,7 @@ const corsOptions = {
     'http://localhost:3002',
     'http://localhost:3004',
     'http://localhost:8000',
+    'https://saramali15792.github.io',
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],

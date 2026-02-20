@@ -2,6 +2,10 @@
 
 import asyncio
 from logging.config import fileConfig
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 from alembic import context
 from sqlalchemy import pool

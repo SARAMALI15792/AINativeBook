@@ -1,7 +1,7 @@
 """Enhanced content structure with deep-dive chapters
 
 Revision ID: 20260217_enhanced_content
-Revises: 20260210_0001_add_oauth_and_password_reset_tables
+Revises: 001_add_chatkit_tables
 Create Date: 2026-02-17 17:25:00.000000
 
 Sprint 1: Foundation - Database Schema Extensions
@@ -16,7 +16,7 @@ from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision: str = '20260217_enhanced_content'
-down_revision: Union[str, None] = '20260210_0001_add_oauth_and_password_reset_tables'
+down_revision: Union[str, None] = '001_add_chatkit_tables'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

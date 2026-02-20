@@ -1,12 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Remove static export for Vercel serverless deployment
-  // output: 'export', // REMOVED - enables server-side features
-  // basePath: '/AINativeBook', // REMOVED - deploy to root domain
+  output: 'export',
+  trailingSlash: true,
   images: {
-    // Enable image optimization on Vercel
-    unoptimized: false,
-    domains: ['vercel.app', 'localhost'],
+    unoptimized: true,
   },
   reactStrictMode: true,
 
@@ -20,20 +17,6 @@ const nextConfig = {
     NEXT_PUBLIC_AUTH_URL: process.env.NEXT_PUBLIC_AUTH_URL,
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
     NEXT_PUBLIC_DOCUSAURUS_URL: process.env.NEXT_PUBLIC_DOCUSAURUS_URL,
-  },
-
-  // Vercel-specific configuration
-  async rewrites() {
-    return [
-      {
-        source: '/api/auth/:path*',
-        destination: '/api/auth/:path*', // Handled by auth-server
-      },
-      {
-        source: '/api/v1/:path*',
-        destination: '/api/v1/:path*', // Handled by backend
-      },
-    ];
   },
 
   webpack: (config, { isServer }) => {
@@ -62,7 +45,6 @@ const nextConfig = {
 
   // Experimental features for better performance
   experimental: {
-    // optimizeCss: true, // Disabled - requires critters package
     optimizePackageImports: ['framer-motion', '@react-three/fiber', '@react-three/drei'],
   },
 };

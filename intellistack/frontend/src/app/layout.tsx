@@ -62,8 +62,32 @@ export default function RootLayout({
         {/* Resource hints for performance */}
         <link rel="preconnect" href={process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:3001'} />
         <link rel="preconnect" href={process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'} />
-        <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_DOCUSAURUS_URL || 'http://localhost:3002'} />
+        <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_DOCUSAURUS_URL || '/docs/'} />
 
+        {/* GitHub Pages SPA redirect receiver - handles 404.html redirects */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function(){
+                var redirect = sessionStorage.redirect;
+                delete sessionStorage.redirect;
+                if (redirect && redirect !== location.href) {
+                  history.replaceState(null, null, redirect);
+                }
+              })();
+              (function(l) {
+                if (l.search[1] === '/') {
+                  var decoded = l.search.slice(1).split('&').map(function(s) {
+                    return s.replace(/~and~/g, '&');
+                  }).join('?');
+                  window.history.replaceState(null, null,
+                    l.pathname.slice(0, -1) + decoded + l.hash
+                  );
+                }
+              }(window.location));
+            `,
+          }}
+        />
       </head>
       <body className={inter.variable}>
         <Providers>{children}</Providers>

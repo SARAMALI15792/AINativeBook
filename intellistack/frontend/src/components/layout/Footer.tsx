@@ -15,7 +15,7 @@ export function Footer({ className = '' }: FooterProps) {
       { label: 'Roadmap', href: '/roadmap' },
     ],
     resources: [
-      { label: 'Documentation', href: process.env.NEXT_PUBLIC_DOCUSAURUS_URL || '/learn' },
+      { label: 'Documentation', href: `${process.env.NEXT_PUBLIC_DOCUSAURUS_URL || 'http://localhost:3002'}/stage-1/intro` },
       { label: 'Tutorials', href: '/tutorials' },
       { label: 'Blog', href: '/blog' },
     ],

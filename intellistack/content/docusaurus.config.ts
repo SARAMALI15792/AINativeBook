@@ -7,17 +7,14 @@ const config: Config = {
   favicon: 'img/favicon.ico',
 
   url: 'https://saramali15792.github.io',
-  baseUrl: '/AINativeBook/docs/',
-  projectName: 'AINativeBook',
-  organizationName: 'SARAMALI15792',
+  baseUrl: '/docs/',
+  projectName: 'physicalhumoniodbook',
+  organizationName: 'saramali15792',
 
   onBrokenLinks: 'ignore',
   markdown: {
     format: 'mdx',
     mermaid: true,
-    hooks: {
-      onBrokenMarkdownLinks: 'ignore',
-    },
   },
 
   // Custom fields for auth and backend integration
@@ -47,11 +44,6 @@ const config: Config = {
     },
   },
 
-  markdown: {
-    format: 'mdx',
-    mermaid: true,
-  },
-
   presets: [
     [
       'classic',
@@ -59,7 +51,7 @@ const config: Config = {
         docs: {
           routeBasePath: '/',
           sidebarPath: './sidebars.ts',
-          editUrl: 'https://github.com/intellistack/intellistack/tree/main/content/',
+          editUrl: 'https://github.com/saramali15792/physicalhumoniodbook/tree/main/intellistack/content/',
           showLastUpdateAuthor: true,
           showLastUpdateTime: true,
         },
@@ -128,15 +120,15 @@ const config: Config = {
           items: [
             {
               label: 'Stage 1: Foundations',
-              to: '/docs/stage-1/intro',
+              to: '/stage-1/intro',
             },
             {
               label: 'Stage 2: ROS & Simulation',
-              to: '/docs/stage-2/intro',
+              to: '/stage-2/intro',
             },
             {
               label: 'Stage 3: Perception & Planning',
-              to: '/docs/stage-3/intro',
+              to: '/stage-3/intro',
             },
           ],
         },
@@ -145,11 +137,11 @@ const config: Config = {
           items: [
             {
               label: 'Documentation',
-              to: '/docs/intro',
+              to: '/intro',
             },
             {
               label: 'GitHub',
-              href: 'https://github.com/intellistack/intellistack',
+              href: 'https://github.com/saramali15792/physicalhumoniodbook',
             },
           ],
         },

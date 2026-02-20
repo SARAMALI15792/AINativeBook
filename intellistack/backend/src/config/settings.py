@@ -62,7 +62,11 @@ class Settings(BaseSettings):
     rate_limit_unauth: int = 10  # requests per minute for unauthenticated
 
     # CORS
-    cors_origins: list[str] | str = Field(default=["http://localhost:3000", "http://localhost:3001"])
+    cors_origins: list[str] | str = Field(default=[
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "https://saramali15792.github.io",
+    ])
     cors_allow_credentials: bool = True
 
     # OAuth Providers
