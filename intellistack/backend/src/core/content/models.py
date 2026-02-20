@@ -10,6 +10,7 @@ from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.shared.database import Base
+from src.core.content.enhanced_models import ComplexityLevel
 
 if TYPE_CHECKING:
     from src.core.auth.models import User
@@ -100,7 +101,7 @@ class Content(Base):
     )
 
     # Enhanced content attributes (used by enhanced_routes)
-    difficulty_level: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    difficulty_level: Mapped[Optional[ComplexityLevel]] = mapped_column(String(20), nullable=True)
     estimated_reading_time: Mapped[Optional[int]] = mapped_column(nullable=True)
     tags: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
     has_summary: Mapped[bool] = mapped_column(Boolean, default=False)

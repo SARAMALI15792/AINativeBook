@@ -29,26 +29,30 @@ def upgrade() -> None:
     # Create enum types with exception handling to prevent duplicate errors
     conn = op.get_bind()
 
-    # Define enum types to create
-    enum_definitions = [
-        ("hierarchytype", ["stage", "chapter", "section", "subsection"]),
-        ("varianttype", ["simplified", "standard", "advanced", "language"]),
-        ("complexitylevel", ["beginner", "intermediate", "advanced"]),
-        ("summarytype", ["brief", "detailed", "key_points"]),
-        ("executionenvironment", ["pyodide", "docker", "wasm", "local"])
-    ]
+    # Check if this is a real connection (not a mock for --sql generation)
+    if hasattr(conn, 'execute'):
+        # Define enum types to create
+        enum_definitions = [
+            ("hierarchytype", ["stage", "chapter", "section", "subsection"]),
+            ("varianttype", ["simplified", "standard", "advanced", "language"]),
+            ("complexitylevel", ["beginner", "intermediate", "advanced"]),
+            ("summarytype", ["brief", "detailed", "key_points"]),
+            ("executionenvironment", ["pyodide", "docker", "wasm", "local"])
+        ]
 
-    for enum_name, enum_values in enum_definitions:
-        try:
-            # Simply attempt to create the enum - if it already exists, catch the exception
-            values_str = ", ".join([f"'{val}'" for val in enum_values])
-            conn.execute(text(f"CREATE TYPE {enum_name} AS ENUM ({values_str})"))
-            conn.commit()
-        except Exception as e:
-            # If type already exists, we just continue (the exception is expected)
-            # We only want to catch the specific duplicate type error, but this is simpler
-            logging.info(f"Enum {enum_name} already exists or error occurred: {str(e)}")
-            conn.rollback()  # Rollback the failed transaction
+        for enum_name, enum_values in enum_definitions:
+            try:
+                # Simply attempt to create the enum - if it already exists, catch the exception
+                values_str = ", ".join([f"'{val}'" for val in enum_values])
+                conn.execute(text(f"CREATE TYPE {enum_name} AS ENUM ({values_str})"))
+                if hasattr(conn, 'commit'):
+                    conn.commit()
+            except Exception as e:
+                # If type already exists, we just continue (the exception is expected)
+                # We only want to catch the specific duplicate type error, but this is simpler
+                logging.info(f"Enum {enum_name} already exists or error occurred: {str(e)}")
+                if hasattr(conn, 'rollback'):
+                    conn.rollback()  # Rollback the failed transaction
 
     # ContentHierarchy table
     op.create_table(
@@ -56,7 +60,7 @@ def upgrade() -> None:
         sa.Column('id', postgresql.UUID(as_uuid=False), nullable=False),
         sa.Column('parent_id', postgresql.UUID(as_uuid=False), nullable=True),
         sa.Column('content_id', postgresql.UUID(as_uuid=False), nullable=False),
-        sa.Column('hierarchy_type', sa.Enum('stage', 'chapter', 'section', 'subsection', name='hierarchytype', create_type=False), nullable=False),
+        sa.Column('hierarchy_type', sa.String(length=20), nullable=False),
         sa.Column('order_index', sa.Integer(), nullable=False, server_default='0'),
         sa.Column('depth_level', sa.Integer(), nullable=False, server_default='0'),
         sa.Column('slug', sa.String(length=255), nullable=False),
@@ -71,15 +75,21 @@ def upgrade() -> None:
     op.create_index('ix_content_hierarchy_content_id', 'content_hierarchy', ['content_id'])
     op.create_index('ix_content_hierarchy_hierarchy_type', 'content_hierarchy', ['hierarchy_type'])
     op.create_index('ix_content_hierarchy_slug', 'content_hierarchy', ['slug'])
+    # Add CHECK constraint for hierarchy_type
+    op.create_check_constraint(
+        constraint_name='ck_content_hierarchy_hierarchy_type',
+        table_name='content_hierarchy',
+        condition="hierarchy_type IN ('stage', 'chapter', 'section', 'subsection')"
+    )
 
     # ContentVariant table
     op.create_table(
         'content_variants',
         sa.Column('id', postgresql.UUID(as_uuid=False), nullable=False),
         sa.Column('content_id', postgresql.UUID(as_uuid=False), nullable=False),
-        sa.Column('variant_type', sa.Enum('simplified', 'standard', 'advanced', 'language', name='varianttype', create_type=False), nullable=False),
+        sa.Column('variant_type', sa.String(length=20), nullable=False),
         sa.Column('language_code', sa.String(length=10), nullable=False, server_default='en'),
-        sa.Column('complexity_level', sa.Enum('beginner', 'intermediate', 'advanced', name='complexitylevel', create_type=False), nullable=False, server_default='intermediate'),
+        sa.Column('complexity_level', sa.String(length=20), nullable=False, server_default='intermediate'),
         sa.Column('mdx_path', sa.String(length=500), nullable=False),
         sa.Column('content_json', postgresql.JSONB(astext_type=sa.Text()), nullable=False),
         sa.Column('word_count', sa.Integer(), nullable=False, server_default='0'),
@@ -97,13 +107,25 @@ def upgrade() -> None:
     op.create_index('ix_content_variants_content_id', 'content_variants', ['content_id'])
     op.create_index('ix_content_variants_variant_type', 'content_variants', ['variant_type'])
     op.create_index('ix_content_variants_language_code', 'content_variants', ['language_code'])
+    # Add CHECK constraint for variant_type
+    op.create_check_constraint(
+        constraint_name='ck_content_variants_variant_type',
+        table_name='content_variants',
+        condition="variant_type IN ('simplified', 'standard', 'advanced', 'language')"
+    )
+    # Add CHECK constraint for complexity_level
+    op.create_check_constraint(
+        constraint_name='ck_content_variants_complexity_level',
+        table_name='content_variants',
+        condition="complexity_level IN ('beginner', 'intermediate', 'advanced')"
+    )
 
     # ContentSummary table
     op.create_table(
         'content_summaries',
         sa.Column('id', postgresql.UUID(as_uuid=False), nullable=False),
         sa.Column('content_id', postgresql.UUID(as_uuid=False), nullable=False),
-        sa.Column('summary_type', sa.Enum('brief', 'detailed', 'key_points', name='summarytype', create_type=False), nullable=False),
+        sa.Column('summary_type', sa.String(length=20), nullable=False),
         sa.Column('language_code', sa.String(length=10), nullable=False, server_default='en'),
         sa.Column('summary_text', sa.Text(), nullable=False),
         sa.Column('key_concepts', postgresql.JSONB(astext_type=sa.Text()), nullable=False, server_default='[]'),
@@ -121,6 +143,12 @@ def upgrade() -> None:
     op.create_index('ix_content_summaries_content_id', 'content_summaries', ['content_id'])
     op.create_index('ix_content_summaries_summary_type', 'content_summaries', ['summary_type'])
     op.create_index('ix_content_summaries_language_code', 'content_summaries', ['language_code'])
+    # Add CHECK constraint for summary_type
+    op.create_check_constraint(
+        constraint_name='ck_content_summaries_summary_type',
+        table_name='content_summaries',
+        condition="summary_type IN ('brief', 'detailed', 'key_points')"
+    )
 
     # InteractiveCodeBlock table
     op.create_table(
@@ -129,7 +157,7 @@ def upgrade() -> None:
         sa.Column('content_id', postgresql.UUID(as_uuid=False), nullable=False),
         sa.Column('code_language', sa.String(length=50), nullable=False),
         sa.Column('code_content', sa.Text(), nullable=False),
-        sa.Column('execution_environment', sa.Enum('pyodide', 'docker', 'wasm', 'local', name='executionenvironment', create_type=False), nullable=False, server_default='pyodide'),
+        sa.Column('execution_environment', sa.String(length=20), nullable=False, server_default='pyodide'),
         sa.Column('is_editable', sa.Boolean(), nullable=False, server_default='true'),
         sa.Column('is_executable', sa.Boolean(), nullable=False, server_default='true'),
         sa.Column('timeout_seconds', sa.Integer(), nullable=False, server_default='30'),
@@ -149,6 +177,12 @@ def upgrade() -> None:
     )
     op.create_index('ix_interactive_code_blocks_content_id', 'interactive_code_blocks', ['content_id'])
     op.create_index('ix_interactive_code_blocks_code_language', 'interactive_code_blocks', ['code_language'])
+    # Add CHECK constraint for execution_environment
+    op.create_check_constraint(
+        constraint_name='ck_interactive_code_blocks_execution_environment',
+        table_name='interactive_code_blocks',
+        condition="execution_environment IN ('pyodide', 'docker', 'wasm', 'local')"
+    )
 
     # ContentEngagement table
     op.create_table(
@@ -204,15 +238,39 @@ def upgrade() -> None:
     # Add new fields to existing Content table
     op.add_column('content', sa.Column('has_summary', sa.Boolean(), nullable=False, server_default='false'))
     op.add_column('content', sa.Column('has_interactive_code', sa.Boolean(), nullable=False, server_default='false'))
-    op.add_column('content', sa.Column('difficulty_level', sa.Enum('beginner', 'intermediate', 'advanced', name='complexitylevel', create_type=False), nullable=False, server_default='intermediate'))
+    op.add_column('content', sa.Column('difficulty_level', sa.String(length=20), nullable=False, server_default='intermediate'))
     op.add_column('content', sa.Column('estimated_reading_time', sa.Integer(), nullable=False, server_default='0'))
     op.add_column('content', sa.Column('prerequisites', postgresql.JSONB(astext_type=sa.Text()), nullable=False, server_default='[]'))
     op.add_column('content', sa.Column('related_content', postgresql.JSONB(astext_type=sa.Text()), nullable=False, server_default='[]'))
     op.add_column('content', sa.Column('tags', postgresql.JSONB(astext_type=sa.Text()), nullable=False, server_default='[]'))
     op.add_column('content', sa.Column('keywords', postgresql.JSONB(astext_type=sa.Text()), nullable=False, server_default='[]'))
 
+    # Add CHECK constraint for difficulty_level in content table
+    op.create_check_constraint(
+        constraint_name='ck_content_difficulty_level',
+        table_name='content',
+        condition="difficulty_level IN ('beginner', 'intermediate', 'advanced')"
+    )
+
 
 def downgrade() -> None:
+    # Remove CHECK constraints before dropping tables and columns
+    # Remove from content table
+    op.drop_constraint('ck_content_difficulty_level', 'content', type_='check')
+
+    # Remove from interactive_code_blocks table
+    op.drop_constraint('ck_interactive_code_blocks_execution_environment', 'interactive_code_blocks', type_='check')
+
+    # Remove from content_summaries table
+    op.drop_constraint('ck_content_summaries_summary_type', 'content_summaries', type_='check')
+
+    # Remove from content_variants table
+    op.drop_constraint('ck_content_variants_complexity_level', 'content_variants', type_='check')
+    op.drop_constraint('ck_content_variants_variant_type', 'content_variants', type_='check')
+
+    # Remove from content_hierarchy table
+    op.drop_constraint('ck_content_hierarchy_hierarchy_type', 'content_hierarchy', type_='check')
+
     # Remove new columns from Content table
     op.drop_column('content', 'keywords')
     op.drop_column('content', 'tags')

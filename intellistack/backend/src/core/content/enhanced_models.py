@@ -98,7 +98,7 @@ class ContentHierarchy(Base):
 
     # Hierarchy metadata
     hierarchy_type: Mapped[HierarchyType] = mapped_column(
-        SQLEnum(HierarchyType), nullable=False, index=True
+        String(20), nullable=False, index=True
     )
     order_index: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     depth_level: Mapped[int] = mapped_column(
@@ -151,13 +151,13 @@ class ContentVariant(Base):
 
     # Variant metadata
     variant_type: Mapped[VariantType] = mapped_column(
-        SQLEnum(VariantType), nullable=False, index=True
+        String(20), nullable=False, index=True
     )
     language_code: Mapped[str] = mapped_column(
         String(10), nullable=False, default="en", index=True
     )  # en, ur
     complexity_level: Mapped[ComplexityLevel] = mapped_column(
-        SQLEnum(ComplexityLevel), nullable=False, default=ComplexityLevel.INTERMEDIATE
+        String(20), nullable=False, default=ComplexityLevel.INTERMEDIATE
     )
 
     # Content storage
@@ -219,7 +219,7 @@ class ContentSummary(Base):
 
     # Summary metadata
     summary_type: Mapped[SummaryType] = mapped_column(
-        SQLEnum(SummaryType), nullable=False, index=True
+        String(20), nullable=False, index=True
     )
     language_code: Mapped[str] = mapped_column(
         String(10), nullable=False, default="en", index=True
@@ -283,7 +283,7 @@ class InteractiveCodeBlock(Base):
     )  # python, bash, cpp, javascript
     code_content: Mapped[str] = mapped_column(Text, nullable=False)
     execution_environment: Mapped[ExecutionEnvironment] = mapped_column(
-        SQLEnum(ExecutionEnvironment), nullable=False, default=ExecutionEnvironment.PYODIDE
+        String(20), nullable=False, default=ExecutionEnvironment.PYODIDE
     )
 
     # Execution configuration

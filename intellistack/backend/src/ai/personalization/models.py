@@ -5,7 +5,8 @@ FR-081 to FR-090: User profiles, preferences, adaptive learning
 
 import uuid
 from datetime import datetime
-from sqlalchemy import Column, String, Text, DateTime, ForeignKey, JSON, Boolean, Enum as SQLEnum
+from sqlalchemy import Column, String, Text, DateTime, ForeignKey, JSON, Boolean
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 import enum
 
@@ -35,8 +36,8 @@ class PersonalizationProfile(Base):
     """
     __tablename__ = "personalization_profiles"
 
-    id = Column(String(255), primary_key=True, default=lambda: str(uuid.uuid4()))
-    user_id = Column(String(255), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, unique=True)
+    id = Column(postgresql.UUID(as_uuid=False), primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id = Column(postgresql.UUID(as_uuid=False), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, unique=True)
 
     # Background information (FR-081)
     educational_background = Column(String(255), nullable=True)  # e.g., "Computer Science degree"
@@ -45,8 +46,8 @@ class PersonalizationProfile(Base):
     learning_goals = Column(Text, nullable=True)  # What they want to achieve
 
     # Learning preferences
-    learning_style = Column(SQLEnum(LearningStyle), nullable=True)
-    learning_pace = Column(SQLEnum(LearningPace), default=LearningPace.MODERATE)
+    learning_style = Column(String(20), nullable=True)
+    learning_pace = Column(String(20), default="moderate")
     preferred_language = Column(String(10), default="en")  # 'en' or 'ur' (FR-084)
 
     # Domain-specific preferences (FR-087)
