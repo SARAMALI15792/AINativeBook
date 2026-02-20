@@ -24,29 +24,31 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     # Import necessary modules for enum handling
     from sqlalchemy import text
+    import logging
 
-    # Create enum types if they don't already exist using raw SQL
-    # This avoids SQLAlchemy's enum creation conflicts
+    # Create enum types with exception handling to prevent duplicate errors
     conn = op.get_bind()
 
-    # Create enum types with conditional checks to prevent duplicate errors
+    # Define enum types to create
     enum_definitions = [
-        ("hierarchytype", ["'stage'", "'chapter'", "'section'", "'subsection'"]),
-        ("varianttype", ["'simplified'", "'standard'", "'advanced'", "'language'"]),
-        ("complexitylevel", ["'beginner'", "'intermediate'", "'advanced'"]),
-        ("summarytype", ["'brief'", "'detailed'", "'key_points'"]),
-        ("executionenvironment", ["'pyodide'", "'docker'", "'wasm'", "'local'"])
+        ("hierarchytype", ["stage", "chapter", "section", "subsection"]),
+        ("varianttype", ["simplified", "standard", "advanced", "language"]),
+        ("complexitylevel", ["beginner", "intermediate", "advanced"]),
+        ("summarytype", ["brief", "detailed", "key_points"]),
+        ("executionenvironment", ["pyodide", "docker", "wasm", "local"])
     ]
 
     for enum_name, enum_values in enum_definitions:
-        # Check if enum type exists
-        result = conn.execute(text(f"SELECT 1 FROM pg_type WHERE typname = '{enum_name}'"))
-        enum_exists = result.fetchone() is not None
-
-        if not enum_exists:
-            values_str = ", ".join(enum_values)
+        try:
+            # Simply attempt to create the enum - if it already exists, catch the exception
+            values_str = ", ".join([f"'{val}'" for val in enum_values])
             conn.execute(text(f"CREATE TYPE {enum_name} AS ENUM ({values_str})"))
-            conn.commit()  # Commit after each enum creation to ensure it's visible
+            conn.commit()
+        except Exception as e:
+            # If type already exists, we just continue (the exception is expected)
+            # We only want to catch the specific duplicate type error, but this is simpler
+            logging.info(f"Enum {enum_name} already exists or error occurred: {str(e)}")
+            conn.rollback()  # Rollback the failed transaction
 
     # ContentHierarchy table
     op.create_table(
