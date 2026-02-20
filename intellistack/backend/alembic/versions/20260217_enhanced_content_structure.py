@@ -22,12 +22,12 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    # Create enum types
-    op.execute("CREATE TYPE hierarchytype AS ENUM ('stage', 'chapter', 'section', 'subsection')")
-    op.execute("CREATE TYPE varianttype AS ENUM ('simplified', 'standard', 'advanced', 'language')")
-    op.execute("CREATE TYPE complexitylevel AS ENUM ('beginner', 'intermediate', 'advanced')")
-    op.execute("CREATE TYPE summarytype AS ENUM ('brief', 'detailed', 'key_points')")
-    op.execute("CREATE TYPE executionenvironment AS ENUM ('pyodide', 'docker', 'wasm', 'local')")
+    # Create enum types if they don't already exist
+    op.execute("DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'hierarchytype') THEN CREATE TYPE hierarchytype AS ENUM ('stage', 'chapter', 'section', 'subsection'); END IF; END $$;")
+    op.execute("DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'varianttype') THEN CREATE TYPE varianttype AS ENUM ('simplified', 'standard', 'advanced', 'language'); END IF; END $$;")
+    op.execute("DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'complexitylevel') THEN CREATE TYPE complexitylevel AS ENUM ('beginner', 'intermediate', 'advanced'); END IF; END $$;")
+    op.execute("DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'summarytype') THEN CREATE TYPE summarytype AS ENUM ('brief', 'detailed', 'key_points'); END IF; END $$;")
+    op.execute("DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'executionenvironment') THEN CREATE TYPE executionenvironment AS ENUM ('pyodide', 'docker', 'wasm', 'local'); END IF; END $$;")
 
     # ContentHierarchy table
     op.create_table(
@@ -232,9 +232,9 @@ def downgrade() -> None:
     op.drop_index('ix_content_hierarchy_parent_id', table_name='content_hierarchy')
     op.drop_table('content_hierarchy')
 
-    # Drop enum types
-    op.execute("DROP TYPE executionenvironment")
-    op.execute("DROP TYPE summarytype")
-    op.execute("DROP TYPE complexitylevel")
-    op.execute("DROP TYPE varianttype")
-    op.execute("DROP TYPE hierarchytype")
+    # Drop enum types only if they exist
+    op.execute("DROP TYPE IF EXISTS executionenvironment")
+    op.execute("DROP TYPE IF EXISTS summarytype")
+    op.execute("DROP TYPE IF EXISTS complexitylevel")
+    op.execute("DROP TYPE IF EXISTS varianttype")
+    op.execute("DROP TYPE IF EXISTS hierarchytype")
