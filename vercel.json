@@ -1,0 +1,36 @@
+{
+  "version": 2,
+  "name": "intellistack-platform",
+  "builds": [
+    {
+      "src": "intellistack/frontend/package.json",
+      "use": "@vercel/next"
+    },
+    {
+      "src": "intellistack/auth-server/package.json",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "intellistack/backend/src/main.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/auth/(.*)",
+      "dest": "intellistack/auth-server/src/index.ts"
+    },
+    {
+      "src": "/api/v1/(.*)",
+      "dest": "intellistack/backend/src/main.py"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "intellistack/frontend/$1"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "regions": ["iad1"]
+}

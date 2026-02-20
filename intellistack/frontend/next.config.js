@@ -1,9 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
-  basePath: '/AINativeBook',
+  // Remove static export for Vercel serverless deployment
+  // output: 'export', // REMOVED - enables server-side features
+  // basePath: '/AINativeBook', // REMOVED - deploy to root domain
   images: {
-    unoptimized: true, // Required for static export
+    // Enable image optimization on Vercel
+    unoptimized: false,
+    domains: ['vercel.app', 'localhost'],
   },
   reactStrictMode: true,
 
@@ -17,6 +20,20 @@ const nextConfig = {
     NEXT_PUBLIC_AUTH_URL: process.env.NEXT_PUBLIC_AUTH_URL,
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
     NEXT_PUBLIC_DOCUSAURUS_URL: process.env.NEXT_PUBLIC_DOCUSAURUS_URL,
+  },
+
+  // Vercel-specific configuration
+  async rewrites() {
+    return [
+      {
+        source: '/api/auth/:path*',
+        destination: '/api/auth/:path*', // Handled by auth-server
+      },
+      {
+        source: '/api/v1/:path*',
+        destination: '/api/v1/:path*', // Handled by backend
+      },
+    ];
   },
 
   webpack: (config, { isServer }) => {
