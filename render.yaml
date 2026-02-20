@@ -1,0 +1,136 @@
+# Render Blueprint — IntelliStack Platform
+# https://docs.render.com/infrastructure-as-code
+#
+# External services (not managed by Render):
+#   - PostgreSQL: Neon (free tier, unlimited)
+#   - Vector DB:  Qdrant Cloud (1 GB free)
+#
+# Deploy: Render Dashboard → "New Blueprint Instance" → select this repo
+
+services:
+  # ── Backend (FastAPI) ───────────────────────────────────────────
+  - type: web
+    name: intellistack-backend
+    runtime: docker
+    repo: https://github.com/saramali15792/physicalhumoniodbook
+    dockerfilePath: intellistack/docker/backend.Dockerfile
+    dockerContext: intellistack
+    plan: free
+    region: oregon
+    healthCheckPath: /health
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: DEBUG
+        value: "false"
+      - key: DATABASE_URL
+        sync: false          # set manually — Neon connection string
+      - key: SECRET_KEY
+        generateValue: true
+      - key: REDIS_URL
+        fromService:
+          name: intellistack-redis
+          type: redis
+          property: connectionString
+      - key: QDRANT_HOST
+        sync: false          # set manually — Qdrant Cloud host
+      - key: QDRANT_PORT
+        value: "6333"
+      - key: QDRANT_API_KEY
+        sync: false          # set manually
+      - key: OPENAI_API_KEY
+        sync: false          # set manually
+      - key: COHERE_API_KEY
+        sync: false          # set manually (optional)
+      - key: BETTER_AUTH_URL
+        value: https://intellistack-auth.onrender.com
+      - key: BETTER_AUTH_JWKS_URL
+        value: https://intellistack-auth.onrender.com/.well-known/jwks.json
+      - key: CORS_ORIGINS
+        value: "https://intellistack-frontend.onrender.com,https://intellistack-content.onrender.com,https://intellistack-auth.onrender.com"
+
+  # ── Auth Server (Better-Auth / Node) ────────────────────────────
+  - type: web
+    name: intellistack-auth
+    runtime: docker
+    repo: https://github.com/saramali15792/physicalhumoniodbook
+    dockerfilePath: intellistack/auth-server/Dockerfile
+    dockerContext: intellistack/auth-server
+    plan: free
+    region: oregon
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false          # set manually — same Neon connection string
+      - key: BETTER_AUTH_SECRET
+        generateValue: true
+      - key: BETTER_AUTH_URL
+        value: https://intellistack-auth.onrender.com
+      - key: BETTER_AUTH_TRUST_HOST
+        value: "true"
+      - key: CORS_ORIGINS
+        value: "https://intellistack-frontend.onrender.com,https://intellistack-content.onrender.com,https://intellistack-backend.onrender.com"
+      - key: RESEND_API_KEY
+        sync: false          # set manually (optional, for emails)
+
+  # ── Content Site (Docusaurus → Static) ──────────────────────────
+  - type: web
+    name: intellistack-content
+    runtime: static
+    repo: https://github.com/saramali15792/physicalhumoniodbook
+    rootDir: intellistack/content
+    buildCommand: npm ci && npm run build
+    staticPublishPath: build
+    plan: free
+    region: oregon
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: SITE_URL
+        value: https://intellistack-content.onrender.com
+      - key: BETTER_AUTH_URL
+        value: https://intellistack-auth.onrender.com
+      - key: BACKEND_URL
+        value: https://intellistack-backend.onrender.com
+
+  # ── Frontend (Next.js → Static Export) ──────────────────────────
+  - type: web
+    name: intellistack-frontend
+    runtime: static
+    repo: https://github.com/saramali15792/physicalhumoniodbook
+    rootDir: intellistack/frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: out
+    plan: free
+    region: oregon
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: NEXT_PUBLIC_AUTH_URL
+        value: https://intellistack-auth.onrender.com
+      - key: NEXT_PUBLIC_API_URL
+        value: https://intellistack-backend.onrender.com
+      - key: NEXT_PUBLIC_DOCUSAURUS_URL
+        value: https://intellistack-content.onrender.com
+
+  # ── Redis ───────────────────────────────────────────────────────
+  - type: redis
+    name: intellistack-redis
+    plan: free
+    region: oregon
+    maxmemoryPolicy: allkeys-lru
+    ipAllowList: []           # only internal access

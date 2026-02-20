@@ -6,8 +6,8 @@ const config: Config = {
   tagline: 'AI-Native Learning Platform for Physical AI & Humanoid Robotics',
   favicon: 'img/favicon.ico',
 
-  url: 'https://saramali15792.github.io',
-  baseUrl: '/docs/',
+  url: process.env.SITE_URL || 'https://intellistack-content.onrender.com',
+  baseUrl: '/',
   projectName: 'physicalhumoniodbook',
   organizationName: 'saramali15792',
 

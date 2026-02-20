@@ -1,0 +1,81 @@
+# IntelliStack — Render Deployment
+#
+# Triggers on push to main. Each job runs only when its service's
+# files change, and calls the corresponding Render Deploy Hook.
+#
+# Required GitHub Secrets (add via repo → Settings → Secrets):
+#   RENDER_DEPLOY_HOOK_BACKEND   — Deploy hook URL for backend service
+#   RENDER_DEPLOY_HOOK_AUTH      — Deploy hook URL for auth server
+#   RENDER_DEPLOY_HOOK_CONTENT   — Deploy hook URL for content site
+#   RENDER_DEPLOY_HOOK_FRONTEND  — Deploy hook URL for frontend site
+
+name: Deploy to Render
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  # ── Detect which services changed ──────────────────────────────
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      auth: ${{ steps.filter.outputs.auth }}
+      content: ${{ steps.filter.outputs.content }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'intellistack/backend/**'
+              - 'intellistack/docker/backend.Dockerfile'
+              - 'render.yaml'
+            auth:
+              - 'intellistack/auth-server/**'
+              - 'render.yaml'
+            content:
+              - 'intellistack/content/**'
+              - 'render.yaml'
+            frontend:
+              - 'intellistack/frontend/**'
+              - 'render.yaml'
+
+  # ── Deploy Backend ─────────────────────────────────────────────
+  deploy-backend:
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Render deploy — Backend
+        run: curl -s "${{ secrets.RENDER_DEPLOY_HOOK_BACKEND }}"
+
+  # ── Deploy Auth Server ─────────────────────────────────────────
+  deploy-auth:
+    needs: changes
+    if: needs.changes.outputs.auth == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Render deploy — Auth
+        run: curl -s "${{ secrets.RENDER_DEPLOY_HOOK_AUTH }}"
+
+  # ── Deploy Content Site ────────────────────────────────────────
+  deploy-content:
+    needs: changes
+    if: needs.changes.outputs.content == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Render deploy — Content
+        run: curl -s "${{ secrets.RENDER_DEPLOY_HOOK_CONTENT }}"
+
+  # ── Deploy Frontend ────────────────────────────────────────────
+  deploy-frontend:
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Render deploy — Frontend
+        run: curl -s "${{ secrets.RENDER_DEPLOY_HOOK_FRONTEND }}"

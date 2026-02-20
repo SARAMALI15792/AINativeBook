@@ -5,9 +5,6 @@ pydantic>=2.5.0
 pydantic-settings>=2.1.0
 python-multipart>=0.0.6
 
-# Vercel serverless adapter
-mangum>=0.17.0
-
 # Database
 sqlalchemy[asyncio]>=2.0.25
 asyncpg>=0.29.0
