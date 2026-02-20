@@ -35,7 +35,7 @@ def upgrade() -> None:
         sa.Column('id', postgresql.UUID(as_uuid=False), nullable=False),
         sa.Column('parent_id', postgresql.UUID(as_uuid=False), nullable=True),
         sa.Column('content_id', postgresql.UUID(as_uuid=False), nullable=False),
-        sa.Column('hierarchy_type', sa.Enum('stage', 'chapter', 'section', 'subsection', name='hierarchytype'), nullable=False),
+        sa.Column('hierarchy_type', sa.Enum('stage', 'chapter', 'section', 'subsection', name='hierarchytype', create_type=False), nullable=False),
         sa.Column('order_index', sa.Integer(), nullable=False, server_default='0'),
         sa.Column('depth_level', sa.Integer(), nullable=False, server_default='0'),
         sa.Column('slug', sa.String(length=255), nullable=False),
@@ -56,9 +56,9 @@ def upgrade() -> None:
         'content_variants',
         sa.Column('id', postgresql.UUID(as_uuid=False), nullable=False),
         sa.Column('content_id', postgresql.UUID(as_uuid=False), nullable=False),
-        sa.Column('variant_type', sa.Enum('simplified', 'standard', 'advanced', 'language', name='varianttype'), nullable=False),
+        sa.Column('variant_type', sa.Enum('simplified', 'standard', 'advanced', 'language', name='varianttype', create_type=False), nullable=False),
         sa.Column('language_code', sa.String(length=10), nullable=False, server_default='en'),
-        sa.Column('complexity_level', sa.Enum('beginner', 'intermediate', 'advanced', name='complexitylevel'), nullable=False, server_default='intermediate'),
+        sa.Column('complexity_level', sa.Enum('beginner', 'intermediate', 'advanced', name='complexitylevel', create_type=False), nullable=False, server_default='intermediate'),
         sa.Column('mdx_path', sa.String(length=500), nullable=False),
         sa.Column('content_json', postgresql.JSONB(astext_type=sa.Text()), nullable=False),
         sa.Column('word_count', sa.Integer(), nullable=False, server_default='0'),
@@ -82,7 +82,7 @@ def upgrade() -> None:
         'content_summaries',
         sa.Column('id', postgresql.UUID(as_uuid=False), nullable=False),
         sa.Column('content_id', postgresql.UUID(as_uuid=False), nullable=False),
-        sa.Column('summary_type', sa.Enum('brief', 'detailed', 'key_points', name='summarytype'), nullable=False),
+        sa.Column('summary_type', sa.Enum('brief', 'detailed', 'key_points', name='summarytype', create_type=False), nullable=False),
         sa.Column('language_code', sa.String(length=10), nullable=False, server_default='en'),
         sa.Column('summary_text', sa.Text(), nullable=False),
         sa.Column('key_concepts', postgresql.JSONB(astext_type=sa.Text()), nullable=False, server_default='[]'),
@@ -108,7 +108,7 @@ def upgrade() -> None:
         sa.Column('content_id', postgresql.UUID(as_uuid=False), nullable=False),
         sa.Column('code_language', sa.String(length=50), nullable=False),
         sa.Column('code_content', sa.Text(), nullable=False),
-        sa.Column('execution_environment', sa.Enum('pyodide', 'docker', 'wasm', 'local', name='executionenvironment'), nullable=False, server_default='pyodide'),
+        sa.Column('execution_environment', sa.Enum('pyodide', 'docker', 'wasm', 'local', name='executionenvironment', create_type=False), nullable=False, server_default='pyodide'),
         sa.Column('is_editable', sa.Boolean(), nullable=False, server_default='true'),
         sa.Column('is_executable', sa.Boolean(), nullable=False, server_default='true'),
         sa.Column('timeout_seconds', sa.Integer(), nullable=False, server_default='30'),
@@ -183,7 +183,7 @@ def upgrade() -> None:
     # Add new fields to existing Content table
     op.add_column('content', sa.Column('has_summary', sa.Boolean(), nullable=False, server_default='false'))
     op.add_column('content', sa.Column('has_interactive_code', sa.Boolean(), nullable=False, server_default='false'))
-    op.add_column('content', sa.Column('difficulty_level', sa.Enum('beginner', 'intermediate', 'advanced', name='complexitylevel'), nullable=False, server_default='intermediate'))
+    op.add_column('content', sa.Column('difficulty_level', sa.Enum('beginner', 'intermediate', 'advanced', name='complexitylevel', create_type=False), nullable=False, server_default='intermediate'))
     op.add_column('content', sa.Column('estimated_reading_time', sa.Integer(), nullable=False, server_default='0'))
     op.add_column('content', sa.Column('prerequisites', postgresql.JSONB(astext_type=sa.Text()), nullable=False, server_default='[]'))
     op.add_column('content', sa.Column('related_content', postgresql.JSONB(astext_type=sa.Text()), nullable=False, server_default='[]'))
