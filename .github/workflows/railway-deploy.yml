@@ -1,19 +1,17 @@
-# IntelliStack — Render Deployment
+# IntelliStack — Railway Deployment
 #
 # Triggers on push to main. Each job runs only when its service's
-# files change, and calls the corresponding Render Deploy Hook.
+# files change, and deploys the corresponding Railway service.
 #
 # Required GitHub Secrets (add via repo → Settings → Secrets):
-#   RENDER_DEPLOY_HOOK_BACKEND   — Deploy hook URL for backend service
-#   RENDER_DEPLOY_HOOK_AUTH      — Deploy hook URL for auth server
-#   RENDER_DEPLOY_HOOK_CONTENT   — Deploy hook URL for content site
-#   RENDER_DEPLOY_HOOK_FRONTEND  — Deploy hook URL for frontend site
+#   RAILWAY_TOKEN — Railway API token (generate with: railway tokens create)
 
-name: Deploy to Render
+name: Deploy to Railway
 
 on:
   push:
     branches: [main]
+  workflow_dispatch:
 
 jobs:
   # ── Detect which services changed ──────────────────────────────
@@ -23,7 +21,6 @@ jobs:
       backend: ${{ steps.filter.outputs.backend }}
       auth: ${{ steps.filter.outputs.auth }}
       content: ${{ steps.filter.outputs.content }}
-      frontend: ${{ steps.filter.outputs.frontend }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
@@ -33,16 +30,13 @@ jobs:
             backend:
               - 'intellistack/backend/**'
               - 'intellistack/docker/backend.Dockerfile'
-              - 'render.yaml'
+              - 'railway.toml'
             auth:
               - 'intellistack/auth-server/**'
-              - 'render.yaml'
+              - 'railway.toml'
             content:
               - 'intellistack/content/**'
-              - 'render.yaml'
-            frontend:
-              - 'intellistack/frontend/**'
-              - 'render.yaml'
+              - 'railway.toml'
 
   # ── Deploy Backend ─────────────────────────────────────────────
   deploy-backend:
@@ -50,8 +44,13 @@ jobs:
     if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger Render deploy — Backend
-        run: curl -s "${{ secrets.RENDER_DEPLOY_HOOK_BACKEND }}"
+      - uses: actions/checkout@v4
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+      - name: Deploy Backend to Railway
+        run: railway up --service backend --detach
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
   # ── Deploy Auth Server ─────────────────────────────────────────
   deploy-auth:
@@ -59,8 +58,13 @@ jobs:
     if: needs.changes.outputs.auth == 'true'
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger Render deploy — Auth
-        run: curl -s "${{ secrets.RENDER_DEPLOY_HOOK_AUTH }}"
+      - uses: actions/checkout@v4
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+      - name: Deploy Auth Server to Railway
+        run: railway up --service auth-server --detach
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
   # ── Deploy Content Site ────────────────────────────────────────
   deploy-content:
@@ -68,14 +72,10 @@ jobs:
     if: needs.changes.outputs.content == 'true'
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger Render deploy — Content
-        run: curl -s "${{ secrets.RENDER_DEPLOY_HOOK_CONTENT }}"
-
-  # ── Deploy Frontend ────────────────────────────────────────────
-  deploy-frontend:
-    needs: changes
-    if: needs.changes.outputs.frontend == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Trigger Render deploy — Frontend
-        run: curl -s "${{ secrets.RENDER_DEPLOY_HOOK_FRONTEND }}"
+      - uses: actions/checkout@v4
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+      - name: Deploy Content to Railway
+        run: railway up --service content --detach
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}

@@ -51,3 +51,7 @@ next-env.d.ts
 # Testing
 .nyc_output/
 *.lcov
+
+# Railway credentials (DO NOT COMMIT)
+railway-credentials.sh
+railway-credentials.bat

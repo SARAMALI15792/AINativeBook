@@ -1,0 +1,14 @@
+# Railway Configuration - IntelliStack Platform (Monorepo Root)
+# This is the root configuration for the monorepo.
+# Individual services have their own railway.toml files in their directories.
+
+[build]
+builder = "NIXPACKS"
+buildCommand = "echo 'Monorepo - see service configs'"
+
+[deploy]
+startCommand = "echo 'Monorepo - see service configs'"
+healthcheckPath = "/health"
+healthcheckTimeout = 100
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
