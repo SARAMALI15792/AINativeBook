@@ -96,8 +96,18 @@ def do_run_migrations(connection: Connection) -> None:
         context.run_migrations()
 
 
+def _get_connect_args() -> dict:
+    """Return connect_args for SSL if using Neon or cloud PostgreSQL."""
+    import os
+    url = os.getenv("DATABASE_URL", "")
+    if "neon.tech" in url or "sslmode=require" in url:
+        return {"ssl": "require"}
+    return {}
+
+
 async def run_async_migrations() -> None:
     """Run migrations in 'online' mode with async engine."""
+
     configuration = config.get_section(config.config_ini_section) or {}
     configuration["sqlalchemy.url"] = get_url()
 
@@ -105,6 +115,7 @@ async def run_async_migrations() -> None:
         configuration,
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
+        connect_args=_get_connect_args(),
     )
 
     async with connectable.connect() as connection:
