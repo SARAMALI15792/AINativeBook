@@ -26,9 +26,10 @@ const config: Config = {
   },
 
   // Client modules for initialization
-  clientModules: [
-    './src/clientModules/authInit.ts',
-  ],
+  // TEMPORARILY DISABLED: Auth integration causing webpack build errors
+  // clientModules: [
+  //   './src/clientModules/authInit.ts',
+  // ],
 
   plugins: [
     function (context, options) {
