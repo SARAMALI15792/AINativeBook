@@ -212,20 +212,20 @@ class JWKSAuthMiddleware(BaseHTTPMiddleware):
         auth_header = request.headers.get("Authorization", "")
         token = None
 
-        print(f"[MIDDLEWARE DEBUG] Path: {request.url.path}")
-        print(f"[MIDDLEWARE DEBUG] Cookie name to check: {self.cookie_name}")
-        print(f"[MIDDLEWARE DEBUG] Available cookies: {list(request.cookies.keys())}")
+        logger.debug(f"Auth middleware processing path: {request.url.path}")
+        logger.debug(f"Cookie name to check: {self.cookie_name}")
+        logger.debug(f"Available cookies: {list(request.cookies.keys())}")
 
         if auth_header.startswith("Bearer "):
             token = auth_header[7:]  # Remove "Bearer " prefix
-            print(f"[MIDDLEWARE DEBUG] Found Bearer token")
+            logger.debug("Found Bearer token in Authorization header")
         else:
             # Fallback: check for session cookie
             token = request.cookies.get(self.cookie_name)
-            print(f"[MIDDLEWARE DEBUG] Checking cookie '{self.cookie_name}': {'found' if token else 'not found'}")
+            logger.debug(f"Checking cookie '{self.cookie_name}': {'found' if token else 'not found'}")
 
         if token:
-            print(f"[MIDDLEWARE DEBUG] Token found, attempting validation (length: {len(token)})")
+            logger.debug(f"Token found, attempting validation (length: {len(token)})")
             try:
                 # Validate JWT using JWKS
                 import jwt
