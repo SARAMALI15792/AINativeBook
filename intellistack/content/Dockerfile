@@ -21,5 +21,5 @@ RUN npm install -g serve
 # Expose port
 EXPOSE 3000
 
-# Serve the built site
-CMD ["npx", "serve", "build", "-s", "-l", "3000"]
+# Serve the built site (serve uses PORT env var automatically)
+CMD ["npx", "serve", "build", "-s"]
