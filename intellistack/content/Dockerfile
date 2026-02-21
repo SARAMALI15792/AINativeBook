@@ -24,9 +24,13 @@ WORKDIR /app
 # Install serve globally
 RUN npm install -g serve@14
 
-# Create non-root user
-RUN addgroup -g 1000 appuser && \
-    adduser -D -u 1000 -G appuser appuser && \
+# Create non-root user (use existing node user or create new one)
+RUN if ! getent group appuser > /dev/null 2>&1; then \
+        addgroup -g 1001 appuser; \
+    fi && \
+    if ! id -u appuser > /dev/null 2>&1; then \
+        adduser -D -u 1001 -G appuser appuser; \
+    fi && \
     chown -R appuser:appuser /app
 
 # Copy built site from builder

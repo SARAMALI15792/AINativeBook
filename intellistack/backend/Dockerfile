@@ -23,8 +23,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Create non-root user
-RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
+# Create non-root user (avoid UID/GID conflicts)
+RUN useradd -m -u 1001 appuser && chown -R appuser:appuser /app
 
 # Copy Python packages from builder
 COPY --from=builder /root/.local /root/.local
