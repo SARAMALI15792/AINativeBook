@@ -36,8 +36,8 @@ class PersonalizationProfile(Base):
     """
     __tablename__ = "personalization_profiles"
 
-    id = Column(postgresql.UUID(as_uuid=False), primary_key=True, default=lambda: str(uuid.uuid4()))
-    user_id = Column(postgresql.UUID(as_uuid=False), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, unique=True)
+    id = Column(UUID(as_uuid=False), primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id = Column(UUID(as_uuid=False), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, unique=True)
 
     # Background information (FR-081)
     educational_background = Column(String(255), nullable=True)  # e.g., "Computer Science degree"
