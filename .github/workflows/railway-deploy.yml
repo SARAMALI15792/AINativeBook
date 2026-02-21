@@ -29,14 +29,14 @@ jobs:
           filters: |
             backend:
               - 'intellistack/backend/**'
-              - 'intellistack/docker/backend.Dockerfile'
-              - 'railway.toml'
+              - 'intellistack/backend/Dockerfile'
+              - 'intellistack/backend/railway.toml'
             auth:
               - 'intellistack/auth-server/**'
-              - 'railway.toml'
+              - 'intellistack/auth-server/railway.toml'
             content:
               - 'intellistack/content/**'
-              - 'railway.toml'
+              - 'intellistack/content/railway.toml'
 
   # ── Deploy Backend ─────────────────────────────────────────────
   deploy-backend:

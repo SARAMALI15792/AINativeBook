@@ -1,8 +1,8 @@
 # Railway Configuration - Content Site (Docusaurus)
 
 [build]
-builder = "NIXPACKS"
-buildCommand = "npm ci && npm run build"
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
 
 [deploy]
 startCommand = "npx serve build -s -p $PORT"
