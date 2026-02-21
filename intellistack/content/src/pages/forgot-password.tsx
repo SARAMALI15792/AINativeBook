@@ -16,7 +16,7 @@ export default function ForgotPasswordPage(): JSX.Element {
   const [authClient, setAuthClient] = useState<any>(null);
 
   useEffect(() => {
-    import('@site/src/lib/auth-client.tsx').then((mod) => {
+    import('@site/src/lib/auth-client').then((mod) => {
       setAuthClient(mod.authClient);
     });
   }, []);
