@@ -1,5 +1,6 @@
 import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
+import path from 'path';
 
 const config: Config = {
   title: 'IntelliStack',
@@ -27,6 +28,43 @@ const config: Config = {
   // Client modules for initialization
   clientModules: [
     './src/clientModules/authInit.ts',
+  ],
+
+  // Webpack configuration to resolve @site alias
+  webpack: {
+    jsLoader: (isServer) => ({
+      loader: require.resolve('swc-loader'),
+      options: {
+        jsc: {
+          parser: {
+            syntax: 'typescript',
+            tsx: true,
+          },
+          target: 'es2017',
+        },
+        module: {
+          type: isServer ? 'commonjs' : 'es6',
+        },
+      },
+    }),
+  },
+
+  plugins: [
+    function (context, options) {
+      return {
+        name: 'custom-webpack-config',
+        configureWebpack(config, isServer, utils) {
+          return {
+            resolve: {
+              alias: {
+                '@site': path.resolve(__dirname),
+              },
+              extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
+            },
+          };
+        },
+      };
+    },
   ],
 
   i18n: {
