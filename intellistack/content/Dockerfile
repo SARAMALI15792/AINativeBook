@@ -22,4 +22,4 @@ RUN npm install -g serve
 EXPOSE 3000
 
 # Serve the built site
-CMD ["serve", "build", "-s", "-p", "3000"]
+CMD ["sh", "-c", "serve build -s -l tcp://0.0.0.0:${PORT:-3000}"]
