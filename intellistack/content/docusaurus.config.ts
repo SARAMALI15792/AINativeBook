@@ -41,6 +41,10 @@ const config: Config = {
                 '@site': path.resolve(__dirname),
               },
               extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
+              modules: [
+                path.resolve(__dirname, 'src'),
+                'node_modules'
+              ],
             },
           };
         },
