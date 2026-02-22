@@ -7,10 +7,15 @@ const config: Config = {
   tagline: 'AI-Native Learning Platform for Physical AI & Humanoid Robotics',
   favicon: 'img/favicon.ico',
 
-  url: process.env.SITE_URL || 'https://intellistack-content.onrender.com',
-  baseUrl: '/',
-  projectName: 'physicalhumoniodbook',
-  organizationName: 'saramali15792',
+  // GitHub Pages deployment configuration
+  url: 'https://saramali15792.github.io',
+  baseUrl: '/AINativeBook/',
+  projectName: 'AINativeBook',
+  organizationName: 'SARAMALI15792',
+
+  // Deployment branch
+  deploymentBranch: 'gh-pages',
+  trailingSlash: false,
 
   onBrokenLinks: 'ignore',
   markdown: {
