@@ -49,9 +49,10 @@ export function LoginForm({ onSuccess, className = '' }: LoginFormProps) {
         }, 500);
       } else {
         info('Redirecting...', 'Taking you to your learning dashboard');
-        setTimeout(() => {
-          const docusaurusUrl = process.env.NEXT_PUBLIC_DOCUSAURUS_URL || 'http://localhost:3002';
-          window.location.href = `${docusaurusUrl}/docs/stage-1/intro?from=login`;
+        setTimeout(async () => {
+          const { getDocusaurusUrl } = await import('@/lib/docusaurus-utils');
+          const docusaurusUrl = getDocusaurusUrl('stage-1/intro', { from: 'login' });
+          window.location.href = docusaurusUrl;
         }, 500);
       }
     }

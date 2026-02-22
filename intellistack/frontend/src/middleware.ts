@@ -11,12 +11,21 @@ export async function middleware(request: NextRequest) {
   const isAuthRoute = authRoutes.some(route => pathname.startsWith(route));
 
   // Check for Better-Auth session cookie (try multiple possible names)
+  const allCookies = request.cookies.getAll();
   const sessionCookie = request.cookies.get('better-auth.session_token') ||
                         request.cookies.get('better_auth.session_token') ||
-                        request.cookies.get('session_token');
+                        request.cookies.get('session_token') ||
+                        allCookies.find(c => c.name.includes('session'));
+
   const isAuthenticated = !!sessionCookie;
 
-  console.log('Middleware check:', { pathname, isProtectedRoute, isAuthenticated, cookies: request.cookies.getAll().map(c => c.name) });
+  console.log('Middleware check:', {
+    pathname,
+    isProtectedRoute,
+    isAuthenticated,
+    sessionCookie: sessionCookie?.name,
+    allCookies: allCookies.map(c => c.name)
+  });
 
   if (isProtectedRoute && !isAuthenticated) {
     const loginUrl = new URL('/auth/login', request.url);

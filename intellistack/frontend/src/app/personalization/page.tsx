@@ -68,7 +68,8 @@ export default function PersonalizationPage() {
       info('Redirecting...', 'Taking you to your learning content');
 
       // Redirect to Docusaurus with indicator
-      const docusaurusUrl = `${process.env.NEXT_PUBLIC_DOCUSAURUS_URL || 'http://localhost:3002'}/docs/stage-1/intro?from=personalization`;
+      const { getDocusaurusUrl } = await import('@/lib/docusaurus-utils');
+      const docusaurusUrl = getDocusaurusUrl('stage-1/intro', { from: 'personalization' });
       window.location.href = docusaurusUrl;
     } catch (err) {
       console.error('Error in handleComplete:', err);
@@ -83,9 +84,10 @@ export default function PersonalizationPage() {
     }
   };
 
-  const handleSkip = () => {
+  const handleSkip = async () => {
     // Redirect to Docusaurus without saving preferences
-    const docusaurusUrl = `${process.env.NEXT_PUBLIC_DOCUSAURUS_URL || 'http://localhost:3002'}/docs/stage-1/intro`;
+    const { getDocusaurusUrl } = await import('@/lib/docusaurus-utils');
+    const docusaurusUrl = getDocusaurusUrl('stage-1/intro');
     window.location.href = docusaurusUrl;
   };
 

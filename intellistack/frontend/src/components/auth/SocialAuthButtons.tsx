@@ -16,7 +16,7 @@ export function SocialAuthButtons({ mode = 'login', onSuccess, className = '' }:
   const handleSocialAuth = async (provider: 'google' | 'github') => {
     setIsLoading(provider);
     try {
-      await socialSignIn(provider, '/dashboard');
+      await socialSignIn(provider, '/auth/callback');
       onSuccess?.();
     } catch (error) {
       console.error(`${provider} authentication failed:`, error);

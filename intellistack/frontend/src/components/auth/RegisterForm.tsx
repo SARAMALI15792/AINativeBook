@@ -57,10 +57,17 @@ export function RegisterForm({ onSuccess, className = '' }: RegisterFormProps) {
 
       onSuccess?.();
 
-      // Redirect to personalization after a short delay
-      setTimeout(() => {
+      // Wait for session to be established before redirecting
+      const { waitForSession } = await import('@/lib/session-utils');
+      const sessionEstablished = await waitForSession(5, 1000);
+
+      if (sessionEstablished) {
         router.push('/personalization');
-      }, 500);
+      } else {
+        // Fallback: redirect anyway but log warning
+        console.warn('Session cookie not detected, redirecting anyway');
+        router.push('/personalization');
+      }
     } catch (err) {
       const errorMessage = err instanceof Error && err.message
         ? err.message

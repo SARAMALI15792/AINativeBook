@@ -2,6 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
+import { getDocusaurusUrl } from '@/lib/docusaurus-utils';
 
 export const metadata = {
   title: 'Dashboard - IntelliStack',
@@ -9,6 +10,8 @@ export const metadata = {
 };
 
 export default function DashboardPage() {
+  const docusaurusUrl = getDocusaurusUrl('stage-1/intro');
+
   return (
     <main className="relative min-h-screen">
       <Header />
@@ -24,7 +27,7 @@ export default function DashboardPage() {
           </p>
 
           <Link
-            href={`${process.env.NEXT_PUBLIC_DOCUSAURUS_URL || 'http://localhost:3002'}/stage-1/intro`}
+            href={docusaurusUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-block px-6 py-3 bg-gradient-to-r from-accent-cyan to-accent-violet rounded-lg text-white font-semibold hover:shadow-glow-cyan transition-all"
