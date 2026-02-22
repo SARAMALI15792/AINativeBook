@@ -1,7 +1,12 @@
 #!/bin/sh
 # Start script for content service
-# Railway sets PORT dynamically, fallback to 3000 for local dev
+# Use PORT if set by Railway, otherwise default to 3000
 
-PORT=${PORT:-3000}
-echo "Starting serve on port $PORT"
+if [ -z "$PORT" ]; then
+  echo "PORT not set, using default 3000"
+  PORT=3000
+else
+  echo "Starting serve on port $PORT"
+fi
+
 exec serve build -s -p "$PORT"
