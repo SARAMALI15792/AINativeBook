@@ -26,6 +26,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Copy Python packages from builder to /app/.local
 COPY --from=builder /root/.local /app/.local
 ENV PATH=/app/.local/bin:$PATH
+ENV PYTHONPATH=/app/.local/lib/python3.11/site-packages:$PYTHONPATH
 
 # Copy application code
 COPY src ./src
