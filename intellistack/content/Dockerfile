@@ -43,7 +43,7 @@ USER appuser
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:${PORT:-3000}/ || exit 1
 
-# Serve uses PORT env var automatically
-CMD ["serve", "build", "-s"]
+# Serve uses PORT env var - Railway sets this dynamically
+CMD ["sh", "-c", "serve build -s -p ${PORT:-3000}"]
 
 EXPOSE 3000
