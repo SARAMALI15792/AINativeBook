@@ -19,7 +19,8 @@ const getBetterAuthUrl = (): string => {
     const url = docusaurus?.siteConfig?.customFields?.betterAuthUrl;
     if (url) return url as string;
   }
-  return 'http://localhost:3001';
+  // Use a more descriptive fallback that indicates the URL should be configured
+  return 'https://your-auth-domain.com/api/auth';
 };
 
 /**
@@ -31,7 +32,8 @@ export const getBackendUrl = (): string => {
     const url = docusaurus?.siteConfig?.customFields?.backendUrl;
     if (url) return url as string;
   }
-  return 'http://localhost:8000';
+  // Use a more descriptive fallback that indicates the URL should be configured
+  return 'https://your-backend-domain.com';
 };
 
 /**

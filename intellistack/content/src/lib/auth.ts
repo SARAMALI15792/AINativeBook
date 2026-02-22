@@ -5,12 +5,12 @@
 const getConfig = () => {
   if (typeof window !== 'undefined' && window.docusaurus) {
     return {
-      betterAuthUrl: window.docusaurus.siteConfig.customFields?.betterAuthUrl as string || 'http://localhost:3001',
+      betterAuthUrl: window.docusaurus.siteConfig.customFields?.betterAuthUrl as string || 'https://your-auth-domain.com/api/auth',
       isProduction: window.location.hostname !== 'localhost',
     };
   }
   return {
-    betterAuthUrl: 'http://localhost:3001',
+    betterAuthUrl: 'https://your-auth-domain.com/api/auth',
     isProduction: false,
   };
 };

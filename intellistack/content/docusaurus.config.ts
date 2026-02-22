@@ -25,9 +25,9 @@ const config: Config = {
 
   // Custom fields for auth and backend integration
   customFields: {
-    betterAuthUrl: process.env.BETTER_AUTH_URL || 'http://localhost:3001',
-    backendUrl: process.env.BACKEND_URL || 'http://localhost:8000',
-    frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
+    betterAuthUrl: process.env.BETTER_AUTH_URL || 'https://your-auth-domain.com/api/auth',
+    backendUrl: process.env.BACKEND_URL || 'https://your-backend-domain.com',
+    frontendUrl: process.env.FRONTEND_URL || 'https://your-frontend-domain.com',
   },
 
   // Client modules for initialization

@@ -5,11 +5,12 @@
 
 import React, { useState } from 'react';
 import Link from '@docusaurus/Link';
+import BrowserOnly from '@docusaurus/BrowserOnly';
 import { useColorMode } from '@docusaurus/theme-common';
 import { useAuth } from '../../contexts/AuthContext';
 import styles from './AuthNavbarItem.module.css';
 
-export default function AuthNavbarItem(): JSX.Element {
+function AuthNavbarItemContent(): JSX.Element {
   const { user, loading, logout } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const { colorMode } = useColorMode();
@@ -107,5 +108,17 @@ export default function AuthNavbarItem(): JSX.Element {
         Sign In
       </Link>
     </div>
+  );
+}
+
+export default function AuthNavbarItem(): JSX.Element {
+  return (
+    <BrowserOnly fallback={
+      <div className={styles.authNavbarItem}>
+        <span className={styles.loadingDot}>...</span>
+      </div>
+    }>
+      {() => <AuthNavbarItemContent />}
+    </BrowserOnly>
   );
 }

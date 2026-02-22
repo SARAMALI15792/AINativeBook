@@ -249,35 +249,66 @@ async def get_preferences(
         profile = result.scalar_one_or_none()
 
         if not profile:
-            raise HTTPException(
-                status_code=404,
-                detail="Preferences not found. Complete onboarding first.",
+            # Return empty preferences instead of throwing 404 to avoid breaking the UI
+            return PreferencesResponse(
+                id="",
+                user_id=str(current_user.id),
+                educational_background=None,
+                prior_experience=None,
+                technical_skills=[],
+                learning_goals=None,
+                learning_style=None,
+                learning_pace="moderate",
+                preferred_language="en",
+                preferred_examples_domain=None,
+                interest_areas=[],
+                adaptive_complexity=True,
+                personalized_exercises=True,
+                personalized_time_estimates=True,
+                share_progress_with_instructors=False,
+                share_with_peers=False,
+                allow_ai_personalization=True,
             )
 
+        # Safely handle enum values that might be None
+        learning_style_value = None
+        if profile.learning_style:
+            try:
+                learning_style_value = profile.learning_style.value
+            except AttributeError:
+                learning_style_value = None
+
+        learning_pace_value = "moderate"  # default
+        if profile.learning_pace:
+            try:
+                learning_pace_value = profile.learning_pace.value
+            except AttributeError:
+                learning_pace_value = "moderate"
+
         return PreferencesResponse(
-            id=str(profile.id),
-            user_id=str(profile.user_id),
-            educational_background=profile.educational_background,
-            prior_experience=profile.prior_experience,
-            technical_skills=profile.technical_skills or [],
-            learning_goals=profile.learning_goals,
-            learning_style=profile.learning_style.value if profile.learning_style else None,
-            learning_pace=profile.learning_pace.value,
-            preferred_language=profile.preferred_language,
-            preferred_examples_domain=profile.preferred_examples_domain,
-            interest_areas=profile.interest_areas or [],
-            adaptive_complexity=profile.adaptive_complexity,
-            personalized_exercises=profile.personalized_exercises,
-            personalized_time_estimates=profile.personalized_time_estimates,
-            share_progress_with_instructors=profile.share_progress_with_instructors,
-            share_with_peers=profile.share_with_peers,
-            allow_ai_personalization=profile.allow_ai_personalization,
+            id=str(profile.id) if hasattr(profile, 'id') and profile.id else "",
+            user_id=str(profile.user_id) if hasattr(profile, 'user_id') and profile.user_id else str(current_user.id),
+            educational_background=getattr(profile, 'educational_background', None),
+            prior_experience=getattr(profile, 'prior_experience', None),
+            technical_skills=getattr(profile, 'technical_skills', []) or [],
+            learning_goals=getattr(profile, 'learning_goals', None),
+            learning_style=learning_style_value,
+            learning_pace=learning_pace_value,
+            preferred_language=getattr(profile, 'preferred_language', 'en'),
+            preferred_examples_domain=getattr(profile, 'preferred_examples_domain', None),
+            interest_areas=getattr(profile, 'interest_areas', []) or [],
+            adaptive_complexity=getattr(profile, 'adaptive_complexity', True),
+            personalized_exercises=getattr(profile, 'personalized_exercises', True),
+            personalized_time_estimates=getattr(profile, 'personalized_time_estimates', True),
+            share_progress_with_instructors=getattr(profile, 'share_progress_with_instructors', False),
+            share_with_peers=getattr(profile, 'share_with_peers', False),
+            allow_ai_personalization=getattr(profile, 'allow_ai_personalization', True),
         )
 
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("get_preferences_error", error=str(e))
+        logger.error("get_preferences_error", error=str(e), exc_info=True)
         raise HTTPException(status_code=500, detail="Failed to retrieve preferences")
 
 

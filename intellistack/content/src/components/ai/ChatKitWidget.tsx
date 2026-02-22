@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import BrowserOnly from '@docusaurus/BrowserOnly';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import { useLocation } from '@docusaurus/router';
 import { ChatKitErrorBoundary } from './ChatKitErrorBoundary';
@@ -41,18 +42,24 @@ function usePageContext() {
   };
 }
 
-export default function ChatKitWidget(): JSX.Element | null {
+function ChatKitWidgetContent(): JSX.Element | null {
   const { siteConfig } = useDocusaurusContext();
+  const { baseUrl } = siteConfig;
   const pageContext = usePageContext();
   const location = useLocation();
 
-  // Only render on Docusaurus learning routes
-  // The paths are like /AINativeBook/docs/stage-1/intro/, so check if they contain the stage paths
-  const isStageRoute = location.pathname.includes('/stage-1/') ||
-                       location.pathname.includes('/stage-2/') ||
-                       location.pathname.includes('/stage-3/') ||
-                       location.pathname.includes('/stage-4/') ||
-                       location.pathname.includes('/stage-5/');
+  // Normalize path to handle baseUrl prefix
+  const normalizePath = (path: string): string => {
+    return path.replace(baseUrl, '/');
+  };
+
+  // Only render on Docusaurus learning routes (handle baseUrl prefix)
+  const normalizedPath = normalizePath(location.pathname);
+  const isStageRoute = normalizedPath.includes('/stage-1/') ||
+                       normalizedPath.includes('/stage-2/') ||
+                       normalizedPath.includes('/stage-3/') ||
+                       normalizedPath.includes('/stage-4/') ||
+                       normalizedPath.includes('/stage-5/');
 
   if (!isStageRoute) {
     return null;
@@ -689,4 +696,12 @@ export default function ChatKitWidget(): JSX.Element | null {
         </>
       </ChatKitErrorBoundary>
     );
+}
+
+export default function ChatKitWidget(): JSX.Element | null {
+  return (
+    <BrowserOnly fallback={<div style={{ display: 'none' }} />}>
+      {() => <ChatKitWidgetContent />}
+    </BrowserOnly>
+  );
 }

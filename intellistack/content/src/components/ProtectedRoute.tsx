@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useLocation, useNavigate } from '@docusaurus/router';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -8,22 +9,24 @@ interface ProtectedRouteProps {
 
 export default function ProtectedRoute({ children, requireAuth = true }: ProtectedRouteProps) {
   const { user, loading } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!loading && requireAuth && !user) {
-      // Redirect to Docusaurus login page with return URL
-      const returnUrl = encodeURIComponent(window.location.href);
-      window.location.href = `/login?returnUrl=${returnUrl}`;
+      // Navigate to login page with return URL using Docusaurus router
+      const returnUrl = encodeURIComponent(location.pathname + location.search);
+      navigate(`/login?returnUrl=${returnUrl}`);
     }
-  }, [user, loading, requireAuth]);
+  }, [user, loading, requireAuth, navigate, location]);
 
   if (loading) {
     return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        minHeight: '400px' 
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '400px'
       }}>
         <div style={{
           width: '48px',

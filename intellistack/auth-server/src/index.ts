@@ -46,6 +46,9 @@ const corsOptions = {
     'http://localhost:3004',
     'http://localhost:8000',
     'https://saramali15792.github.io',
+    ...(process.env.NODE_ENV === 'production'
+      ? [process.env.PRODUCTION_ORIGIN || 'https://your-production-domain.com']
+      : []),
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -99,8 +102,10 @@ app.get('/.well-known/openid-configuration', async (_req: Request, res: Response
 app.get('/.well-known/jwks.json', async (_req: Request, res: Response) => {
   try {
     // Proxy to Better-Auth's internal JWKS endpoint (mounted at basePath + jwksPath)
-    // Use 0.0.0.0 to allow container to reach itself on the bound port
-    const jwksUrl = `http://0.0.0.0:${PORT}/api/auth/.well-known/jwks.json`;
+    // Use actual hostname in production, localhost in development
+    const isProduction = process.env.NODE_ENV === 'production';
+    const host = isProduction ? process.env.BETTER_AUTH_URL : `http://0.0.0.0:${PORT}`;
+    const jwksUrl = `${host}/api/auth/.well-known/jwks.json`;
     const response = await fetch(jwksUrl);
     if (!response.ok) {
       throw new Error(`JWKS fetch failed: ${response.status}`);
@@ -154,10 +159,14 @@ async function start() {
     console.log('✅ Database connection successful. Starting server...');
 
     app.listen(PORT, () => {
-      console.log(`✅ Auth server running on http://localhost:${PORT}`);
-      console.log(`📋 OIDC Discovery: http://localhost:${PORT}/.well-known/openid-configuration`);
-      console.log(`🔑 JWKS Endpoint: http://localhost:${PORT}/.well-known/jwks.json`);
-      console.log(`📚 API Routes: http://localhost:${PORT}/api/auth/*`);
+      const serverUrl = process.env.NODE_ENV === 'production'
+        ? process.env.BETTER_AUTH_URL || `https://localhost:${PORT}`
+        : `http://localhost:${PORT}`;
+
+      console.log(`✅ Auth server running on ${serverUrl}`);
+      console.log(`📋 OIDC Discovery: ${serverUrl}/.well-known/openid-configuration`);
+      console.log(`🔑 JWKS Endpoint: ${serverUrl}/.well-known/jwks.json`);
+      console.log(`📚 API Routes: ${serverUrl}/api/auth/*`);
     });
   } catch (error) {
     console.error('Failed to start server:', error);
