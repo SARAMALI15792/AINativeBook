@@ -42,15 +42,15 @@ export const auth = betterAuth({
   }),
 
   // Base URL for OIDC discovery and callbacks
-  baseURL: process.env.BETTER_AUTH_URL || 'http://localhost:3001',
+  baseURL: process.env.BETTER_AUTH_URL!,
   basePath: '/api/auth',
-  secret: process.env.BETTER_AUTH_SECRET || 'your-secret-key-min-32-characters',
+  secret: process.env.BETTER_AUTH_SECRET!,
 
   // Trust proxy headers (for reverse proxy deployment)
   trustHost: process.env.BETTER_AUTH_TRUST_HOST === 'true',
 
   // Trusted origins for cross-origin requests (frontend → auth server)
-  trustedOrigins: process.env.CORS_ORIGINS?.split(',') || ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002', 'http://localhost:3004', 'http://localhost:8000'],
+  trustedOrigins: process.env.CORS_ORIGINS?.split(',') || [],
 
   // Email configuration
   emailAndPassword: {
@@ -89,12 +89,12 @@ export const auth = betterAuth({
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID || '',
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
-      redirectURI: `${process.env.BETTER_AUTH_URL}/api/auth/callback/google`,
+      redirectURI: `${process.env.BETTER_AUTH_URL!}/api/auth/callback/google`,
     },
     github: {
       clientId: process.env.GITHUB_CLIENT_ID || '',
       clientSecret: process.env.GITHUB_CLIENT_SECRET || '',
-      redirectURI: `${process.env.BETTER_AUTH_URL}/api/auth/callback/github`,
+      redirectURI: `${process.env.BETTER_AUTH_URL!}/api/auth/callback/github`,
     },
   },
 
@@ -115,13 +115,13 @@ export const auth = betterAuth({
     // OIDC Provider Plugin: OpenID Connect discovery endpoint
     oidcProvider({
       useJWTPlugin: true, // Integrate with JWT plugin
-      loginPage: `${process.env.BETTER_AUTH_URL || 'http://localhost:3001'}/login`,
+      loginPage: `${process.env.BETTER_AUTH_URL!}/login`,
       metadata: {
-        issuer: process.env.BETTER_AUTH_URL || 'http://localhost:3001',
-        authorization_endpoint: `${process.env.BETTER_AUTH_URL}/api/auth/authorize`,
-        token_endpoint: `${process.env.BETTER_AUTH_URL}/api/auth/token`,
-        userinfo_endpoint: `${process.env.BETTER_AUTH_URL}/api/auth/userinfo`,
-        jwks_uri: `${process.env.BETTER_AUTH_URL}/.well-known/jwks.json`,
+        issuer: process.env.BETTER_AUTH_URL!,
+        authorization_endpoint: `${process.env.BETTER_AUTH_URL!}/api/auth/authorize`,
+        token_endpoint: `${process.env.BETTER_AUTH_URL!}/api/auth/token`,
+        userinfo_endpoint: `${process.env.BETTER_AUTH_URL!}/api/auth/userinfo`,
+        jwks_uri: `${process.env.BETTER_AUTH_URL!}/.well-known/jwks.json`,
         scopes_supported: ['openid', 'profile', 'email'],
         response_types_supported: ['code', 'id_token'] as any,
         subject_types_supported: ['public'],

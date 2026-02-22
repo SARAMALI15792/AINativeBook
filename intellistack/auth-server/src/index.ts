@@ -99,7 +99,8 @@ app.get('/.well-known/openid-configuration', async (_req: Request, res: Response
 app.get('/.well-known/jwks.json', async (_req: Request, res: Response) => {
   try {
     // Proxy to Better-Auth's internal JWKS endpoint (mounted at basePath + jwksPath)
-    const jwksUrl = `http://localhost:${PORT}/api/auth/.well-known/jwks.json`;
+    // Use 0.0.0.0 to allow container to reach itself on the bound port
+    const jwksUrl = `http://0.0.0.0:${PORT}/api/auth/.well-known/jwks.json`;
     const response = await fetch(jwksUrl);
     if (!response.ok) {
       throw new Error(`JWKS fetch failed: ${response.status}`);

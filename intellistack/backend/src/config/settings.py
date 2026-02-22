@@ -40,11 +40,11 @@ class Settings(BaseSettings):
     db_max_overflow: int = 10
     db_pool_timeout: int = 30
 
-    # Redis (optional for development)
-    redis_url: str = Field(default="redis://localhost:6379/0", alias="REDIS_URL")
+    # Redis (required for production)
+    redis_url: str = Field(..., alias="REDIS_URL")
 
     # Qdrant Vector DB
-    qdrant_host: str = "localhost"
+    qdrant_host: str = Field(..., alias="QDRANT_HOST")
     qdrant_port: int = 6333
     qdrant_api_key: str | None = None
     qdrant_collection_name: str = "intellistack_content"
@@ -62,30 +62,29 @@ class Settings(BaseSettings):
     rate_limit_unauth: int = 10  # requests per minute for unauthenticated
 
     # CORS
-    cors_origins: list[str] | str = Field(default=[
-        "http://localhost:3000",
-        "http://localhost:3001",
-        "https://saramali15792.github.io",
-    ])
+    cors_origins: list[str] | str = Field(
+        default=["http://localhost:3000", "http://localhost:3001"],
+        alias="CORS_ORIGINS"
+    )
     cors_allow_credentials: bool = True
 
     # OAuth Providers
     # NOTE: Redirect URIs must point to the BACKEND server (port 8000)
     google_client_id: str | None = Field(default=None, alias="GOOGLE_CLIENT_ID")
     google_client_secret: str | None = Field(default=None, alias="GOOGLE_CLIENT_SECRET")
-    google_redirect_uri: str = Field(default="http://localhost:8000/api/v1/auth/callback/google", alias="GOOGLE_REDIRECT_URI")
+    google_redirect_uri: str = Field(..., alias="GOOGLE_REDIRECT_URI")
 
     github_client_id: str | None = Field(default=None, alias="GITHUB_CLIENT_ID")
     github_client_secret: str | None = Field(default=None, alias="GITHUB_CLIENT_SECRET")
-    github_redirect_uri: str = Field(default="http://localhost:8000/api/v1/auth/callback/github", alias="GITHUB_REDIRECT_URI")
+    github_redirect_uri: str = Field(..., alias="GITHUB_REDIRECT_URI")
 
     # Post-Auth Redirect
     post_login_redirect_path: str = Field(default="/learn", alias="POST_LOGIN_REDIRECT_PATH")
     post_logout_redirect_path: str = Field(default="/login", alias="POST_LOGOUT_REDIRECT_PATH")
 
     # Better-Auth OIDC Server (JWT validation)
-    better_auth_url: str = Field(default="http://localhost:3001", alias="BETTER_AUTH_URL")
-    better_auth_jwks_url: str = Field(default="http://localhost:3001/.well-known/jwks.json", alias="BETTER_AUTH_JWKS_URL")
+    better_auth_url: str = Field(..., alias="BETTER_AUTH_URL")
+    better_auth_jwks_url: str = Field(..., alias="BETTER_AUTH_JWKS_URL")
     better_auth_issuer: str | None = Field(default=None, alias="BETTER_AUTH_ISSUER")
     better_auth_audience: str | None = Field(default=None, alias="BETTER_AUTH_AUDIENCE")
     better_auth_session_cookie_name: str = "better-auth.session_token"

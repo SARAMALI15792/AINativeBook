@@ -1,6 +1,7 @@
 """Qdrant vector store client for RAG system."""
 
 import logging
+import os
 from typing import List, Optional
 
 from qdrant_client import AsyncQdrantClient, models
@@ -27,11 +28,10 @@ class VectorStore:
         """
         self.config = config or get_qdrant_config()
         host = self.config.host
-        # Use HTTPS for cloud instances, HTTP for localhost
-        if host in ("localhost", "127.0.0.1"):
-            url = f"http://{host}:{self.config.port}"
-        else:
-            url = f"https://{host}:{self.config.port}"
+        # Use QDRANT_USE_HTTPS env var to control protocol (default: False for Railway internal services)
+        use_https = os.getenv("QDRANT_USE_HTTPS", "false").lower() == "true"
+        protocol = "https" if use_https else "http"
+        url = f"{protocol}://{host}:{self.config.port}"
         self.client = AsyncQdrantClient(
             url=url,
             api_key=self.config.api_key,
