@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Optional
 from uuid import uuid4
 
 from sqlalchemy import Boolean, DateTime, ForeignKey, String, Text, func
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.shared.database import Base
@@ -108,7 +108,7 @@ class Role(Base):
     __tablename__ = "roles"
 
     id: Mapped[str] = mapped_column(
-        String(255), primary_key=True, default=lambda: str(uuid4())
+        UUID(as_uuid=False), primary_key=True, default=lambda: str(uuid4())
     )
     name: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
