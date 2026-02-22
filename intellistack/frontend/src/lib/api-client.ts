@@ -177,7 +177,7 @@ class ApiClient {
     success: true;
     data: PersonalizationPreferences | null;
   }> {
-    return this.request(`${this.baseUrl}/api/v1/users/me`);
+    return this.request(`${this.baseUrl}/api/v1/users/preferences`);
   }
 
   async updatePreferences(
