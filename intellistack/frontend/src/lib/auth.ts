@@ -88,9 +88,29 @@ export async function socialSignIn(provider: 'google' | 'github', callbackURL?: 
       ? `${frontendUrl}${callbackURL.startsWith('/') ? callbackURL : '/' + callbackURL}`
       : `${frontendUrl}/dashboard`;
 
-    const redirectUrl = `${authClient.baseURL}/api/auth/oauth/${provider}?callbackURL=${encodeURIComponent(absoluteCallback)}`;
+    // Use Better-Auth's correct OAuth endpoint
+    const response = await fetch(`${authClient.baseURL}/api/auth/sign-in/social`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({
+        provider,
+        callbackURL: absoluteCallback,
+      }),
+    });
 
-    window.location.href = redirectUrl;
+    if (!response.ok) {
+      throw new Error('OAuth initialization failed');
+    }
+
+    const data = await response.json();
+
+    // Redirect to OAuth provider
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      throw new Error('No OAuth URL returned');
+    }
   } catch (error) {
     console.error('Social auth error:', error);
     throw error;
