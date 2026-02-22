@@ -23,17 +23,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Create non-root user (avoid UID/GID conflicts)
-RUN useradd -m -u 1001 appuser && chown -R appuser:appuser /app
-
-# Copy Python packages from builder
-COPY --from=builder /root/.local /root/.local
-ENV PATH=/root/.local/bin:$PATH
+# Copy Python packages from builder to /app/.local
+COPY --from=builder /root/.local /app/.local
+ENV PATH=/app/.local/bin:$PATH
 
 # Copy application code
 COPY src ./src
 COPY alembic ./alembic
 COPY alembic.ini ./
+
+# Create non-root user and set ownership
+RUN useradd -m -u 1001 appuser && chown -R appuser:appuser /app
 
 # Switch to non-root user
 USER appuser
