@@ -17,7 +17,7 @@ class ApiClient {
   private onlineListeners: Set<(online: boolean) => void> = new Set();
 
   constructor() {
-    this.baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    this.baseUrl = process.env.NEXT_PUBLIC_API_URL || '';
 
     // Monitor online/offline status
     if (typeof window !== 'undefined') {

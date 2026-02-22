@@ -72,15 +72,14 @@ export const auth = betterAuth({
     },
   },
 
-  // Advanced configuration for cookie handling across localhost ports
+  // Advanced configuration for cookie handling
   advanced: {
-    // Apply domain to ALL cookies (session_token, session_data, etc.)
-    // so they are shared across localhost:3000, :3001, :3002, :3004
+    // Let cookie domain default to request origin for proxy compatibility
     defaultCookieAttributes: {
       sameSite: 'lax' as const,
       secure: process.env.NODE_ENV === 'production',
       path: '/',
-      domain: process.env.COOKIE_DOMAIN || (process.env.NODE_ENV === 'production' ? undefined : 'localhost'),
+      domain: undefined, // Let it default to request origin
     },
   },
 

@@ -59,3 +59,6 @@ next-env.d.ts
 # Railway credentials (DO NOT COMMIT)
 railway-credentials.sh
 railway-credentials.bat
+
+# Local Netlify folder
+.netlify

@@ -11,10 +11,31 @@ import type { PersonalizationPreferences } from '@/types/api';
 
 export default function PersonalizationPage() {
   const router = useRouter();
-  const { updatePreferences } = useAuth();
+  const { session, isLoading, updatePreferences } = useAuth();
   const { success, error: showError, info } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Auth guard - redirect if not authenticated
+  React.useEffect(() => {
+    if (!isLoading && !session.isAuthenticated) {
+      router.push('/auth/login?redirect=/personalization');
+    }
+  }, [session.isAuthenticated, isLoading, router]);
+
+  // Show loading state while checking auth
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  // Don't render if not authenticated
+  if (!session.isAuthenticated) {
+    return null;
+  }
 
   const handleComplete = async (preferences: PersonalizationPreferences) => {
     setIsSubmitting(true);

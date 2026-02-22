@@ -1,9 +1,7 @@
 // Auth client configuration
 export const authClient = {
-  baseURL: process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:3001',
+  baseURL: process.env.NEXT_PUBLIC_AUTH_URL || '',
   cookieOptions: {
-    domain:
-      process.env.NODE_ENV === 'production' ? '.intellistack.com' : 'localhost',
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax' as const,
   },
@@ -42,11 +40,19 @@ export async function signIn(email: string, password: string, rememberMe = false
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-      throw new Error(error.message || 'Login failed');
+      const errorData = await response.json().catch(() => ({}));
+      console.error('Login failed:', {
+        status: response.status,
+        statusText: response.statusText,
+        error: errorData,
+        url: response.url,
+      });
+      throw new Error(errorData.message || 'Login failed');
     }
 
-    return await response.json();
+    const data = await response.json();
+    console.log('Login successful:', { userId: data.user?.id });
+    return data;
   } catch (error) {
     console.error('Login error:', error);
     throw error;
@@ -73,8 +79,17 @@ export async function signOut() {
 
 export async function socialSignIn(provider: 'google' | 'github', callbackURL?: string) {
   try {
-    // Redirect to OAuth provider
-    const redirectUrl = `${authClient.baseURL}/api/auth/oauth/${provider}?callbackURL=${encodeURIComponent(callbackURL || '/dashboard')}`;
+    // Use absolute Netlify URL for OAuth callback
+    const frontendUrl = typeof window !== 'undefined'
+      ? window.location.origin
+      : 'https://intellistack-frontend.netlify.app';
+
+    const absoluteCallback = callbackURL
+      ? `${frontendUrl}${callbackURL.startsWith('/') ? callbackURL : '/' + callbackURL}`
+      : `${frontendUrl}/dashboard`;
+
+    const redirectUrl = `${authClient.baseURL}/api/auth/oauth/${provider}?callbackURL=${encodeURIComponent(absoluteCallback)}`;
+
     window.location.href = redirectUrl;
   } catch (error) {
     console.error('Social auth error:', error);
