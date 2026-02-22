@@ -36,7 +36,7 @@ export default function CurriculumPage() {
           {stages.map((stage) => (
             <Link
               key={stage.id}
-              href={`${process.env.NEXT_PUBLIC_DOCUSAURUS_URL || 'http://localhost:3002'}/${stage.slug}/intro`}
+              href={`${process.env.NEXT_PUBLIC_DOCUSAURUS_URL || 'http://localhost:3002'}/docs/${stage.slug}/intro`}
               target="_blank"
               rel="noopener noreferrer"
               className="glass backdrop-blur-md rounded-xl p-6 border border-glass-border hover:border-accent-cyan transition-all group"
