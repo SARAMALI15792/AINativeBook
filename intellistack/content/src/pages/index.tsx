@@ -10,7 +10,7 @@ export default function Home(): JSX.Element {
 
   useEffect(() => {
     // Redirect to Stage 1 intro
-    history.replace('/docs/stage-1/intro');
+    history.replace('/stage-1/intro');
   }, [history]);
 
   // Show minimal loading state during redirect

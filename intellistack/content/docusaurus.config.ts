@@ -1,4 +1,4 @@
-import type {Config} from '@docusaurus/types';
+import type { Config } from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 import path from 'path';
 
@@ -166,7 +166,7 @@ const config: Config = {
           items: [
             {
               label: 'Documentation',
-              to: '/intro',
+              to: '/stage-1/intro',
             },
             {
               label: 'GitHub',
