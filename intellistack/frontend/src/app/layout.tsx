@@ -19,6 +19,11 @@ export const metadata: Metadata = {
   authors: [{ name: 'IntelliStack' }],
   creator: 'IntelliStack',
   publisher: 'IntelliStack',
+  icons: {
+    icon: '/favicon.svg',
+    shortcut: '/favicon.svg',
+    apple: '/favicon.svg',
+  },
   openGraph: {
     type: 'website',
     locale: 'en_US',
