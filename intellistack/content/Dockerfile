@@ -36,6 +36,10 @@ RUN if ! getent group appuser > /dev/null 2>&1; then \
 # Copy built site from builder
 COPY --from=builder /app/build ./build
 
+# Copy start script
+COPY start.sh ./
+RUN chmod +x start.sh
+
 # Switch to non-root user
 USER appuser
 
@@ -43,8 +47,7 @@ USER appuser
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:${PORT:-3000}/ || exit 1
 
-# Serve uses PORT env var - Railway sets this dynamically
-# Use exec form with sh -c to ensure proper variable expansion
-CMD sh -c "serve build -s -p ${PORT:-3000}"
+# Start the server using the wrapper script
+CMD ["./start.sh"]
 
 EXPOSE 3000
