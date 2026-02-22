@@ -74,12 +74,12 @@ export const auth = betterAuth({
 
   // Advanced configuration for cookie handling
   advanced: {
-    // Let cookie domain default to request origin for proxy compatibility
+    // Use SameSite=None for cross-site OAuth flows through proxy
     defaultCookieAttributes: {
-      sameSite: 'lax' as const,
-      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'none' as const,
+      secure: true, // Required for SameSite=None
       path: '/',
-      domain: undefined, // Let it default to request origin
+      domain: undefined,
     },
   },
 
