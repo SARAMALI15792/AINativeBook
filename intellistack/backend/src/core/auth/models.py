@@ -5,8 +5,8 @@ from enum import Enum
 from typing import TYPE_CHECKING, Optional
 from uuid import uuid4
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, String, Text, func
-from sqlalchemy.dialects.postgresql import JSONB, UUID
+from sqlalchemy import Boolean, DateTime, ForeignKey, String, Text, JSON, func
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.shared.database import Base
@@ -41,8 +41,8 @@ class User(Base):
     avatar_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
     bio: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     locale: Mapped[str] = mapped_column(String(10), default="en")
-    notification_settings: Mapped[dict] = mapped_column(JSONB, default=dict)
-    preferences: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)  # Onboarding preferences
+    notification_settings: Mapped[dict] = mapped_column(JSON, default=dict)
+    preferences: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)  # Onboarding preferences
 
     # Status flags
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
@@ -112,7 +112,7 @@ class Role(Base):
     )
     name: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    permissions: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
+    permissions: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
 
     # Relationships
     user_roles: Mapped[list["UserRole"]] = relationship("UserRole", back_populates="role")

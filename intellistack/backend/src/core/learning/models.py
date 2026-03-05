@@ -5,8 +5,8 @@ from enum import Enum
 from typing import TYPE_CHECKING, Optional
 from uuid import uuid4
 
-from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, Text, func
-from sqlalchemy.dialects.postgresql import JSONB, UUID
+from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, Text, JSON, func
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.shared.database import Base
@@ -36,7 +36,7 @@ class Stage(Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     slug: Mapped[str] = mapped_column(String(100), nullable=False, unique=True)
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    learning_objectives: Mapped[list] = mapped_column(JSONB, default=list)
+    learning_objectives: Mapped[list] = mapped_column(JSON, default=list)
 
     # Prerequisites - self-referential (FR-001)
     prerequisite_stage_id: Mapped[Optional[str]] = mapped_column(
@@ -112,7 +112,7 @@ class Badge(Base):
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     icon_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
-    criteria: Mapped[dict] = mapped_column(JSONB, default=dict)  # JSON criteria for earning
+    criteria: Mapped[dict] = mapped_column(JSON, default=dict)  # JSON criteria for earning
 
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(
@@ -133,7 +133,7 @@ class Progress(Base):
         UUID(as_uuid=False), primary_key=True, default=lambda: str(uuid4())
     )
     user_id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False), ForeignKey("users.id"), nullable=False, unique=True
+        String(255), ForeignKey("users.id"), nullable=False, unique=True
     )
 
     # Current progress
@@ -145,7 +145,7 @@ class Progress(Base):
 
     # Stage-specific progress stored as JSON
     # Format: {"stage_id": {"percentage": 50.0, "status": "in_progress", "started_at": "..."}}
-    stage_progress: Mapped[dict] = mapped_column(JSONB, default=dict)
+    stage_progress: Mapped[dict] = mapped_column(JSON, default=dict)
 
     # Timestamps
     started_at: Mapped[datetime] = mapped_column(
@@ -204,7 +204,7 @@ class UserBadge(Base):
         UUID(as_uuid=False), primary_key=True, default=lambda: str(uuid4())
     )
     user_id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False), ForeignKey("users.id"), nullable=False
+        String(255), ForeignKey("users.id"), nullable=False
     )
     badge_id: Mapped[str] = mapped_column(
         UUID(as_uuid=False), ForeignKey("badges.id"), nullable=False
@@ -229,7 +229,7 @@ class Certificate(Base):
         UUID(as_uuid=False), primary_key=True, default=lambda: str(uuid4())
     )
     user_id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False), ForeignKey("users.id"), nullable=False
+        String(255), ForeignKey("users.id"), nullable=False
     )
 
     certificate_number: Mapped[str] = mapped_column(

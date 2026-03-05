@@ -29,6 +29,9 @@ _async_session_factory = None
 
 def _get_connect_args(database_url: str) -> dict:
     """Return connect_args based on whether the database is cloud or local."""
+    if "sqlite" in database_url:
+        # SQLite doesn't support pool configuration
+        return {"check_same_thread": False}
     if "neon.tech" in database_url or "sslmode=require" in database_url:
         return {"ssl": "require"}
     return {}
@@ -38,14 +41,26 @@ def init_db(settings: Settings) -> None:
     """Initialize database engine and session factory."""
     global _engine, _async_session_factory
 
+    # Determine if using SQLite for testing
+    is_sqlite = "sqlite" in settings.async_database_url
+
+    engine_kwargs = {
+        "echo": settings.debug,
+        "connect_args": _get_connect_args(settings.database_url),
+    }
+
+    # Only add pool settings for non-SQLite databases
+    if not is_sqlite:
+        engine_kwargs.update({
+            "pool_size": settings.db_pool_size,
+            "max_overflow": settings.db_max_overflow,
+            "pool_timeout": settings.db_pool_timeout,
+            "pool_pre_ping": True,  # Verify connections before use
+        })
+
     _engine = create_async_engine(
         settings.async_database_url,
-        echo=settings.debug,
-        pool_size=settings.db_pool_size,
-        max_overflow=settings.db_max_overflow,
-        pool_timeout=settings.db_pool_timeout,
-        pool_pre_ping=True,  # Verify connections before use
-        connect_args=_get_connect_args(settings.database_url),
+        **engine_kwargs
     )
 
     _async_session_factory = async_sessionmaker(
@@ -100,12 +115,26 @@ async def drop_tables() -> None:
 
 
 async def ensure_tables_created(settings: Settings) -> None:
-    """Create tables via Alembic migrations (PostgreSQL)."""
+    """Create tables - works for both PostgreSQL (via migrations) and SQLite (for testing)."""
     if _engine is None:
         raise RuntimeError("Database not initialized. Call init_db() first.")
 
-    # PostgreSQL requires migrations - skip auto-creation
-    logger.info("Using PostgreSQL - tables managed via Alembic migrations")
+    # For SQLite (used in testing), create tables directly
+    if "sqlite" in settings.async_database_url:
+        logger.info("Using SQLite - creating tables directly for testing")
+        try:
+            async with _engine.begin() as conn:
+                await conn.run_sync(Base.metadata.create_all)
+        except Exception as e:
+            # Handle "already exists" errors gracefully for SQLite
+            if "already exists" in str(e).lower():
+                logger.info("Tables already exist, skipping creation")
+            else:
+                raise
+    else:
+        # PostgreSQL requires migrations - skip auto-creation
+        logger.info("Using PostgreSQL - tables managed via Alembic migrations")
+
     return
 
 

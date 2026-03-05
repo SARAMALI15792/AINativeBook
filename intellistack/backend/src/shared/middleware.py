@@ -1,7 +1,7 @@
 """
 Middleware for rate limiting, RBAC, request processing, and JWT validation.
 """
-from collections import defaultdict
+import redis.asyncio as redis
 from datetime import datetime, timedelta, timezone
 from functools import wraps
 from typing import Callable, List, Optional
@@ -19,16 +19,24 @@ from src.shared.exceptions import AuthorizationError
 
 logger = get_logger(__name__)
 
-# Simple in-memory rate limiter (for development)
-# TODO: Replace with Redis-based rate limiter in production
-rate_limit_store = defaultdict(list)
+# Redis rate limiter instance (initialized once)
+_redis_client = None
+
+
+async def get_redis_client():
+    """Get or create Redis client instance."""
+    global _redis_client
+    if _redis_client is None:
+        settings = get_settings()
+        _redis_client = redis.from_url(settings.redis_url)
+    return _redis_client
 
 
 class RateLimiter:
     """
-    Simple rate limiter middleware.
+    Redis-based rate limiter middleware.
 
-    In production, this should be replaced with Redis-based rate limiting.
+    Uses Redis for distributed rate limiting across multiple server instances.
     """
 
     def __init__(self, requests: int, window: int):
@@ -44,7 +52,7 @@ class RateLimiter:
 
     async def __call__(self, request: Request):
         """
-        Check rate limit for request.
+        Check rate limit for request using Redis.
 
         Args:
             request: FastAPI request
@@ -57,25 +65,42 @@ class RateLimiter:
         user_agent = request.headers.get("user-agent", "unknown")
         client_id = f"{client_ip}:{user_agent}"
 
+        # Get Redis client
+        redis_client = await get_redis_client()
+
+        # Use Redis to implement sliding window counter
         now = datetime.now()
         window_start = now - timedelta(seconds=self.window)
+        window_start_timestamp = window_start.timestamp()
 
-        # Clean old requests
-        rate_limit_store[client_id] = [
-            req_time
-            for req_time in rate_limit_store[client_id]
-            if req_time > window_start
-        ]
+        # Redis key for this client's rate limit
+        key = f"rate_limit:{client_id}"
 
-        # Check limit
-        if len(rate_limit_store[client_id]) >= self.requests:
+        # Start transaction
+        pipe = redis_client.pipeline()
+
+        # Remove expired entries (older than window)
+        pipe.zremrangebyscore(key, 0, window_start_timestamp)
+
+        # Count current requests
+        pipe.zcard(key)
+
+        # Add current request timestamp
+        pipe.zadd(key, {str(now.timestamp()): now.timestamp()})
+
+        # Set expiration for the key to clean up automatically
+        pipe.expire(key, self.window)
+
+        # Execute transaction
+        results = await pipe.execute()
+        current_requests = results[1]
+
+        # Check if limit exceeded
+        if current_requests >= self.requests:
             raise HTTPException(
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS,
                 detail=f"Rate limit exceeded. Maximum {self.requests} requests per {self.window} seconds.",
             )
-
-        # Add current request
-        rate_limit_store[client_id].append(now)
 
 
 # Rate limiters for different endpoints
@@ -246,14 +271,21 @@ class JWKSAuthMiddleware(BaseHTTPMiddleware):
                             break
 
                 if key_data:
-                    # Verify JWT signature
+                    # Verify JWT signature - Better-Auth uses EdDSA algorithm
                     settings = get_settings()
 
-                    # Extract algorithm from JWT header to support EdDSA and RS256
+                    # Extract algorithm from JWT header
                     from jwt import PyJWK
 
                     unverified_header = jwt.get_unverified_header(token)
-                    algorithm = unverified_header.get("alg", "RS256")
+                    algorithm = unverified_header.get("alg", "EdDSA")
+
+                    # Ensure we're using EdDSA algorithm as per Better-Auth configuration
+                    if algorithm != "EdDSA":
+                        logger.warning(f"Unexpected algorithm in token: {algorithm}, expected EdDSA")
+                        request.state.user = None
+                        request.state.user_id = None
+                        return await call_next(request)
 
                     # Convert JWKS key data to PyJWK object
                     jwk = PyJWK.from_dict(key_data)
@@ -261,7 +293,7 @@ class JWKSAuthMiddleware(BaseHTTPMiddleware):
                     payload = jwt.decode(
                         token,
                         jwk.key,
-                        algorithms=[algorithm],
+                        algorithms=[algorithm],  # Only allow EdDSA
                         options={
                             "verify_exp": True,
                             "verify_aud": settings.better_auth_audience is not None,

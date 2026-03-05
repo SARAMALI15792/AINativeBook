@@ -130,10 +130,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @app.get("/health", tags=["System"])
     async def health_check() -> dict:
         """Health check endpoint."""
+        from datetime import datetime
         return {
             "status": "healthy",
             "version": settings.app_version,
             "environment": settings.environment,
+            "timestamp": datetime.utcnow().isoformat(),
         }
 
     # API v1 router

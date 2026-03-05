@@ -29,6 +29,9 @@ RUN npm ci --only=production
 # Copy built application from builder
 COPY --from=builder /app/dist ./dist
 
+# Copy migration script (ESM module)
+COPY migrate.js ./migrate.js
+
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD curl -f http://127.0.0.1:${PORT:-3001}/health || exit 1
@@ -36,8 +39,8 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 # Use dumb-init to handle signals properly
 ENTRYPOINT ["dumb-init", "--"]
 
-# Start application
-CMD ["node", "dist/index.js"]
+# Run migration then start the server
+CMD ["sh", "-c", "node migrate.js && node dist/index.js"]
 
 # Expose port
 EXPOSE 3001

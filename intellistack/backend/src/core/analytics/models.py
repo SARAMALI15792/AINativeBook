@@ -4,8 +4,8 @@ from datetime import datetime
 from typing import Optional
 from uuid import uuid4
 
-from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, func
-from sqlalchemy.dialects.postgresql import JSONB, UUID
+from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, JSON, func
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.shared.database import Base
@@ -40,7 +40,7 @@ class AnalyticsEvent(Base):
     event_category: Mapped[str] = mapped_column(
         String(50), nullable=False
     )  # learning, community, admin, etc.
-    event_data: Mapped[dict] = mapped_column(JSONB, default=dict)
+    event_data: Mapped[dict] = mapped_column(JSON, default=dict)
 
     # Session tracking
     session_id: Mapped[Optional[str]] = mapped_column(String(255), nullable=True, index=True)

@@ -11,8 +11,8 @@
 export function getDocusaurusUrl(path: string, queryParams?: Record<string, string>): string {
   const baseUrl = process.env.NEXT_PUBLIC_DOCUSAURUS_URL || 'http://localhost:3002';
 
-  // Ensure path starts with /docs/
-  const normalizedPath = path.startsWith('/docs/') ? path : `/docs/${path.replace(/^\//, '')}`;
+  // routeBasePath is '/' so paths are served directly (no /docs/ prefix)
+  const normalizedPath = `/${path.replace(/^\//, '')}`;
 
   // Build URL
   let url = `${baseUrl}${normalizedPath}`;

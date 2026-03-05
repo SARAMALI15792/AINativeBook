@@ -74,10 +74,11 @@ export const auth = betterAuth({
 
   // Advanced configuration for cookie handling
   advanced: {
-    // Use SameSite=None for cross-site OAuth flows through proxy
+    // SameSite=Lax for same-domain deployment (Next.js and Docusaurus on same domain)
+    // Secure flag enabled in production for HTTPS
     defaultCookieAttributes: {
-      sameSite: 'none' as const,
-      secure: true, // Required for SameSite=None
+      sameSite: 'lax' as 'lax',
+      secure: process.env.NODE_ENV === 'production',
       path: '/',
       domain: undefined,
     },
@@ -108,7 +109,12 @@ export const auth = betterAuth({
           crv: 'Ed25519',
         },
       },
-      expiresIn: 24 * 60 * 60, // JWT expires in 24 hours (matches session)
+      jwt: {
+        // audience must match BETTER_AUTH_AUDIENCE expected by the FastAPI backend
+        audience: process.env.BETTER_AUTH_AUDIENCE || 'intellistack-api',
+        issuer: process.env.BETTER_AUTH_URL || 'http://localhost:3001',
+        expirationTime: '24h',
+      },
     }),
 
     // OIDC Provider Plugin: OpenID Connect discovery endpoint

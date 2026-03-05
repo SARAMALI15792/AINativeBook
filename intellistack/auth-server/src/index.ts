@@ -27,6 +27,9 @@ const { auth } = await import('./auth.js');
 // Import database connection check function
 const { checkDatabaseConnection } = await import('./db.js');
 
+// Import onboarding routes
+const onboardingRoutes = (await import('./routes/onboarding.js')).default;
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 
@@ -34,16 +37,14 @@ const PORT = process.env.PORT || 3001;
 // Middleware
 // ==========================================
 
-// Security headers
-app.use(helmet());
-
-// CORS configuration
+// CORS configuration (must be before helmet for proper handling)
 const corsOptions = {
   origin: process.env.CORS_ORIGINS?.split(',') || [
     'http://localhost:3000',
     'http://localhost:3001',
     'http://localhost:3002',
     'http://localhost:3004',
+    'http://localhost:3005',
     'http://localhost:8000',
     'https://saramali15792.github.io',
     ...(process.env.NODE_ENV === 'production'
@@ -55,6 +56,11 @@ const corsOptions = {
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 };
 app.use(cors(corsOptions));
+
+// Security headers (configured to allow cross-origin requests)
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+}));
 
 // Request logging middleware
 app.use((req: Request, res: Response, next: NextFunction) => {
@@ -121,6 +127,9 @@ app.get('/.well-known/jwks.json', async (_req: Request, res: Response) => {
 // ==========================================
 // Better-Auth API Routes
 // ==========================================
+
+// Mount onboarding routes at /api/auth/onboarding/*
+app.use('/api/auth/onboarding', onboardingRoutes);
 
 // Mount all Better-Auth routes at /api/auth/*
 app.all('/api/auth/*', toNodeHandler(auth));

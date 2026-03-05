@@ -17,9 +17,10 @@ from sqlalchemy import (
     Integer,
     String,
     Text,
+    JSON,
     func,
 )
-from sqlalchemy.dialects.postgresql import JSONB, UUID
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.shared.database import Base
@@ -110,7 +111,7 @@ class ContentHierarchy(Base):
         String(255), nullable=False, index=True
     )  # URL-friendly identifier
     breadcrumb_path: Mapped[dict] = mapped_column(
-        JSONB, nullable=False, default=list
+        JSON, nullable=False, default=list
     )  # ["Stage 1", "Linux", "Kernel Theory"]
 
     # Timestamps
@@ -165,7 +166,7 @@ class ContentVariant(Base):
         String(500), nullable=False
     )  # Path to variant MDX file
     content_json: Mapped[dict] = mapped_column(
-        JSONB, nullable=False
+        JSON, nullable=False
     )  # Full content snapshot with metadata
 
     # Quality metadata
@@ -228,13 +229,13 @@ class ContentSummary(Base):
     # Summary content
     summary_text: Mapped[str] = mapped_column(Text, nullable=False)
     key_concepts: Mapped[list] = mapped_column(
-        JSONB, nullable=False, default=list
+        JSON, nullable=False, default=list
     )  # ["Kernel space", "System calls", "File descriptors"]
     learning_objectives: Mapped[list] = mapped_column(
-        JSONB, nullable=False, default=list
+        JSON, nullable=False, default=list
     )  # ["Understand kernel vs user space", ...]
     prerequisites: Mapped[list] = mapped_column(
-        JSONB, nullable=False, default=list
+        JSON, nullable=False, default=list
     )  # ["Basic programming", "Command line"]
 
     # Generation metadata
@@ -299,7 +300,7 @@ class InteractiveCodeBlock(Base):
     # Expected behavior
     expected_output: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     test_cases: Mapped[list] = mapped_column(
-        JSONB, nullable=False, default=list
+        JSON, nullable=False, default=list
     )  # [{"input": "...", "expected": "..."}]
 
     # Display configuration
@@ -315,10 +316,10 @@ class InteractiveCodeBlock(Base):
 
     # Security & resource limits
     allowed_imports: Mapped[list] = mapped_column(
-        JSONB, nullable=False, default=list
+        JSON, nullable=False, default=list
     )  # Whitelist of allowed imports
     blocked_functions: Mapped[list] = mapped_column(
-        JSONB, nullable=False, default=list
+        JSON, nullable=False, default=list
     )  # Blacklist of dangerous functions
     memory_limit_mb: Mapped[int] = mapped_column(
         Integer, nullable=False, default=128
@@ -437,10 +438,10 @@ class ContentEffectiveness(Base):
         Integer, nullable=True
     )  # 0.0-1.0
     user_ratings: Mapped[dict] = mapped_column(
-        JSONB, nullable=False, default=dict
+        JSON, nullable=False, default=dict
     )  # {"5_star": 10, "4_star": 5, ...}
     common_struggles: Mapped[list] = mapped_column(
-        JSONB, nullable=False, default=list
+        JSON, nullable=False, default=list
     )  # ["Async concepts", "System calls"]
 
     # Engagement patterns
@@ -453,7 +454,7 @@ class ContentEffectiveness(Base):
 
     # Language preferences
     language_distribution: Mapped[dict] = mapped_column(
-        JSONB, nullable=False, default=dict
+        JSON, nullable=False, default=dict
     )  # {"en": 80, "ur": 20}
 
     # Timestamps

@@ -63,7 +63,12 @@ class Settings(BaseSettings):
 
     # CORS
     cors_origins: list[str] | str = Field(
-        default=["http://localhost:3000", "http://localhost:3001"],
+        default=[
+            "http://localhost:3000",  # Next.js frontend
+            "http://localhost:3001",  # Auth server
+            "http://localhost:3002",  # Docusaurus content (local)
+            "https://saramali15792.github.io",  # Docusaurus (GitHub Pages)
+        ],
         alias="CORS_ORIGINS"
     )
     cors_allow_credentials: bool = True
@@ -93,6 +98,12 @@ class Settings(BaseSettings):
     chatkit_rate_limit_student: int = 20  # messages per day for students
     chatkit_rate_limit_instructor: int = 0  # unlimited for instructors (0 = no limit)
     chatkit_rate_limit_admin: int = 0  # unlimited for admins
+
+    # Docusaurus Content Platform
+    docusaurus_url: str = Field(
+        default="http://localhost:3002/AINativeBook",
+        alias="DOCUSAURUS_URL"
+    )
 
     # Logging
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "INFO"

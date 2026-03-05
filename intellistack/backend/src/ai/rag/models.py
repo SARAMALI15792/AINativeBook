@@ -4,8 +4,8 @@ from datetime import datetime
 from typing import Optional
 from uuid import uuid4
 
-from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, Text, func
-from sqlalchemy.dialects.postgresql import JSONB, UUID
+from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, Text, JSON, func
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.shared.database import Base
@@ -69,7 +69,7 @@ class RAGMessage(Base):
 
     # Response metadata
     confidence: Mapped[Optional[float]] = mapped_column(Float, nullable=True)  # FR-072
-    sources: Mapped[dict] = mapped_column(JSONB, default=dict)  # Citations (FR-067)
+    sources: Mapped[dict] = mapped_column(JSON, default=dict)  # Citations (FR-067)
     retrieved_count: Mapped[int] = mapped_column(Integer, default=0)
 
     # Timestamps

@@ -8,16 +8,23 @@ import Link from '@docusaurus/Link';
 import BrowserOnly from '@docusaurus/BrowserOnly';
 import { useColorMode } from '@docusaurus/theme-common';
 import { useAuth } from '../../contexts/AuthContext';
+import { authClient } from '../../lib/auth';
 import styles from './AuthNavbarItem.module.css';
 
 function AuthNavbarItemContent(): JSX.Element {
-  const { user, loading, logout } = useAuth();
+  const { user, loading } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const { colorMode } = useColorMode();
 
   const handleSignOut = async () => {
     setIsDropdownOpen(false);
-    await logout();
+    try {
+      await authClient.signOut();
+      window.dispatchEvent(new Event('auth-state-changed'));
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
 
   // Loading state
@@ -104,8 +111,8 @@ function AuthNavbarItemContent(): JSX.Element {
   // Unauthenticated state
   return (
     <div className={styles.authNavbarItem}>
-      <Link to="/login" className={styles.signInButton}>
-        Sign In
+      <Link to="/auth/login" className={styles.signInButton}>
+        Login
       </Link>
     </div>
   );

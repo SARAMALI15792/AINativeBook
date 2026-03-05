@@ -5,8 +5,8 @@ from enum import Enum
 from typing import TYPE_CHECKING, Optional
 from uuid import uuid4
 
-from sqlalchemy import Boolean, Date, DateTime, ForeignKey, Integer, String, Text, func
-from sqlalchemy.dialects.postgresql import JSONB, UUID
+from sqlalchemy import Boolean, Date, DateTime, ForeignKey, Integer, String, Text, JSON, func
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.shared.database import Base
@@ -54,7 +54,7 @@ class Institution(Base):
 
     # Settings
     settings: Mapped[dict] = mapped_column(
-        JSONB, default=dict
+        JSON, default=dict
     )  # Custom configuration per institution
     welcome_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
@@ -151,7 +151,7 @@ class Cohort(Base):
     is_enrollment_open: Mapped[bool] = mapped_column(Boolean, default=True)
 
     # Settings
-    settings: Mapped[dict] = mapped_column(JSONB, default=dict)
+    settings: Mapped[dict] = mapped_column(JSON, default=dict)
 
     # Metadata
     created_by: Mapped[str] = mapped_column(

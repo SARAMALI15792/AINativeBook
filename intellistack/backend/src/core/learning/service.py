@@ -60,6 +60,18 @@ class LearningService:
             raise NotFoundError(resource="Stage", resource_id=stage_id)
         return stage
 
+    async def get_stage_by_slug(self, slug: str) -> Stage:
+        """Get a stage by slug."""
+        result = await self.session.execute(
+            select(Stage)
+            .options(selectinload(Stage.content_items))
+            .where(Stage.slug == slug)
+        )
+        stage = result.scalar_one_or_none()
+        if not stage:
+            raise NotFoundError(resource="Stage", resource_id=slug)
+        return stage
+
     async def get_stage_with_content(self, stage_id: str) -> Stage:
         """Get a stage with its content items."""
         result = await self.session.execute(
@@ -71,6 +83,55 @@ class LearningService:
         if not stage:
             raise NotFoundError(resource="Stage", resource_id=stage_id)
         return stage
+
+    async def get_content_item_by_id(self, content_id: str) -> ContentItem:
+        """Get a content item by ID with stage relationship."""
+        result = await self.session.execute(
+            select(ContentItem)
+            .options(selectinload(ContentItem.stage))
+            .where(ContentItem.id == content_id)
+        )
+        content_item = result.scalar_one_or_none()
+        if not content_item:
+            raise NotFoundError(resource="ContentItem", resource_id=content_id)
+        return content_item
+
+    async def get_content_docusaurus_url(
+        self, content_id: str, user_id: str
+    ) -> dict:
+        """Get embeddable Docusaurus URL for a content item.
+
+        Verifies stage access before returning URL.
+        """
+        from src.config.settings import get_settings
+
+        settings = get_settings()
+
+        # Get content item with stage
+        content_item = await self.get_content_item_by_id(content_id)
+
+        # Verify user has access to this stage
+        await self.verify_stage_access(user_id, content_item.stage_id)
+
+        # Construct full Docusaurus URL
+        if not content_item.content_path:
+            raise NotFoundError(
+                resource="Content path",
+                resource_id=content_id,
+                message="Content path not configured for this item"
+            )
+
+        full_url = f"{settings.docusaurus_url}/{content_item.content_path}"
+
+        return {
+            "url": full_url,
+            "content_id": content_item.id,
+            "title": content_item.title,
+            "content_type": content_item.content_type,
+            "estimated_minutes": content_item.estimated_minutes,
+            "stage_id": content_item.stage_id,
+            "stage_number": content_item.stage.number,
+        }
 
     # === Prerequisite Checking (FR-001) ===
 

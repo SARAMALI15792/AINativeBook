@@ -3,23 +3,20 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui';
-import { UserMenu } from './UserMenu';
-import { useAuth } from '@/contexts/AuthContext';
 
 interface HeaderProps {
   transparent?: boolean;
-  showAuth?: boolean;
   className?: string;
 }
 
-export function Header({ transparent = false, showAuth = true, className = '' }: HeaderProps) {
+export function Header({ transparent = false, className = '' }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { session } = useAuth();
+
+  const docusaurusUrl = process.env.NEXT_PUBLIC_DOCUSAURUS_URL || 'http://localhost:3005/AINativeBook';
 
   const navLinks: { label: string; href: string; badge?: string; external?: boolean }[] = [
     { label: 'Home', href: '/' },
-    { label: 'Books', href: `${process.env.NEXT_PUBLIC_DOCUSAURUS_URL || 'http://localhost:3002'}/docs/stage-1/intro`, external: true },
-    { label: 'Personalize', href: '/personalization' },
+    { label: 'Book', href: `${docusaurusUrl}/stage-1/intro`, external: true },
     { label: 'Community', href: '#', badge: 'Coming Soon' },
     { label: 'AI Tutor', href: '#', badge: 'Coming Soon' },
   ];
@@ -83,35 +80,18 @@ export function Header({ transparent = false, showAuth = true, className = '' }:
             })}
           </nav>
 
-          {/* Auth Buttons / User Menu */}
-          {showAuth && (
-            <div className="hidden md:flex items-center space-x-4">
-              {session.isAuthenticated ? (
-                <UserMenu />
-              ) : (
-                <>
-                  <Link href="/auth/login">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="hover:shadow-glow-cyan transition-all duration-normal"
-                    >
-                      Login
-                    </Button>
-                  </Link>
-                  <Link href="/auth/register">
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      className="hover:shadow-glow-cyan hover:scale-105 transition-all duration-normal"
-                    >
-                      Sign Up
-                    </Button>
-                  </Link>
-                </>
-              )}
-            </div>
-          )}
+          {/* Login Button */}
+          <div className="hidden md:flex items-center">
+            <a href={`${docusaurusUrl}/auth/login`}>
+              <Button
+                variant="primary"
+                size="sm"
+                className="hover:shadow-glow-cyan hover:scale-105 transition-all duration-normal"
+              >
+                Login
+              </Button>
+            </a>
+          </div>
 
           {/* Mobile Menu Button */}
           <button
@@ -175,36 +155,15 @@ export function Header({ transparent = false, showAuth = true, className = '' }:
                   </Link>
                 );
               })}
-              {showAuth && (
-                <>
-                  {session.isAuthenticated ? (
-                    <div className="py-2 border-t border-glass-border mt-2">
-                      <UserMenu />
-                    </div>
-                  ) : (
-                    <>
-                      <Link
-                        href="/auth/login"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className="py-2"
-                      >
-                        <Button variant="ghost" size="sm" fullWidth>
-                          Login
-                        </Button>
-                      </Link>
-                      <Link
-                        href="/auth/register"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className="py-2"
-                      >
-                        <Button variant="primary" size="sm" fullWidth>
-                          Sign Up
-                        </Button>
-                      </Link>
-                    </>
-                  )}
-                </>
-              )}
+              <a
+                href={`${docusaurusUrl}/auth/login`}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="py-2"
+              >
+                <Button variant="primary" size="sm" fullWidth>
+                  Login
+                </Button>
+              </a>
             </nav>
           </div>
         )}

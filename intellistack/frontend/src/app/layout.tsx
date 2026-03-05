@@ -67,7 +67,7 @@ export default function RootLayout({
         {/* Resource hints for performance */}
         <link rel="preconnect" href={process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:3001'} />
         <link rel="preconnect" href={process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'} />
-        <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_DOCUSAURUS_URL || '/docs/'} />
+        <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_DOCUSAURUS_URL || 'http://localhost:3002/AINativeBook'} />
 
       </head>
       <body className={inter.variable}>

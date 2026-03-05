@@ -14,6 +14,7 @@ from .schemas import (
     CompleteContentRequest,
     CompleteContentResponse,
     ContentItemResponse,
+    ContentUrlResponse,
     LearningPathResponse,
     ProgressResponse,
     StageResponse,
@@ -40,7 +41,8 @@ ServiceDep = Annotated[LearningService, Depends(get_learning_service)]
 # TODO: Replace with actual auth dependency
 def get_current_user_id() -> str:
     """Temporary: Get current user ID (replace with auth)."""
-    return "test-user-id"
+    # Return a valid UUID format for testing
+    return "00000000-0000-0000-0000-000000000001"
 
 
 CurrentUserDep = Annotated[str, Depends(get_current_user_id)]
@@ -68,16 +70,20 @@ async def get_stage(
     """Get a specific stage with user's status.
 
     Includes whether the stage is locked, available, in_progress, or completed.
+    stage_id can be either UUID or slug (e.g., 'stage-1')
     """
     try:
-        # Get stage
-        stage = await service.get_stage_by_id(stage_id)
+        # Try to get stage by slug first, then by ID
+        try:
+            stage = await service.get_stage_by_slug(stage_id)
+        except NotFoundError:
+            stage = await service.get_stage_by_id(stage_id)
 
         # Get user progress for status
         progress = await service.get_progress(user_id)
-        stage_data = progress.stage_progress.get(stage_id, {})
+        stage_data = progress.stage_progress.get(str(stage.id), {})
 
-        can_access = await service.check_prerequisites(user_id, stage_id)
+        can_access = await service.check_prerequisites(user_id, str(stage.id))
         status = stage_data.get("status", "locked")
         if can_access and status == "locked":
             status = "available"
@@ -110,13 +116,20 @@ async def get_stage_content(
     """Get content items for a stage.
 
     Requires prerequisite completion to access (FR-001).
+    stage_id can be either UUID or slug (e.g., 'stage-1')
     """
     try:
-        # Verify access
-        await service.verify_stage_access(user_id, stage_id)
+        # Get stage by slug or ID
+        try:
+            stage = await service.get_stage_by_slug(stage_id)
+        except NotFoundError:
+            stage = await service.get_stage_by_id(stage_id)
 
-        # Get stage with content
-        stage = await service.get_stage_with_content(stage_id)
+        # Verify access using the actual stage UUID
+        await service.verify_stage_access(user_id, str(stage.id))
+
+        # Get stage with content using UUID
+        stage = await service.get_stage_with_content(str(stage.id))
 
         # Get user's completions for this stage
         progress = await service.get_progress(user_id)
@@ -140,6 +153,26 @@ async def get_stage_content(
             for item in sorted(stage.content_items, key=lambda x: x.order)
             if item.is_active
         ]
+    except PrerequisiteNotMetError as e:
+        raise HTTPException(status_code=e.status_code, detail=e.to_dict())
+    except NotFoundError as e:
+        raise HTTPException(status_code=e.status_code, detail=e.to_dict())
+
+
+@router.get("/content/{content_id}/url", response_model=ContentUrlResponse)
+async def get_content_url(
+    content_id: str,
+    service: ServiceDep,
+    user_id: CurrentUserDep,
+) -> ContentUrlResponse:
+    """Get embeddable Docusaurus URL for a content item.
+
+    Verifies stage access before returning URL.
+    Returns full URL with content metadata for iframe embedding.
+    """
+    try:
+        url_data = await service.get_content_docusaurus_url(content_id, user_id)
+        return ContentUrlResponse(**url_data)
     except PrerequisiteNotMetError as e:
         raise HTTPException(status_code=e.status_code, detail=e.to_dict())
     except NotFoundError as e:

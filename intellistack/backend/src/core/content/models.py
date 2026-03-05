@@ -5,8 +5,8 @@ from enum import Enum
 from typing import TYPE_CHECKING, Optional
 from uuid import uuid4
 
-from sqlalchemy import Boolean, DateTime, Enum as SQLEnum, ForeignKey, Integer, String, Text, func
-from sqlalchemy.dialects.postgresql import JSONB, UUID
+from sqlalchemy import Boolean, DateTime, Enum as SQLEnum, ForeignKey, Integer, String, Text, JSON, func
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.shared.database import Base
@@ -57,7 +57,7 @@ class Content(Base):
     )  # lesson, exercise, simulation, resource
     title: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    learning_objectives: Mapped[dict] = mapped_column(JSONB, nullable=False, default=list)
+    learning_objectives: Mapped[dict] = mapped_column(JSON, nullable=False, default=list)
     order_index: Mapped[int] = mapped_column(Integer, nullable=False)
 
     # File references
@@ -65,7 +65,7 @@ class Content(Base):
         String(500), nullable=False
     )  # Path to MDX file in content repo
     format_variants: Mapped[dict] = mapped_column(
-        JSONB, default=list
+        JSON, default=list
     )  # Available formats (video, text, interactive)
 
     # Versioning
@@ -103,7 +103,7 @@ class Content(Base):
     # Enhanced content attributes (used by enhanced_routes)
     difficulty_level: Mapped[Optional[ComplexityLevel]] = mapped_column(String(20), nullable=True)
     estimated_reading_time: Mapped[Optional[int]] = mapped_column(nullable=True)
-    tags: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
+    tags: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
     has_summary: Mapped[bool] = mapped_column(Boolean, default=False)
     has_interactive_code: Mapped[bool] = mapped_column(Boolean, default=False)
 
@@ -139,7 +139,7 @@ class ContentVersion(Base):
     # Content snapshot
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     content_json: Mapped[dict] = mapped_column(
-        JSONB, nullable=False
+        JSON, nullable=False
     )  # Full content snapshot including MDX
     mdx_content_hash: Mapped[str] = mapped_column(
         String(64), nullable=False

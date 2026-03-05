@@ -163,11 +163,11 @@ class ApiClient {
     throw lastError || new Error('Request failed after retries');
   }
 
-  // Preferences methods
+  // Preferences methods — baseUrl already contains /api/v1 so paths are relative to it
   async savePreferences(
     data: SavePreferencesRequest
   ): Promise<SavePreferencesResponse> {
-    return this.request(`${this.baseUrl}/api/v1/users/onboarding`, {
+    return this.request(`${this.baseUrl}/users/onboarding`, {
       method: 'POST',
       body: JSON.stringify(data),
     });
@@ -177,7 +177,7 @@ class ApiClient {
     success: true;
     data: PersonalizationPreferences | null;
   }> {
-    return this.request(`${this.baseUrl}/api/v1/users/preferences`);
+    return this.request(`${this.baseUrl}/users/preferences`);
   }
 
   async updatePreferences(
@@ -185,8 +185,8 @@ class ApiClient {
   ): Promise<SavePreferencesResponse> {
     // Transform frontend PersonalizationPreferences to backend OnboardingPreferencesRequest
     const backendData = {
-      learning_style: 'visual', // Default - can be enhanced later
-      learning_pace: 'moderate', // Default - can be enhanced later
+      learning_style: 'visual',
+      learning_pace: 'moderate',
       preferred_language: (data as any).preferredLanguage || 'en',
       focus_areas: (data as any).interests || [],
       adaptive_complexity: true,
@@ -203,15 +203,46 @@ class ApiClient {
       domain_preference: null,
     };
 
-    return this.request(`${this.baseUrl}/api/v1/users/preferences/onboarding`, {
+    return this.request(`${this.baseUrl}/users/preferences/onboarding`, {
       method: 'POST',
       body: JSON.stringify(backendData),
     });
   }
 
   async deletePreferences(): Promise<{ success: true; message: string }> {
-    return this.request(`${this.baseUrl}/api/v1/users/preferences/reset`, {
+    return this.request(`${this.baseUrl}/users/preferences/reset`, {
       method: 'POST',
+    });
+  }
+
+  // Learning methods
+  async getStageContent(stageSlug: string): Promise<any[]> {
+    return this.request(`${this.baseUrl}/learning/stages/${stageSlug}/content`);
+  }
+
+  async getContentUrl(contentId: string): Promise<{
+    url: string;
+    content_id: string;
+    title: string;
+    content_type: string;
+    estimated_minutes: number;
+    stage_id: string;
+    stage_number: number;
+  }> {
+    return this.request(`${this.baseUrl}/learning/content/${contentId}/url`);
+  }
+
+  async getUserProgress(): Promise<any> {
+    return this.request(`${this.baseUrl}/learning/progress`);
+  }
+
+  async completeContent(
+    contentId: string,
+    data: { time_spent_minutes: number; score?: number }
+  ): Promise<any> {
+    return this.request(`${this.baseUrl}/learning/progress/content/${contentId}/complete`, {
+      method: 'POST',
+      body: JSON.stringify(data),
     });
   }
 }

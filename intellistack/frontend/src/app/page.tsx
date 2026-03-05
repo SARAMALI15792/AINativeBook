@@ -166,10 +166,12 @@ export default function HomePage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
               <a
-                href="/auth/register"
+                href="http://localhost:3005/AINativeBook/stage-1/intro"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-block px-8 py-4 bg-gradient-to-r from-accent-cyan to-accent-violet rounded-lg text-white font-semibold text-lg hover:shadow-glow-cyan transition-all duration-normal focus:outline-none focus:ring-2 focus:ring-accent-cyan"
               >
-                Get Started Free
+                Start Learning Free
               </a>
               <a
                 href="/curriculum"

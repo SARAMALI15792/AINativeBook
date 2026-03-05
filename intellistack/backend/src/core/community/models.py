@@ -5,8 +5,8 @@ from enum import Enum
 from typing import TYPE_CHECKING, Optional
 from uuid import uuid4
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text, func
-from sqlalchemy.dialects.postgresql import JSONB, UUID
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text, JSON, func
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.shared.database import Base
@@ -237,7 +237,7 @@ class StudyGroup(Base):
     # Settings
     max_members: Mapped[int] = mapped_column(Integer, default=10)
     is_open: Mapped[bool] = mapped_column(Boolean, default=True)
-    settings: Mapped[dict] = mapped_column(JSONB, default=dict)
+    settings: Mapped[dict] = mapped_column(JSON, default=dict)
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(
@@ -374,7 +374,7 @@ class ModerationRecord(Base):
     # Action
     action: Mapped[ModerationAction] = mapped_column(String(50), nullable=False)
     reason: Mapped[str] = mapped_column(Text, nullable=False)
-    metadata: Mapped[dict] = mapped_column(JSONB, default=dict)  # Context-specific data
+    meta_data: Mapped[dict] = mapped_column(JSON, default=dict)  # Context-specific data
 
     # Status
     status: Mapped[str] = mapped_column(String(50), default="active")

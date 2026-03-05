@@ -1,12 +1,15 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { authClient, User as AuthUser } from '../lib/auth';
 
 interface User {
   id: string;
   email: string;
   name: string;
-  role?: string;
-  emailVerified?: boolean;
-  image?: string | null;
+  email_verified: boolean;
+  onboarding_completed: boolean;
+  current_stage: number;
+  role: string;
+  avatar_url?: string;
 }
 
 interface AuthContextType {
@@ -24,20 +27,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const loadSession = async () => {
     try {
-      // Use the Better-Auth client (same one used by login/register/navbar)
-      const mod = await import('../lib/auth-client');
-      const client = mod.getAuthClient();
-      const result = await client.getSession();
-      if (result?.data?.user) {
-        const u = result.data.user;
-        setUser({
-          id: u.id,
-          email: u.email || '',
-          name: u.name || '',
-          role: u.role || 'student',
-          emailVerified: u.emailVerified || false,
-          image: u.image || null,
-        });
+      const result = await authClient.getSession();
+      if (result?.data) {
+        setUser(result.data as User);
       } else {
         setUser(null);
       }
@@ -50,6 +42,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
+    // Only run in browser
+    if (typeof window === 'undefined') {
+      setLoading(false);
+      return;
+    }
+
     loadSession();
 
     // Listen for auth state changes (fired by login/register pages)
@@ -60,11 +58,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     try {
-      const mod = await import('../lib/auth-client');
-      const client = mod.getAuthClient();
-      await client.signOut();
+      await authClient.signOut();
       setUser(null);
-      window.location.href = '/login';
+      // Dispatch event for other components
+      window.dispatchEvent(new Event('auth-state-changed'));
+      // Redirect to login
+      window.location.href = '/auth/login';
     } catch (error) {
       console.error('Logout failed:', error);
     }

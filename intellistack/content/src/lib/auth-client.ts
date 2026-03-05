@@ -11,16 +11,17 @@ import { jwtClient } from "better-auth/client/plugins";
  * Falls back to localhost for development
  *
  * NOTE: Docusaurus client-side does NOT have process.env.
- * We read from window.__DOCUSAURUS__ customFields or use a literal fallback.
+ * We read from window.docusaurus customFields or use localhost fallback.
  */
 const getBetterAuthUrl = (): string => {
   if (typeof window !== 'undefined') {
-    const docusaurus = (window as any).__DOCUSAURUS__;
+    // Try both possible window locations where Docusaurus stores config
+    const docusaurus = (window as any).docusaurus || (window as any).__DOCUSAURUS__;
     const url = docusaurus?.siteConfig?.customFields?.betterAuthUrl;
     if (url) return url as string;
   }
-  // Use a more descriptive fallback that indicates the URL should be configured
-  return 'https://your-auth-domain.com/api/auth';
+  // Development fallback
+  return 'http://localhost:3001/api/auth';
 };
 
 /**
@@ -28,12 +29,12 @@ const getBetterAuthUrl = (): string => {
  */
 export const getBackendUrl = (): string => {
   if (typeof window !== 'undefined') {
-    const docusaurus = (window as any).__DOCUSAURUS__;
+    const docusaurus = (window as any).docusaurus || (window as any).__DOCUSAURUS__;
     const url = docusaurus?.siteConfig?.customFields?.backendUrl;
     if (url) return url as string;
   }
-  // Use a more descriptive fallback that indicates the URL should be configured
-  return 'https://your-backend-domain.com';
+  // Development fallback
+  return 'http://localhost:8000';
 };
 
 /**

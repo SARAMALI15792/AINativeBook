@@ -60,6 +60,18 @@ class ContentItemResponse(BaseModel):
     is_completed: bool = False
 
 
+class ContentUrlResponse(BaseModel):
+    """Content URL response for embedding Docusaurus content."""
+
+    url: str
+    content_id: str
+    title: str
+    content_type: str
+    estimated_minutes: int
+    stage_id: str
+    stage_number: int
+
+
 # === Progress Schemas ===
 
 

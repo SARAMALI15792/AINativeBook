@@ -7,8 +7,8 @@ const config: Config = {
   tagline: 'AI-Native Learning Platform for Physical AI & Humanoid Robotics',
   favicon: 'img/favicon.ico',
 
-  // GitHub Pages deployment configuration
-  url: 'https://saramali15792.github.io',
+  // Local development configuration (use baseUrl: '/AINativeBook/' for production)
+  url: process.env.NODE_ENV === 'production' ? 'https://saramali15792.github.io' : 'http://localhost:3005',
   baseUrl: '/AINativeBook/',
   projectName: 'AINativeBook',
   organizationName: 'SARAMALI15792',
@@ -25,16 +25,15 @@ const config: Config = {
 
   // Custom fields for auth and backend integration
   customFields: {
-    betterAuthUrl: process.env.BETTER_AUTH_URL || 'https://your-auth-domain.com/api/auth',
-    backendUrl: process.env.BACKEND_URL || 'https://your-backend-domain.com',
-    frontendUrl: process.env.FRONTEND_URL || 'https://your-frontend-domain.com',
+    betterAuthUrl: process.env.BETTER_AUTH_URL || 'http://localhost:3001',
+    backendUrl: process.env.BACKEND_URL || 'http://localhost:8000',
+    frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
   },
 
   // Client modules for initialization
-  // TEMPORARILY DISABLED: Auth integration causing webpack build errors
-  // clientModules: [
-  //   './src/clientModules/authInit.ts',
-  // ],
+  clientModules: [
+    './src/clientModules/authInit.ts',
+  ],
 
   plugins: [
     function (context, options) {

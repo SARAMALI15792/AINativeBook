@@ -109,18 +109,12 @@ async def complete_onboarding(
 
         if profile:
             # Update existing profile
-            # Convert string values to enum types
+            # Store as string values (not enums)
             if preferences.learning_style:
-                try:
-                    profile.learning_style = LearningStyle(preferences.learning_style.lower())
-                except ValueError:
-                    pass  # Keep existing value
+                profile.learning_style = preferences.learning_style.lower()
 
             if preferences.learning_pace:
-                try:
-                    profile.learning_pace = LearningPace(preferences.learning_pace.lower())
-                except ValueError:
-                    pass  # Keep existing value
+                profile.learning_pace = preferences.learning_pace.lower()
 
             profile.preferred_language = preferences.preferred_language
             profile.preferred_examples_domain = preferences.domain_preference
@@ -158,25 +152,19 @@ async def complete_onboarding(
 
         else:
             # Create new profile
-            # Convert string values to enum types
-            learning_style_enum = None
+            # Store as string values (not enums)
+            learning_style_value = None
             if preferences.learning_style:
-                try:
-                    learning_style_enum = LearningStyle(preferences.learning_style.lower())
-                except ValueError:
-                    learning_style_enum = None
+                learning_style_value = preferences.learning_style.lower()
 
-            learning_pace_enum = LearningPace.MODERATE
+            learning_pace_value = "moderate"
             if preferences.learning_pace:
-                try:
-                    learning_pace_enum = LearningPace(preferences.learning_pace.lower())
-                except ValueError:
-                    learning_pace_enum = LearningPace.MODERATE
+                learning_pace_value = preferences.learning_pace.lower()
 
             profile = PersonalizationProfile(
                 user_id=str(current_user.id),
-                learning_style=learning_style_enum,
-                learning_pace=learning_pace_enum,
+                learning_style=learning_style_value,
+                learning_pace=learning_pace_value,
                 preferred_language=preferences.preferred_language,
                 preferred_examples_domain=preferences.domain_preference,
                 interest_areas=preferences.focus_areas,
@@ -215,8 +203,8 @@ async def complete_onboarding(
             prior_experience=profile.prior_experience,
             technical_skills=profile.technical_skills or [],
             learning_goals=profile.learning_goals,
-            learning_style=profile.learning_style.value if profile.learning_style else None,
-            learning_pace=profile.learning_pace.value,
+            learning_style=profile.learning_style if isinstance(profile.learning_style, str) else (profile.learning_style.value if profile.learning_style else None),
+            learning_pace=profile.learning_pace if isinstance(profile.learning_pace, str) else profile.learning_pace.value,
             preferred_language=profile.preferred_language,
             preferred_examples_domain=profile.preferred_examples_domain,
             interest_areas=profile.interest_areas or [],
@@ -342,7 +330,7 @@ async def reset_preferences(
 
         # Reset to defaults
         profile.learning_style = None
-        profile.learning_pace = LearningPace.MODERATE
+        profile.learning_pace = "moderate"
         profile.preferred_language = "en"
         profile.preferred_examples_domain = None
         profile.interest_areas = []
