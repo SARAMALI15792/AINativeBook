@@ -1,0 +1,32 @@
+{
+  "id": "stage-2/gazebo-simulation",
+  "title": "Gazebo Simulation Environment",
+  "description": "Gazebo is a powerful 3D robotics simulator that provides realistic physics simulation, sensor simulation, and a rich library of robot models.",
+  "source": "@site/docs/stage-2/gazebo-simulation.md",
+  "sourceDirName": "stage-2",
+  "slug": "/stage-2/gazebo-simulation",
+  "permalink": "/AINativeBook/stage-2/gazebo-simulation",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/saramali15792/physicalhumoniodbook/tree/main/intellistack/content/docs/stage-2/gazebo-simulation.md",
+  "tags": [],
+  "version": "current",
+  "lastUpdatedBy": "Author",
+  "lastUpdatedAt": 1539502055000,
+  "sidebarPosition": 4,
+  "frontMatter": {
+    "id": "gazebo-simulation",
+    "title": "Gazebo Simulation Environment",
+    "sidebar_label": "Gazebo Basics",
+    "sidebar_position": 4
+  },
+  "sidebar": "stage2Sidebar",
+  "previous": {
+    "title": "2.3 Services & Actions",
+    "permalink": "/AINativeBook/stage-2/services/2-3-services-actions"
+  },
+  "next": {
+    "title": "04. TF2 & Transforms",
+    "permalink": "/AINativeBook/category/04-tf2--transforms"
+  }
+}

@@ -1,0 +1,93 @@
+import type { Metadata, Viewport } from 'next';
+import { Sora, DM_Sans, JetBrains_Mono } from 'next/font/google';
+import '@/styles/globals.css';
+import '@/styles/animations.css';
+import { Providers } from './providers';
+
+const geist = Sora({
+  subsets: ['latin'],
+  variable: '--font-heading',
+  display: 'swap',
+  preload: true,
+  fallback: ['system-ui', 'sans-serif'],
+});
+
+const dmSans = DM_Sans({
+  subsets: ['latin'],
+  variable: '--font-body',
+  display: 'swap',
+  preload: true,
+  fallback: ['system-ui', '-apple-system', 'sans-serif'],
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  variable: '--font-mono',
+  display: 'swap',
+  preload: false,
+  fallback: ['Fira Code', 'Courier New', 'monospace'],
+});
+
+export const metadata: Metadata = {
+  title: 'IntelliStack - Master Physical AI & Humanoid Robotics',
+  description: 'Learn robotics with AI-powered tutoring, interactive simulations, and hands-on projects. From ROS 2 fundamentals to advanced perception and planning.',
+  keywords: ['robotics', 'AI', 'ROS 2', 'humanoid robotics', 'machine learning', 'computer vision', 'autonomous systems', 'physical AI'],
+  authors: [{ name: 'IntelliStack' }],
+  creator: 'IntelliStack',
+  publisher: 'IntelliStack',
+  icons: {
+    icon: '/favicon.svg',
+    shortcut: '/favicon.svg',
+    apple: '/favicon.svg',
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://intellistack.com',
+    title: 'IntelliStack - Master Physical AI & Humanoid Robotics',
+    description: 'Learn robotics with AI-powered tutoring, interactive simulations, and hands-on projects.',
+    siteName: 'IntelliStack',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'IntelliStack - Master Physical AI & Humanoid Robotics',
+    description: 'Learn robotics with AI-powered tutoring, interactive simulations, and hands-on projects.',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en">
+      <head>
+        {/* Resource hints for performance */}
+        <link rel="preconnect" href={process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:3001'} />
+        <link rel="preconnect" href={process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'} />
+        <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_DOCUSAURUS_URL || 'http://localhost:3002/AINativeBook'} />
+      </head>
+      <body className={`${geist.variable} ${dmSans.variable} ${jetbrainsMono.variable}`}>
+        <Providers>{children}</Providers>
+      </body>
+    </html>
+  );
+}

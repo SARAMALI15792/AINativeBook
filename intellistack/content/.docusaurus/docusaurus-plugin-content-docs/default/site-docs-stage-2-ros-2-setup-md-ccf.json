@@ -1,0 +1,32 @@
+{
+  "id": "stage-2/ros2-setup",
+  "title": "ROS 2 Installation and Setup",
+  "description": "ROS 2 (Robot Operating System 2) is the industry-standard middleware for building robot applications. This lesson will guide you through installing and configuring ROS 2 Humble.",
+  "source": "@site/docs/stage-2/ros2-setup.md",
+  "sourceDirName": "stage-2",
+  "slug": "/stage-2/ros2-setup",
+  "permalink": "/AINativeBook/stage-2/ros2-setup",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/saramali15792/physicalhumoniodbook/tree/main/intellistack/content/docs/stage-2/ros2-setup.md",
+  "tags": [],
+  "version": "current",
+  "lastUpdatedBy": "Author",
+  "lastUpdatedAt": 1539502055000,
+  "sidebarPosition": 2,
+  "frontMatter": {
+    "id": "ros2-setup",
+    "title": "ROS 2 Installation and Setup",
+    "sidebar_label": "ROS 2 Setup",
+    "sidebar_position": 2
+  },
+  "sidebar": "stage2Sidebar",
+  "previous": {
+    "title": "2.2 Middleware & QoS",
+    "permalink": "/AINativeBook/stage-2/middleware/2-2-pub-sub"
+  },
+  "next": {
+    "title": "03. Services & Actions",
+    "permalink": "/AINativeBook/category/03-services--actions"
+  }
+}

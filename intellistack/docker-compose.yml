@@ -1,0 +1,120 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: intellistack-postgres
+    environment:
+      POSTGRES_USER: intellistack
+      POSTGRES_PASSWORD: intellistack_dev
+      POSTGRES_DB: intellistack
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U intellistack"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Better-Auth OIDC Server
+  auth-server:
+    build:
+      context: ./auth-server
+      dockerfile: Dockerfile
+    container_name: intellistack-auth-server
+    ports:
+      - "3001:3001"
+    environment:
+      - DATABASE_URL=postgresql://intellistack:intellistack_dev@postgres:5432/intellistack
+      - BETTER_AUTH_SECRET=dev-secret-key-min32-chars-for-jwt-signing
+      - BETTER_AUTH_URL=http://localhost:3001
+      - BETTER_AUTH_TRUST_HOST=true
+      - BETTER_AUTH_AUDIENCE=intellistack-api
+      - CORS_ORIGINS=http://localhost:3000,http://localhost:3001,http://localhost:3002,http://localhost:3004,http://localhost:3005,http://localhost:8000,https://saramali15792.github.io
+      - NODE_ENV=development
+      - RESEND_API_KEY=${RESEND_API_KEY:-sk-placeholder}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-}
+      - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID:-}
+      - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: intellistack-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Qdrant Vector Database
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: intellistack-qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    environment:
+      QDRANT__SERVICE__GRPC_PORT: 6334
+
+  # Backend API (development mode - mount source)
+  backend:
+    build:
+      context: .
+      dockerfile: docker/backend.Dockerfile
+    container_name: intellistack-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/src:/app/src:ro
+    environment:
+      - DATABASE_URL=postgresql://intellistack:intellistack_dev@postgres:5432/intellistack
+      - REDIS_URL=redis://redis:6379/0
+      - QDRANT_HOST=qdrant
+      - QDRANT_PORT=6333
+      - SECRET_KEY=dev-secret-key-change-in-production-min32chars
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-sk-placeholder}
+      - BETTER_AUTH_URL=http://auth-server:3001
+      - BETTER_AUTH_JWKS_URL=http://auth-server:3001/.well-known/jwks.json
+      - BETTER_AUTH_ISSUER=http://localhost:3001
+      - BETTER_AUTH_AUDIENCE=intellistack-api
+      - GOOGLE_REDIRECT_URI=http://localhost:3001/api/auth/callback/google
+      - GITHUB_REDIRECT_URI=http://localhost:3001/api/auth/callback/github
+      - CORS_ORIGINS=http://localhost:3000,http://localhost:3001,http://localhost:3002,http://localhost:3005,http://localhost:8000
+      - ENVIRONMENT=development
+      - DEBUG=true
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      qdrant:
+        condition: service_started
+      auth-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  postgres_data:
+  redis_data:
+  qdrant_data:

@@ -1,0 +1,139 @@
+:root {
+  /* ===== Colors ===== */
+
+  /* Background Colors — Neural Forge palette */
+  --color-bg-primary: #0A0F1E;      /* deep navy-blue */
+  --color-bg-secondary: #111827;    /* dark blue-gray surface */
+  --color-bg-tertiary: #1E2A3A;     /* medium blue-gray elevated */
+  --color-bg-base: #0A0F1E;         /* alias for bg-primary */
+  --color-bg-elevated: #253347;     /* highest surface */
+
+  /* Accent Colors — Electric Blue replaces neon cyan */
+  --color-accent-cyan: #2563EB;        /* kept for backward compat — now Electric Blue */
+  --color-accent-blue: #2563EB;        /* Electric Blue primary */
+  --color-accent-blue-light: #3B82F6;  /* hover/lighter variant */
+  --color-accent-violet: #6366F1;      /* Indigo secondary */
+  --color-accent-amber: #F59E0B;       /* achievement / warm highlight */
+  --color-accent-emerald: #10B981;     /* success states */
+  --color-accent-teal: #14b8a6;        /* kept for stage badges */
+
+  /* Text Colors */
+  --color-text-primary: #F8FAFC;
+  --color-text-secondary: #94A3B8;
+  --color-text-tertiary: #475569;
+  --color-text-muted: #475569;      /* alias for tertiary */
+
+  /* Semantic Colors */
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-error: #ef4444;
+  --color-info: #3b82f6;
+
+  /* Border System */
+  --color-border-subtle: rgba(255, 255, 255, 0.06);
+  --color-border-default: rgba(255, 255, 255, 0.08);
+  --color-border-emphasis: rgba(255, 255, 255, 0.16);
+
+  /* Glassmorphism — updated for new bg palette */
+  --glass-bg: rgba(17, 24, 39, 0.8);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-highlight: rgba(255, 255, 255, 0.04);
+
+  /* Grid Dot */
+  --grid-dot-color: rgba(255, 255, 255, 0.07);
+
+  /* ===== Spacing ===== */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+  --space-3xl: 4rem;
+
+  /* ===== Typography ===== */
+  --font-heading: 'Sora', system-ui, -apple-system, sans-serif;
+  --font-body: 'DM Sans', system-ui, -apple-system, sans-serif;
+  --font-sans: 'DM Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  --text-5xl: 3rem;
+
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+
+  /* ===== Effects ===== */
+  --blur-sm: blur(8px);
+  --blur-md: blur(12px);
+  --blur-lg: blur(16px);
+
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 10px 10px -5px rgba(0, 0, 0, 0.5);
+
+  /* Glow shadows — Electric Blue, Amber, Emerald */
+  --shadow-glow-cyan: 0 0 24px rgba(37, 99, 235, 0.4), 0 0 48px rgba(37, 99, 235, 0.15);
+  --shadow-glow-blue: 0 0 24px rgba(37, 99, 235, 0.4), 0 0 48px rgba(37, 99, 235, 0.15);
+  --shadow-glow-violet: 0 0 24px rgba(99, 102, 241, 0.4);
+  --shadow-glow-amber: 0 0 24px rgba(245, 158, 11, 0.4);
+  --shadow-glow-emerald: 0 0 24px rgba(16, 185, 129, 0.4);
+
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-full: 9999px;
+
+  /* ===== Animation ===== */
+  --duration-fast: 150ms;
+  --duration-normal: 300ms;
+  --duration-slow: 500ms;
+
+  --ease-linear: linear;
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-smooth: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+  /* ===== Z-Index ===== */
+  --z-base: 0;
+  --z-dropdown: 1000;
+  --z-sticky: 1100;
+  --z-modal: 1200;
+  --z-popover: 1300;
+  --z-toast: 1400;
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0.01ms;
+    --duration-normal: 0.01ms;
+    --duration-slow: 0.01ms;
+  }
+}
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+  :root {
+    --space-lg: 1rem;
+    --space-xl: 1.5rem;
+    --space-2xl: 2rem;
+    --text-4xl: 1.875rem;
+    --text-5xl: 2.25rem;
+    --blur-md: blur(8px);
+    --blur-lg: blur(10px);
+  }
+}

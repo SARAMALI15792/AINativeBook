@@ -1,0 +1,790 @@
+openapi: 3.1.0
+info:
+  title: IntelliStack Learning API
+  version: 1.0.0
+  description: Learning progress, prerequisites, badges, certificates (FR-001 to FR-015)
+
+servers:
+  - url: /api/v1/learning
+    description: Learning API base path
+
+tags:
+  - name: Stages
+    description: Course stage information
+  - name: Progress
+    description: Student progress tracking
+  - name: Badges
+    description: Achievement badges
+  - name: Certificates
+    description: Completion certificates
+  - name: Challenge
+    description: Challenge pathway for experienced learners
+
+paths:
+  /stages:
+    get:
+      tags: [Stages]
+      summary: List all stages
+      operationId: listStages
+      responses:
+        '200':
+          description: Stage list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StageResponse'
+
+  /stages/{stageId}:
+    get:
+      tags: [Stages]
+      summary: Get stage details
+      operationId: getStage
+      parameters:
+        - name: stageId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Stage details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StageDetailResponse'
+        '404':
+          description: Stage not found
+
+  /progress:
+    get:
+      tags: [Progress]
+      summary: Get current user's progress (FR-003)
+      operationId: getProgress
+      security:
+        - sessionAuth: []
+      responses:
+        '200':
+          description: User progress
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProgressResponse'
+
+  /progress/content/{contentId}/complete:
+    post:
+      tags: [Progress]
+      summary: Mark content as completed (FR-003, FR-008)
+      operationId: completeContent
+      security:
+        - sessionAuth: []
+      parameters:
+        - name: contentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                timeSpent:
+                  type: integer
+                  description: Seconds spent on content
+      responses:
+        '200':
+          description: Content marked complete
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentCompletionResponse'
+        '403':
+          description: Prerequisites not met (FR-001)
+
+  /progress/stages/{stageId}/unlock:
+    get:
+      tags: [Progress]
+      summary: Check if stage is unlocked (FR-001)
+      operationId: checkStageUnlock
+      security:
+        - sessionAuth: []
+      parameters:
+        - name: stageId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Unlock status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  unlocked:
+                    type: boolean
+                  reason:
+                    type: string
+                  missingPrerequisites:
+                    type: array
+                    items:
+                      type: string
+
+  /progress/path:
+    get:
+      tags: [Progress]
+      summary: Get personalized learning path (FR-012)
+      operationId: getLearningPath
+      security:
+        - sessionAuth: []
+      responses:
+        '200':
+          description: Learning path visualization
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LearningPathResponse'
+
+  /progress/estimated-time:
+    get:
+      tags: [Progress]
+      summary: Get estimated time to completion (FR-007)
+      operationId: getEstimatedTime
+      security:
+        - sessionAuth: []
+      responses:
+        '200':
+          description: Time estimates
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  currentStage:
+                    $ref: '#/components/schemas/TimeEstimate'
+                  remaining:
+                    $ref: '#/components/schemas/TimeEstimate'
+                  total:
+                    $ref: '#/components/schemas/TimeEstimate'
+
+  /diagnostic:
+    get:
+      tags: [Progress]
+      summary: Get diagnostic assessment (FR-002)
+      operationId: getDiagnostic
+      security:
+        - sessionAuth: []
+      responses:
+        '200':
+          description: Diagnostic assessment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiagnosticResponse'
+    post:
+      tags: [Progress]
+      summary: Submit diagnostic assessment
+      operationId: submitDiagnostic
+      security:
+        - sessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DiagnosticSubmission'
+      responses:
+        '200':
+          description: Diagnostic result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiagnosticResultResponse'
+
+  /challenge/eligibility:
+    get:
+      tags: [Challenge]
+      summary: Check challenge pathway eligibility (FR-010)
+      operationId: checkChallengeEligibility
+      security:
+        - sessionAuth: []
+      responses:
+        '200':
+          description: Eligibility status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChallengeEligibilityResponse'
+
+  /challenge/assessment/{stageId}:
+    get:
+      tags: [Challenge]
+      summary: Get challenge assessment for stage
+      operationId: getChallengeAssessment
+      security:
+        - sessionAuth: []
+      parameters:
+        - name: stageId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Challenge assessment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChallengeAssessmentResponse'
+        '403':
+          description: Not eligible for challenge pathway
+    post:
+      tags: [Challenge]
+      summary: Submit challenge assessment
+      operationId: submitChallengeAssessment
+      security:
+        - sessionAuth: []
+      parameters:
+        - name: stageId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChallengeSubmission'
+      responses:
+        '200':
+          description: Challenge result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChallengeResultResponse'
+
+  /badges:
+    get:
+      tags: [Badges]
+      summary: List all badges
+      operationId: listBadges
+      responses:
+        '200':
+          description: Badge list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BadgeResponse'
+
+  /badges/earned:
+    get:
+      tags: [Badges]
+      summary: Get user's earned badges (FR-005)
+      operationId: getEarnedBadges
+      security:
+        - sessionAuth: []
+      responses:
+        '200':
+          description: Earned badges
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EarnedBadgeResponse'
+
+  /badges/{badgeId}/verify:
+    get:
+      tags: [Badges]
+      summary: Verify badge (public)
+      operationId: verifyBadge
+      parameters:
+        - name: badgeId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: code
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Badge verification
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadgeVerificationResponse'
+        '404':
+          description: Invalid verification
+
+  /certificates:
+    get:
+      tags: [Certificates]
+      summary: Get user's certificates (FR-014)
+      operationId: getCertificates
+      security:
+        - sessionAuth: []
+      responses:
+        '200':
+          description: User certificates
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CertificateResponse'
+
+  /certificates/{code}/verify:
+    get:
+      tags: [Certificates]
+      summary: Verify certificate (public)
+      operationId: verifyCertificate
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Certificate verification
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CertificateVerificationResponse'
+        '404':
+          description: Invalid verification code
+
+  /portfolio:
+    get:
+      tags: [Certificates]
+      summary: Get user's portfolio (FR-015)
+      operationId: getPortfolio
+      security:
+        - sessionAuth: []
+      responses:
+        '200':
+          description: User portfolio
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortfolioResponse'
+
+  /portfolio/share:
+    post:
+      tags: [Certificates]
+      summary: Generate shareable portfolio link
+      operationId: sharePortfolio
+      security:
+        - sessionAuth: []
+      responses:
+        '200':
+          description: Shareable link
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+                    format: uri
+                  expiresAt:
+                    type: string
+                    format: date-time
+
+components:
+  securitySchemes:
+    sessionAuth:
+      type: apiKey
+      in: cookie
+      name: session
+
+  schemas:
+    StageResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        number:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        estimatedHours:
+          type: integer
+        badgeId:
+          type: string
+          format: uuid
+
+    StageDetailResponse:
+      allOf:
+        - $ref: '#/components/schemas/StageResponse'
+        - type: object
+          properties:
+            learningObjectives:
+              type: array
+              items:
+                type: string
+            prerequisites:
+              type: array
+              items:
+                $ref: '#/components/schemas/StageResponse'
+            content:
+              type: array
+              items:
+                $ref: '#/components/schemas/ContentSummary'
+
+    ContentSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        type:
+          type: string
+          enum: [lesson, exercise, simulation, resource]
+        orderIndex:
+          type: integer
+
+    ProgressResponse:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        currentStage:
+          $ref: '#/components/schemas/StageResponse'
+        completedStages:
+          type: array
+          items:
+            type: integer
+        contentCompletions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContentCompletionSummary'
+        totalTimeOnTask:
+          type: integer
+          description: Total seconds
+        challengePathwayUsed:
+          type: boolean
+        stagesSkipped:
+          type: array
+          items:
+            type: integer
+        startedAt:
+          type: string
+          format: date-time
+
+    ContentCompletionSummary:
+      type: object
+      properties:
+        contentId:
+          type: string
+          format: uuid
+        completedAt:
+          type: string
+          format: date-time
+        timeSpent:
+          type: integer
+
+    ContentCompletionResponse:
+      type: object
+      properties:
+        contentId:
+          type: string
+          format: uuid
+        completedAt:
+          type: string
+          format: date-time
+        stageProgress:
+          type: number
+          format: float
+          description: Percentage complete in current stage
+        badgeEarned:
+          $ref: '#/components/schemas/BadgeResponse'
+        nextContent:
+          $ref: '#/components/schemas/ContentSummary'
+
+    LearningPathResponse:
+      type: object
+      properties:
+        stages:
+          type: array
+          items:
+            type: object
+            properties:
+              stage:
+                $ref: '#/components/schemas/StageResponse'
+              status:
+                type: string
+                enum: [completed, current, locked]
+              progress:
+                type: number
+                format: float
+
+    TimeEstimate:
+      type: object
+      properties:
+        hours:
+          type: integer
+        basedOn:
+          type: string
+          enum: [average, personalized]
+
+    DiagnosticResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiagnosticQuestion'
+
+    DiagnosticQuestion:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        area:
+          type: string
+          enum: [python, linux, math]
+        question:
+          type: string
+        options:
+          type: array
+          items:
+            type: string
+
+    DiagnosticSubmission:
+      type: object
+      properties:
+        answers:
+          type: array
+          items:
+            type: object
+            properties:
+              questionId:
+                type: string
+                format: uuid
+              answer:
+                type: string
+
+    DiagnosticResultResponse:
+      type: object
+      properties:
+        overallScore:
+          type: number
+          format: float
+        areaScores:
+          type: object
+          additionalProperties:
+            type: number
+        recommendedPath:
+          type: string
+          enum: [stage_0_remedial, stage_1_start]
+        gaps:
+          type: array
+          items:
+            type: string
+
+    ChallengeEligibilityResponse:
+      type: object
+      properties:
+        eligible:
+          type: boolean
+        maxSkippableStages:
+          type: integer
+        availableStages:
+          type: array
+          items:
+            type: integer
+        limitations:
+          type: array
+          items:
+            type: string
+
+    ChallengeAssessmentResponse:
+      type: object
+      properties:
+        stageId:
+          type: string
+          format: uuid
+        assessmentType:
+          type: string
+          enum: [comprehensive_exam, portfolio_review, live_demonstration]
+        instructions:
+          type: string
+        competencies:
+          type: array
+          items:
+            type: string
+        passingThreshold:
+          type: number
+          format: float
+          description: 0.85 (85%)
+
+    ChallengeSubmission:
+      type: object
+      properties:
+        assessmentType:
+          type: string
+          enum: [comprehensive_exam, portfolio_review]
+        responses:
+          type: object
+        portfolioUrls:
+          type: array
+          items:
+            type: string
+            format: uri
+
+    ChallengeResultResponse:
+      type: object
+      properties:
+        passed:
+          type: boolean
+        score:
+          type: number
+          format: float
+        competenciesMet:
+          type: array
+          items:
+            type: string
+        competenciesGaps:
+          type: array
+          items:
+            type: string
+        stageSkipped:
+          type: boolean
+        safetyRefresherRequired:
+          type: boolean
+
+    BadgeResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        imageUrl:
+          type: string
+          format: uri
+        stageId:
+          type: string
+          format: uuid
+
+    EarnedBadgeResponse:
+      allOf:
+        - $ref: '#/components/schemas/BadgeResponse'
+        - type: object
+          properties:
+            earnedAt:
+              type: string
+              format: date-time
+            verificationCode:
+              type: string
+
+    BadgeVerificationResponse:
+      type: object
+      properties:
+        valid:
+          type: boolean
+        badge:
+          $ref: '#/components/schemas/BadgeResponse'
+        earnedBy:
+          type: string
+        earnedAt:
+          type: string
+          format: date-time
+
+    CertificateResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        verificationCode:
+          type: string
+        issuedAt:
+          type: string
+          format: date-time
+        portfolioUrl:
+          type: string
+          format: uri
+
+    CertificateVerificationResponse:
+      type: object
+      properties:
+        valid:
+          type: boolean
+        holderName:
+          type: string
+        issuedAt:
+          type: string
+          format: date-time
+        capstoneTitle:
+          type: string
+
+    PortfolioResponse:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        userName:
+          type: string
+        badges:
+          type: array
+          items:
+            $ref: '#/components/schemas/EarnedBadgeResponse'
+        projects:
+          type: array
+          items:
+            $ref: '#/components/schemas/PortfolioProject'
+        certificate:
+          $ref: '#/components/schemas/CertificateResponse'
+
+    PortfolioProject:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        stageId:
+          type: string
+          format: uuid
+        completedAt:
+          type: string
+          format: date-time
+        showcaseUrl:
+          type: string
+          format: uri

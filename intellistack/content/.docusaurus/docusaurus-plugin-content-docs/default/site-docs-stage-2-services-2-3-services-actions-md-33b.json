@@ -1,0 +1,31 @@
+{
+  "id": "stage-2/services/2-3-services-actions",
+  "title": "2.3 The Request/Response",
+  "description": "Synchronous RPC vs. Asynchronous Goal seeking.",
+  "source": "@site/docs/stage-2/services/2-3-services-actions.md",
+  "sourceDirName": "stage-2/services",
+  "slug": "/stage-2/services/2-3-services-actions",
+  "permalink": "/AINativeBook/stage-2/services/2-3-services-actions",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/saramali15792/physicalhumoniodbook/tree/main/intellistack/content/docs/stage-2/services/2-3-services-actions.md",
+  "tags": [],
+  "version": "current",
+  "lastUpdatedBy": "Author",
+  "lastUpdatedAt": 1539502055000,
+  "frontMatter": {
+    "id": "2-3-services-actions",
+    "title": "2.3 The Request/Response",
+    "sidebar_label": "2.3 Services & Actions",
+    "description": "Synchronous RPC vs. Asynchronous Goal seeking."
+  },
+  "sidebar": "stage2Sidebar",
+  "previous": {
+    "title": "03. Services & Actions",
+    "permalink": "/AINativeBook/category/03-services--actions"
+  },
+  "next": {
+    "title": "Gazebo Basics",
+    "permalink": "/AINativeBook/stage-2/gazebo-simulation"
+  }
+}

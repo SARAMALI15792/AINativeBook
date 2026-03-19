@@ -1,0 +1,26 @@
+{
+  "id": "stage-1/python/README",
+  "title": "Python Axioms",
+  "description": "Files in this module cover Python internals and asynchronous theory.",
+  "source": "@site/docs/stage-1/python/README.md",
+  "sourceDirName": "stage-1/python",
+  "slug": "/stage-1/python/",
+  "permalink": "/AINativeBook/stage-1/python/",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/saramali15792/physicalhumoniodbook/tree/main/intellistack/content/docs/stage-1/python/README.md",
+  "tags": [],
+  "version": "current",
+  "lastUpdatedBy": "Author",
+  "lastUpdatedAt": 1539502055000,
+  "frontMatter": {},
+  "sidebar": "stage1Sidebar",
+  "previous": {
+    "title": "1.3 Advanced Async Theory",
+    "permalink": "/AINativeBook/stage-1/python/1-3-async-theory"
+  },
+  "next": {
+    "title": "Python Basics",
+    "permalink": "/AINativeBook/stage-1/python-basics"
+  }
+}

@@ -1,0 +1,8 @@
+# Proxy auth-server requests through Netlify domain
+/api/auth/*  https://auth-server-production-0f46.up.railway.app/api/auth/:splat  200!
+
+# Proxy backend API requests through Netlify domain
+/api/v1/*  https://backend-production-bcb8.up.railway.app/api/v1/:splat  200!
+
+# SPA fallback for client-side routing
+/*  /index.html  200

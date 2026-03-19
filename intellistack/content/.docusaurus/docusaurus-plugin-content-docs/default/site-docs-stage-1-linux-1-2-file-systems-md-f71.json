@@ -1,0 +1,76 @@
+{
+  "id": "stage-1/linux/1-2-linux-file-systems",
+  "title": "1.2 The File System: Reality as a Tree",
+  "description": "Deep dive into ext4, inodes, journaling, and the VFS abstraction layer",
+  "source": "@site/docs/stage-1/linux/1-2-file-systems.md",
+  "sourceDirName": "stage-1/linux",
+  "slug": "/stage-1/linux/1-2-linux-file-systems",
+  "permalink": "/AINativeBook/stage-1/linux/1-2-linux-file-systems",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/saramali15792/physicalhumoniodbook/tree/main/intellistack/content/docs/stage-1/linux/1-2-file-systems.md",
+  "tags": [
+    {
+      "inline": true,
+      "label": "linux",
+      "permalink": "/AINativeBook/tags/linux"
+    },
+    {
+      "inline": true,
+      "label": "file-systems",
+      "permalink": "/AINativeBook/tags/file-systems"
+    },
+    {
+      "inline": true,
+      "label": "ext4",
+      "permalink": "/AINativeBook/tags/ext-4"
+    },
+    {
+      "inline": true,
+      "label": "vfs",
+      "permalink": "/AINativeBook/tags/vfs"
+    },
+    {
+      "inline": true,
+      "label": "storage",
+      "permalink": "/AINativeBook/tags/storage"
+    }
+  ],
+  "version": "current",
+  "lastUpdatedBy": "Author",
+  "lastUpdatedAt": 1539502055000,
+  "frontMatter": {
+    "id": "1-2-linux-file-systems",
+    "title": "1.2 The File System: Reality as a Tree",
+    "sidebar_label": "1.2 File Systems",
+    "description": "Deep dive into ext4, inodes, journaling, and the VFS abstraction layer",
+    "difficulty": "intermediate",
+    "estimated_time": 50,
+    "tags": [
+      "linux",
+      "file-systems",
+      "ext4",
+      "vfs",
+      "storage"
+    ],
+    "learning_objectives": [
+      "Understand the VFS abstraction layer",
+      "Explain how inodes work and why they matter",
+      "Describe journaling and crash recovery",
+      "Apply file system concepts to robotics data logging"
+    ],
+    "prerequisites": [
+      "Basic Linux command line knowledge",
+      "Understanding of kernel vs user space (Chapter 1.1)"
+    ]
+  },
+  "sidebar": "stage1Sidebar",
+  "previous": {
+    "title": "1.1 Linux & OS Theory",
+    "permalink": "/AINativeBook/stage-1/linux/1-1-linux-theory"
+  },
+  "next": {
+    "title": "1.3 Processes & Scheduling",
+    "permalink": "/AINativeBook/stage-1/linux/1-3-process-management"
+  }
+}

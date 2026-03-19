@@ -1,0 +1,31 @@
+{
+  "id": "stage-1/math/1-5-calculus-dynamics",
+  "title": "1.5 The Physics of Motion",
+  "description": "Derivatives, Integrals, Numerical Integration (Euler/RK4), and Lagrangian Mechanics.",
+  "source": "@site/docs/stage-1/math/1-5-calculus-dynamics.md",
+  "sourceDirName": "stage-1/math",
+  "slug": "/stage-1/math/1-5-calculus-dynamics",
+  "permalink": "/AINativeBook/stage-1/math/1-5-calculus-dynamics",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/saramali15792/physicalhumoniodbook/tree/main/intellistack/content/docs/stage-1/math/1-5-calculus-dynamics.md",
+  "tags": [],
+  "version": "current",
+  "lastUpdatedBy": "Author",
+  "lastUpdatedAt": 1539502055000,
+  "frontMatter": {
+    "id": "1-5-calculus-dynamics",
+    "title": "1.5 The Physics of Motion",
+    "sidebar_label": "1.5 Calculus & Dynamics",
+    "description": "Derivatives, Integrals, Numerical Integration (Euler/RK4), and Lagrangian Mechanics."
+  },
+  "sidebar": "stage1Sidebar",
+  "previous": {
+    "title": "1.4 Linear Algebra",
+    "permalink": "/AINativeBook/stage-1/math/1-4-linear-algebra"
+  },
+  "next": {
+    "title": "Mathematics of Reality",
+    "permalink": "/AINativeBook/stage-1/math/"
+  }
+}

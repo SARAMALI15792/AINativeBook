@@ -1,0 +1,26 @@
+{
+  "id": "stage-1/git/README",
+  "title": "Git & History",
+  "description": "Files in this module cover Version Control theory.",
+  "source": "@site/docs/stage-1/git/README.md",
+  "sourceDirName": "stage-1/git",
+  "slug": "/stage-1/git/",
+  "permalink": "/AINativeBook/stage-1/git/",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/saramali15792/physicalhumoniodbook/tree/main/intellistack/content/docs/stage-1/git/README.md",
+  "tags": [],
+  "version": "current",
+  "lastUpdatedBy": "Author",
+  "lastUpdatedAt": 1539502055000,
+  "frontMatter": {},
+  "sidebar": "stage1Sidebar",
+  "previous": {
+    "title": "1.6 Git & Version Control",
+    "permalink": "/AINativeBook/stage-1/git/1-6-git-history"
+  },
+  "next": {
+    "title": "Math Foundations",
+    "permalink": "/AINativeBook/stage-1/math-foundations"
+  }
+}

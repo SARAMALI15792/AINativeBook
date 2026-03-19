@@ -1,0 +1,28 @@
+{
+  "id": "stage-1/intro",
+  "title": "Stage 1 - Foundations",
+  "description": "Stage 1",
+  "source": "@site/docs/stage-1/intro.md",
+  "sourceDirName": "stage-1",
+  "slug": "/stage-1/intro",
+  "permalink": "/AINativeBook/stage-1/intro",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/saramali15792/physicalhumoniodbook/tree/main/intellistack/content/docs/stage-1/intro.md",
+  "tags": [],
+  "version": "current",
+  "lastUpdatedBy": "Author",
+  "lastUpdatedAt": 1539502055000,
+  "sidebarPosition": 1,
+  "frontMatter": {
+    "id": "intro",
+    "title": "Stage 1 - Foundations",
+    "sidebar_label": "Introduction",
+    "sidebar_position": 1
+  },
+  "sidebar": "stage1Sidebar",
+  "next": {
+    "title": "Introduction",
+    "permalink": "/AINativeBook/stage-1/intro"
+  }
+}

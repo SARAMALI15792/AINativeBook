@@ -1,0 +1,31 @@
+{
+  "id": "stage-1/linux/1-1-linux-theory",
+  "title": "1.1 The Digital Nervous System",
+  "description": "Deep dive into Kernel Space, User Space, and the 'Everything is a File' abstraction.",
+  "source": "@site/docs/stage-1/linux/1-1-linux-theory.md",
+  "sourceDirName": "stage-1/linux",
+  "slug": "/stage-1/linux/1-1-linux-theory",
+  "permalink": "/AINativeBook/stage-1/linux/1-1-linux-theory",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/saramali15792/physicalhumoniodbook/tree/main/intellistack/content/docs/stage-1/linux/1-1-linux-theory.md",
+  "tags": [],
+  "version": "current",
+  "lastUpdatedBy": "Author",
+  "lastUpdatedAt": 1539502055000,
+  "frontMatter": {
+    "id": "1-1-linux-theory",
+    "title": "1.1 The Digital Nervous System",
+    "sidebar_label": "1.1 Linux & OS Theory",
+    "description": "Deep dive into Kernel Space, User Space, and the 'Everything is a File' abstraction."
+  },
+  "sidebar": "stage1Sidebar",
+  "previous": {
+    "title": "01. Linux & Systems",
+    "permalink": "/AINativeBook/category/01-linux--systems"
+  },
+  "next": {
+    "title": "1.2 File Systems",
+    "permalink": "/AINativeBook/stage-1/linux/1-2-linux-file-systems"
+  }
+}

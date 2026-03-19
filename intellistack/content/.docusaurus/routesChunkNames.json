@@ -1,0 +1,380 @@
+{
+  "/AINativeBook/__docusaurus/debug-f8a": {
+    "__comp": "__comp---theme-debug-config-23-a-2ff",
+    "__context": {
+      "plugin": "plugin---ai-native-book-docusaurus-debugb-38-cda"
+    }
+  },
+  "/AINativeBook/__docusaurus/debug/config-c7f": {
+    "__comp": "__comp---theme-debug-config-23-a-2ff",
+    "__context": {
+      "plugin": "plugin---ai-native-book-docusaurus-debugb-38-cda"
+    }
+  },
+  "/AINativeBook/__docusaurus/debug/content-1d7": {
+    "__comp": "__comp---theme-debug-contentba-8-ce7",
+    "__context": {
+      "plugin": "plugin---ai-native-book-docusaurus-debugb-38-cda"
+    },
+    "__props": "__props---ai-native-book-docusaurus-debug-contentf-41-403"
+  },
+  "/AINativeBook/__docusaurus/debug/globalData-0ab": {
+    "__comp": "__comp---theme-debug-global-dataede-0fa",
+    "__context": {
+      "plugin": "plugin---ai-native-book-docusaurus-debugb-38-cda"
+    }
+  },
+  "/AINativeBook/__docusaurus/debug/metadata-41f": {
+    "__comp": "__comp---theme-debug-site-metadata-68-e-3d4",
+    "__context": {
+      "plugin": "plugin---ai-native-book-docusaurus-debugb-38-cda"
+    }
+  },
+  "/AINativeBook/__docusaurus/debug/registry-d0a": {
+    "__comp": "__comp---theme-debug-registry-679-501",
+    "__context": {
+      "plugin": "plugin---ai-native-book-docusaurus-debugb-38-cda"
+    }
+  },
+  "/AINativeBook/__docusaurus/debug/routes-2b2": {
+    "__comp": "__comp---theme-debug-routes-946-699",
+    "__context": {
+      "plugin": "plugin---ai-native-book-docusaurus-debugb-38-cda"
+    }
+  },
+  "/AINativeBook/auth/callback-b30": {
+    "__comp": "__comp---site-src-pages-auth-callback-tsx-5-d-7-bfe",
+    "__context": {
+      "plugin": "plugin---ai-native-book-auth-callbacka-74-262"
+    },
+    "config": "config---ai-native-book-auth-callback-5-e-9-c30"
+  },
+  "/AINativeBook/auth/login-74a": {
+    "__comp": "__comp---site-src-pages-auth-login-tsx-1-e-4-c42",
+    "__context": {
+      "plugin": "plugin---ai-native-book-auth-callbacka-74-262"
+    },
+    "config": "config---ai-native-book-auth-callback-5-e-9-c30"
+  },
+  "/AINativeBook/auth/signup-163": {
+    "__comp": "__comp---site-src-pages-auth-signup-tsx-48-e-c8c",
+    "__context": {
+      "plugin": "plugin---ai-native-book-auth-callbacka-74-262"
+    },
+    "config": "config---ai-native-book-auth-callback-5-e-9-c30"
+  },
+  "/AINativeBook/forgot-password-aa4": {
+    "__comp": "__comp---site-src-pages-forgot-password-tsxed-3-6c3",
+    "__context": {
+      "plugin": "plugin---ai-native-book-auth-callbacka-74-262"
+    },
+    "config": "config---ai-native-book-auth-callback-5-e-9-c30"
+  },
+  "/AINativeBook/login-273": {
+    "__comp": "__comp---site-src-pages-login-tsx-34-b-c7d",
+    "__context": {
+      "plugin": "plugin---ai-native-book-auth-callbacka-74-262"
+    },
+    "config": "config---ai-native-book-auth-callback-5-e-9-c30"
+  },
+  "/AINativeBook/onboarding/step-1-35a": {
+    "__comp": "__comp---site-src-pages-onboarding-step-1-tsxfe-8-640",
+    "__context": {
+      "plugin": "plugin---ai-native-book-auth-callbacka-74-262"
+    },
+    "config": "config---ai-native-book-auth-callback-5-e-9-c30"
+  },
+  "/AINativeBook/onboarding/step-2-5a3": {
+    "__comp": "__comp---site-src-pages-onboarding-step-2-tsxc-2-f-a45",
+    "__context": {
+      "plugin": "plugin---ai-native-book-auth-callbacka-74-262"
+    },
+    "config": "config---ai-native-book-auth-callback-5-e-9-c30"
+  },
+  "/AINativeBook/onboarding/step-3-f75": {
+    "__comp": "__comp---site-src-pages-onboarding-step-3-tsxb-61-4bb",
+    "__context": {
+      "plugin": "plugin---ai-native-book-auth-callbacka-74-262"
+    },
+    "config": "config---ai-native-book-auth-callback-5-e-9-c30"
+  },
+  "/AINativeBook/onboarding/step-4-b31": {
+    "__comp": "__comp---site-src-pages-onboarding-step-4-tsxbab-be3",
+    "__context": {
+      "plugin": "plugin---ai-native-book-auth-callbacka-74-262"
+    },
+    "config": "config---ai-native-book-auth-callback-5-e-9-c30"
+  },
+  "/AINativeBook/profile-265": {
+    "__comp": "__comp---site-src-pages-profile-tsxe-6-e-75e",
+    "__context": {
+      "plugin": "plugin---ai-native-book-auth-callbacka-74-262"
+    },
+    "config": "config---ai-native-book-auth-callback-5-e-9-c30"
+  },
+  "/AINativeBook/register-135": {
+    "__comp": "__comp---site-src-pages-register-tsxa-51-f5f",
+    "__context": {
+      "plugin": "plugin---ai-native-book-auth-callbacka-74-262"
+    },
+    "config": "config---ai-native-book-auth-callback-5-e-9-c30"
+  },
+  "/AINativeBook/reset-password-4b0": {
+    "__comp": "__comp---site-src-pages-reset-password-tsx-831-855",
+    "__context": {
+      "plugin": "plugin---ai-native-book-auth-callbacka-74-262"
+    },
+    "config": "config---ai-native-book-auth-callback-5-e-9-c30"
+  },
+  "/AINativeBook/settings-ef6": {
+    "__comp": "__comp---site-src-pages-settings-tsxd-3-b-06e",
+    "__context": {
+      "plugin": "plugin---ai-native-book-auth-callbacka-74-262"
+    },
+    "config": "config---ai-native-book-auth-callback-5-e-9-c30"
+  },
+  "/AINativeBook/-60b": {
+    "__comp": "__comp---site-src-pages-index-tsx-1-df-d3e",
+    "__context": {
+      "plugin": "plugin---ai-native-book-auth-callbacka-74-262"
+    },
+    "config": "config---ai-native-book-auth-callback-5-e-9-c30"
+  },
+  "/AINativeBook/-e0d": {
+    "__comp": "__comp---theme-docs-root-5-e-9-0b6",
+    "__context": {
+      "plugin": "plugin---ai-native-book-aba-ef1"
+    }
+  },
+  "/AINativeBook/-f34": {
+    "__comp": "__comp---theme-doc-version-roota-7-b-5de",
+    "__props": "__props---ai-native-book-8-a-8-a3d"
+  },
+  "/AINativeBook/tags-5e1": {
+    "__comp": "__comp---theme-doc-tags-list-page-372-89e",
+    "__props": "__props---ai-native-book-tags-741-903"
+  },
+  "/AINativeBook/tags/ext-4-e65": {
+    "__comp": "__comp---theme-doc-tag-doc-list-pagedf-2-9f0",
+    "__props": "__props---ai-native-book-tags-ext-447-c-cdd"
+  },
+  "/AINativeBook/tags/file-systems-e95": {
+    "__comp": "__comp---theme-doc-tag-doc-list-pagedf-2-9f0",
+    "__props": "__props---ai-native-book-tags-file-systemsd-23-f1b"
+  },
+  "/AINativeBook/tags/linux-5ed": {
+    "__comp": "__comp---theme-doc-tag-doc-list-pagedf-2-9f0",
+    "__props": "__props---ai-native-book-tags-linux-25-a-a0c"
+  },
+  "/AINativeBook/tags/preempt-rt-aa4": {
+    "__comp": "__comp---theme-doc-tag-doc-list-pagedf-2-9f0",
+    "__props": "__props---ai-native-book-tags-preempt-rtb-03-87f"
+  },
+  "/AINativeBook/tags/processes-62f": {
+    "__comp": "__comp---theme-doc-tag-doc-list-pagedf-2-9f0",
+    "__props": "__props---ai-native-book-tags-processesd-59-9fc"
+  },
+  "/AINativeBook/tags/real-time-492": {
+    "__comp": "__comp---theme-doc-tag-doc-list-pagedf-2-9f0",
+    "__props": "__props---ai-native-book-tags-real-timec-43-f45"
+  },
+  "/AINativeBook/tags/scheduling-de7": {
+    "__comp": "__comp---theme-doc-tag-doc-list-pagedf-2-9f0",
+    "__props": "__props---ai-native-book-tags-scheduling-94-a-079"
+  },
+  "/AINativeBook/tags/storage-672": {
+    "__comp": "__comp---theme-doc-tag-doc-list-pagedf-2-9f0",
+    "__props": "__props---ai-native-book-tags-storageb-91-2d5"
+  },
+  "/AINativeBook/tags/vfs-fdd": {
+    "__comp": "__comp---theme-doc-tag-doc-list-pagedf-2-9f0",
+    "__props": "__props---ai-native-book-tags-vfs-1-fe-444"
+  },
+  "/AINativeBook/-11a": {
+    "__comp": "__comp---theme-doc-roota-94-67a"
+  },
+  "/AINativeBook/category/01-linux--systems-145": {
+    "__comp": "__comp---theme-doc-category-generated-index-page-14-e-640",
+    "__props": "__props---ai-native-book-category-01-linux-systemsd-1-e-906"
+  },
+  "/AINativeBook/category/01-the-distributed-mind-4f4": {
+    "__comp": "__comp---theme-doc-category-generated-index-page-14-e-640",
+    "__props": "__props---ai-native-book-category-01-the-distributed-mind-1-cc-810"
+  },
+  "/AINativeBook/category/02-middleware--communication-7f6": {
+    "__comp": "__comp---theme-doc-category-generated-index-page-14-e-640",
+    "__props": "__props---ai-native-book-category-02-middleware-communication-1-fb-e18"
+  },
+  "/AINativeBook/category/02-python-internal-theory-1a9": {
+    "__comp": "__comp---theme-doc-category-generated-index-page-14-e-640",
+    "__props": "__props---ai-native-book-category-02-python-internal-theoryb-16-c6c"
+  },
+  "/AINativeBook/category/03-mathematics-of-reality-202": {
+    "__comp": "__comp---theme-doc-category-generated-index-page-14-e-640",
+    "__props": "__props---ai-native-book-category-03-mathematics-of-reality-510-488"
+  },
+  "/AINativeBook/category/03-services--actions-911": {
+    "__comp": "__comp---theme-doc-category-generated-index-page-14-e-640",
+    "__props": "__props---ai-native-book-category-03-services-actions-7-b-1-2ee"
+  },
+  "/AINativeBook/category/04-git--history-3c9": {
+    "__comp": "__comp---theme-doc-category-generated-index-page-14-e-640",
+    "__props": "__props---ai-native-book-category-04-git-historyda-5-9c0"
+  },
+  "/AINativeBook/category/04-tf2--transforms-564": {
+    "__comp": "__comp---theme-doc-category-generated-index-page-14-e-640",
+    "__props": "__props---ai-native-book-category-04-tf-2-transformsb-5-f-25d"
+  },
+  "/AINativeBook/stage-1/1-1-linux-theory-264": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---ai-native-book-stage-1-1-1-linux-theorye-2-e-f68"
+  },
+  "/AINativeBook/stage-1/1-2-python-axioms-480": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---ai-native-book-stage-1-1-2-python-axioms-2-a-1-ae3"
+  },
+  "/AINativeBook/stage-1/1-3-async-theory-db8": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---ai-native-book-stage-1-1-3-async-theory-411-920"
+  },
+  "/AINativeBook/stage-1/1-4-linear-algebra-b30": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---ai-native-book-stage-1-1-4-linear-algebraeb-4-64d"
+  },
+  "/AINativeBook/stage-1/1-6-git-history-ddd": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---ai-native-book-stage-1-1-6-git-historyeb-8-9fe"
+  },
+  "/AINativeBook/stage-1/1-7-bash-shell-e8e": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---ai-native-book-stage-1-1-7-bash-shell-2-f-4-fd4"
+  },
+  "/AINativeBook/stage-1/git-835": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---ai-native-book-stage-1-git-20-d-bfd"
+  },
+  "/AINativeBook/stage-1/git/1-6-git-history-af2": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---ai-native-book-stage-1-git-1-6-git-history-30-c-f4c"
+  },
+  "/AINativeBook/stage-1/intro-d0a": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---ai-native-book-stage-1-intro-6-da-7ac"
+  },
+  "/AINativeBook/stage-1/linux-66b": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---ai-native-book-stage-1-linux-724-f4c"
+  },
+  "/AINativeBook/stage-1/linux-fundamentals-66a": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---ai-native-book-stage-1-linux-fundamentalsf-0-b-d1d"
+  },
+  "/AINativeBook/stage-1/linux/1-1-linux-theory-50e": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---ai-native-book-stage-1-linux-1-1-linux-theory-2-b-3-c85"
+  },
+  "/AINativeBook/stage-1/linux/1-2-linux-file-systems-31b": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---ai-native-book-stage-1-linux-1-2-linux-file-systemsf-71-7a1"
+  },
+  "/AINativeBook/stage-1/linux/1-3-process-management-2ca": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---ai-native-book-stage-1-linux-1-3-process-management-33-d-af1"
+  },
+  "/AINativeBook/stage-1/linux/1-7-bash-shell-d54": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---ai-native-book-stage-1-linux-1-7-bash-shellcb-3-d25"
+  },
+  "/AINativeBook/stage-1/math-da6": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---ai-native-book-stage-1-math-940-eb1"
+  },
+  "/AINativeBook/stage-1/math-foundations-541": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---ai-native-book-stage-1-math-foundations-4-d-0-7d6"
+  },
+  "/AINativeBook/stage-1/math/1-4-linear-algebra-1aa": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---ai-native-book-stage-1-math-1-4-linear-algebra-527-817"
+  },
+  "/AINativeBook/stage-1/math/1-5-calculus-dynamics-2c1": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---ai-native-book-stage-1-math-1-5-calculus-dynamicsb-07-87f"
+  },
+  "/AINativeBook/stage-1/physics-basics-900": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---ai-native-book-stage-1-physics-basics-892-67d"
+  },
+  "/AINativeBook/stage-1/python-d4c": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---ai-native-book-stage-1-python-286-cd3"
+  },
+  "/AINativeBook/stage-1/python-basics-ec2": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---ai-native-book-stage-1-python-basics-160-c07"
+  },
+  "/AINativeBook/stage-1/python/1-2-python-axioms-a3f": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---ai-native-book-stage-1-python-1-2-python-axiomsc-84-376"
+  },
+  "/AINativeBook/stage-1/python/1-3-async-theory-f60": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---ai-native-book-stage-1-python-1-3-async-theoryff-0-a6a"
+  },
+  "/AINativeBook/stage-1/theory/1-1-axioms-computation-c33": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---ai-native-book-stage-1-theory-1-1-axioms-computation-45-a-f08"
+  },
+  "/AINativeBook/stage-2/gazebo-simulation-e8d": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---ai-native-book-stage-2-gazebo-simulationf-26-eb0"
+  },
+  "/AINativeBook/stage-2/graph-theory/2-1-distributed-mind-315": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---ai-native-book-stage-2-graph-theory-2-1-distributed-mindde-4-928"
+  },
+  "/AINativeBook/stage-2/intro-44f": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---ai-native-book-stage-2-intro-9-f-5-6f2"
+  },
+  "/AINativeBook/stage-2/middleware/2-2-pub-sub-400": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---ai-native-book-stage-2-middleware-2-2-pub-sub-1-c-4-37b"
+  },
+  "/AINativeBook/stage-2/ros2-setup-4e6": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---ai-native-book-stage-2-ros-2-setupccf-14a"
+  },
+  "/AINativeBook/stage-2/services/2-3-services-actions-e2a": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---ai-native-book-stage-2-services-2-3-services-actions-33-b-42f"
+  },
+  "/AINativeBook/stage-2/tf2/2-4-coordinate-frames-91f": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---ai-native-book-stage-2-tf-2-2-4-coordinate-frames-2-f-0-553"
+  },
+  "/AINativeBook/stage-3/computer-vision-d25": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---ai-native-book-stage-3-computer-vision-3-f-1-db9"
+  },
+  "/AINativeBook/stage-3/intro-899": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---ai-native-book-stage-3-introd-2-b-13f"
+  },
+  "/AINativeBook/stage-4/intro-fe0": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---ai-native-book-stage-4-intro-9-b-9-d80"
+  },
+  "/AINativeBook/stage-4/machine-learning-basics-258": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---ai-native-book-stage-4-machine-learning-basics-1-f-0-fd6"
+  },
+  "/AINativeBook/stage-5/intro-340": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---ai-native-book-stage-5-intro-5-c-4-0da"
+  },
+  "/AINativeBook/stage-5/project-guidelines-b65": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---ai-native-book-stage-5-project-guidelinesf-40-37b"
+  }
+}

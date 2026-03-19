@@ -1,0 +1,133 @@
+@import './tokens.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-bg-primary text-text-secondary;
+    font-family: var(--font-body);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply text-text-primary font-bold;
+    font-family: var(--font-heading);
+  }
+
+  h1 { @apply text-5xl; }
+  h2 { @apply text-4xl; }
+  h3 { @apply text-3xl; }
+  h4 { @apply text-2xl; }
+  h5 { @apply text-xl; }
+  h6 { @apply text-lg; }
+
+  code, pre, kbd {
+    font-family: var(--font-mono);
+  }
+
+  /* Ambient glow orbs — Electric Blue + Indigo */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 30%, rgba(37, 99, 235, 0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 80% 70%, rgba(99, 102, 241, 0.05) 0%, transparent 60%);
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  /* Dot-grid background overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(var(--grid-dot-color) 1px, transparent 1px);
+    background-size: 24px 24px;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  /* Focus ring — Electric Blue */
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible,
+  [role="button"]:focus-visible,
+  [role="link"]:focus-visible,
+  [tabindex]:not([tabindex="-1"]):focus-visible {
+    outline: 2px solid var(--color-accent-blue);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  *:focus {
+    outline: none;
+  }
+
+  *:focus:not(:focus-visible) {
+    outline: none;
+  }
+}
+
+@layer utilities {
+  /* Minimal surface card — replaces heavy glassmorphism */
+  .surface {
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border-default);
+  }
+
+  .surface-elevated {
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border-default);
+  }
+
+  /* Legacy glass — kept for backward compat, lighter than before */
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: var(--blur-md) saturate(180%);
+    -webkit-backdrop-filter: var(--blur-md) saturate(180%);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-md);
+  }
+
+  @supports not (backdrop-filter: blur(12px)) {
+    .glass {
+      background: rgba(17, 17, 25, 0.95);
+    }
+  }
+
+  .glass-sm {
+    backdrop-filter: var(--blur-sm) saturate(180%);
+    -webkit-backdrop-filter: var(--blur-sm) saturate(180%);
+  }
+
+  .glass-lg {
+    backdrop-filter: var(--blur-lg) saturate(180%);
+    -webkit-backdrop-filter: var(--blur-lg) saturate(180%);
+  }
+
+  .glass-hover {
+    transition: all var(--duration-normal) var(--ease-out);
+  }
+
+  .glass-hover:hover {
+    background: var(--glass-highlight);
+    border-color: var(--color-accent-blue);
+    box-shadow: var(--shadow-lg), var(--shadow-glow-blue);
+  }
+
+  /* Focus-visible utility */
+  .focus-visible:focus-visible {
+    outline: 2px solid var(--color-accent-blue);
+    outline-offset: 2px;
+  }
+
+  /* Staggered entry animation helper */
+  .animate-entry-up {
+    animation: entryUp var(--duration-slow) var(--ease-smooth) both;
+    animation-delay: var(--stagger-delay, 0ms);
+  }
+}

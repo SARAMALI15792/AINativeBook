@@ -1,0 +1,32 @@
+{
+  "id": "stage-1/physics-basics",
+  "title": "Physics Fundamentals for Robotics",
+  "description": "Understanding physics is crucial for designing, simulating, and controlling robots. This lesson covers the core physics concepts you'll apply in robotics.",
+  "source": "@site/docs/stage-1/physics-basics.md",
+  "sourceDirName": "stage-1",
+  "slug": "/stage-1/physics-basics",
+  "permalink": "/AINativeBook/stage-1/physics-basics",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/saramali15792/physicalhumoniodbook/tree/main/intellistack/content/docs/stage-1/physics-basics.md",
+  "tags": [],
+  "version": "current",
+  "lastUpdatedBy": "Author",
+  "lastUpdatedAt": 1539502055000,
+  "sidebarPosition": 5,
+  "frontMatter": {
+    "id": "physics-basics",
+    "title": "Physics Fundamentals for Robotics",
+    "sidebar_label": "Physics Basics",
+    "sidebar_position": 5
+  },
+  "sidebar": "stage1Sidebar",
+  "previous": {
+    "title": "Math Foundations",
+    "permalink": "/AINativeBook/stage-1/math-foundations"
+  },
+  "next": {
+    "title": "1.1 Linux & OS Theory",
+    "permalink": "/AINativeBook/stage-1/1-1-linux-theory"
+  }
+}

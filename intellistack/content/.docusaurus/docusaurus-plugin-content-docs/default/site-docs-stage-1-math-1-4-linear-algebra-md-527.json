@@ -1,0 +1,31 @@
+{
+  "id": "stage-1/math/1-4-linear-algebra",
+  "title": "1.4 The Geometry of Reality",
+  "description": "Vector Spaces, Rotation Matrices (SO3), Quaternions, and Eigenvalues.",
+  "source": "@site/docs/stage-1/math/1-4-linear-algebra.md",
+  "sourceDirName": "stage-1/math",
+  "slug": "/stage-1/math/1-4-linear-algebra",
+  "permalink": "/AINativeBook/stage-1/math/1-4-linear-algebra",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/saramali15792/physicalhumoniodbook/tree/main/intellistack/content/docs/stage-1/math/1-4-linear-algebra.md",
+  "tags": [],
+  "version": "current",
+  "lastUpdatedBy": "Author",
+  "lastUpdatedAt": 1539502055000,
+  "frontMatter": {
+    "id": "1-4-linear-algebra",
+    "title": "1.4 The Geometry of Reality",
+    "sidebar_label": "1.4 Linear Algebra",
+    "description": "Vector Spaces, Rotation Matrices (SO3), Quaternions, and Eigenvalues."
+  },
+  "sidebar": "stage1Sidebar",
+  "previous": {
+    "title": "03. Mathematics of Reality",
+    "permalink": "/AINativeBook/category/03-mathematics-of-reality"
+  },
+  "next": {
+    "title": "1.5 Calculus & Dynamics",
+    "permalink": "/AINativeBook/stage-1/math/1-5-calculus-dynamics"
+  }
+}

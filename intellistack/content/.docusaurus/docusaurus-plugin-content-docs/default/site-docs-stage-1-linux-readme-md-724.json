@@ -1,0 +1,26 @@
+{
+  "id": "stage-1/linux/README",
+  "title": "Linux & OS Theory",
+  "description": "Files in this module cover the operating system fundamentals.",
+  "source": "@site/docs/stage-1/linux/README.md",
+  "sourceDirName": "stage-1/linux",
+  "slug": "/stage-1/linux/",
+  "permalink": "/AINativeBook/stage-1/linux/",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/saramali15792/physicalhumoniodbook/tree/main/intellistack/content/docs/stage-1/linux/README.md",
+  "tags": [],
+  "version": "current",
+  "lastUpdatedBy": "Author",
+  "lastUpdatedAt": 1539502055000,
+  "frontMatter": {},
+  "sidebar": "stage1Sidebar",
+  "previous": {
+    "title": "1.7 Bash & Automation",
+    "permalink": "/AINativeBook/stage-1/linux/1-7-bash-shell"
+  },
+  "next": {
+    "title": "02. Python Internal Theory",
+    "permalink": "/AINativeBook/category/02-python-internal-theory"
+  }
+}

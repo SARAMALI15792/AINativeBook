@@ -1,0 +1,282 @@
+{
+  "docusaurus-plugin-content-docs": {
+    "default": {
+      "path": "/AINativeBook/",
+      "versions": [
+        {
+          "name": "current",
+          "label": "Next",
+          "isLast": true,
+          "path": "/AINativeBook/",
+          "mainDocId": "stage-1/intro",
+          "docs": [
+            {
+              "id": "stage-1/1-1-linux-theory",
+              "path": "/AINativeBook/stage-1/1-1-linux-theory",
+              "sidebar": "stage1Sidebar"
+            },
+            {
+              "id": "stage-1/1-2-python-axioms",
+              "path": "/AINativeBook/stage-1/1-2-python-axioms",
+              "sidebar": "stage1Sidebar"
+            },
+            {
+              "id": "stage-1/1-3-async-theory",
+              "path": "/AINativeBook/stage-1/1-3-async-theory",
+              "sidebar": "stage1Sidebar"
+            },
+            {
+              "id": "stage-1/1-4-linear-algebra",
+              "path": "/AINativeBook/stage-1/1-4-linear-algebra",
+              "sidebar": "stage1Sidebar"
+            },
+            {
+              "id": "stage-1/1-6-git-history",
+              "path": "/AINativeBook/stage-1/1-6-git-history",
+              "sidebar": "stage1Sidebar"
+            },
+            {
+              "id": "stage-1/1-7-bash-shell",
+              "path": "/AINativeBook/stage-1/1-7-bash-shell",
+              "sidebar": "stage1Sidebar"
+            },
+            {
+              "id": "stage-1/git/1-6-git-history",
+              "path": "/AINativeBook/stage-1/git/1-6-git-history",
+              "sidebar": "stage1Sidebar"
+            },
+            {
+              "id": "stage-1/git/README",
+              "path": "/AINativeBook/stage-1/git/",
+              "sidebar": "stage1Sidebar"
+            },
+            {
+              "id": "stage-1/intro",
+              "path": "/AINativeBook/stage-1/intro",
+              "sidebar": "stage1Sidebar"
+            },
+            {
+              "id": "stage-1/linux-fundamentals",
+              "path": "/AINativeBook/stage-1/linux-fundamentals",
+              "sidebar": "stage1Sidebar"
+            },
+            {
+              "id": "stage-1/linux/1-1-linux-theory",
+              "path": "/AINativeBook/stage-1/linux/1-1-linux-theory",
+              "sidebar": "stage1Sidebar"
+            },
+            {
+              "id": "stage-1/linux/1-2-linux-file-systems",
+              "path": "/AINativeBook/stage-1/linux/1-2-linux-file-systems",
+              "sidebar": "stage1Sidebar"
+            },
+            {
+              "id": "stage-1/linux/1-3-process-management",
+              "path": "/AINativeBook/stage-1/linux/1-3-process-management",
+              "sidebar": "stage1Sidebar"
+            },
+            {
+              "id": "stage-1/linux/1-7-bash-shell",
+              "path": "/AINativeBook/stage-1/linux/1-7-bash-shell",
+              "sidebar": "stage1Sidebar"
+            },
+            {
+              "id": "stage-1/linux/README",
+              "path": "/AINativeBook/stage-1/linux/",
+              "sidebar": "stage1Sidebar"
+            },
+            {
+              "id": "stage-1/math-foundations",
+              "path": "/AINativeBook/stage-1/math-foundations",
+              "sidebar": "stage1Sidebar"
+            },
+            {
+              "id": "stage-1/math/1-4-linear-algebra",
+              "path": "/AINativeBook/stage-1/math/1-4-linear-algebra",
+              "sidebar": "stage1Sidebar"
+            },
+            {
+              "id": "stage-1/math/1-5-calculus-dynamics",
+              "path": "/AINativeBook/stage-1/math/1-5-calculus-dynamics",
+              "sidebar": "stage1Sidebar"
+            },
+            {
+              "id": "stage-1/math/README",
+              "path": "/AINativeBook/stage-1/math/",
+              "sidebar": "stage1Sidebar"
+            },
+            {
+              "id": "stage-1/physics-basics",
+              "path": "/AINativeBook/stage-1/physics-basics",
+              "sidebar": "stage1Sidebar"
+            },
+            {
+              "id": "stage-1/python-basics",
+              "path": "/AINativeBook/stage-1/python-basics",
+              "sidebar": "stage1Sidebar"
+            },
+            {
+              "id": "stage-1/python/1-2-python-axioms",
+              "path": "/AINativeBook/stage-1/python/1-2-python-axioms",
+              "sidebar": "stage1Sidebar"
+            },
+            {
+              "id": "stage-1/python/1-3-async-theory",
+              "path": "/AINativeBook/stage-1/python/1-3-async-theory",
+              "sidebar": "stage1Sidebar"
+            },
+            {
+              "id": "stage-1/python/README",
+              "path": "/AINativeBook/stage-1/python/",
+              "sidebar": "stage1Sidebar"
+            },
+            {
+              "id": "stage-1/theory/1-1-axioms-computation",
+              "path": "/AINativeBook/stage-1/theory/1-1-axioms-computation",
+              "sidebar": "stage1Sidebar"
+            },
+            {
+              "id": "stage-2/gazebo-simulation",
+              "path": "/AINativeBook/stage-2/gazebo-simulation",
+              "sidebar": "stage2Sidebar"
+            },
+            {
+              "id": "stage-2/graph-theory/2-1-distributed-mind",
+              "path": "/AINativeBook/stage-2/graph-theory/2-1-distributed-mind",
+              "sidebar": "stage2Sidebar"
+            },
+            {
+              "id": "stage-2/intro",
+              "path": "/AINativeBook/stage-2/intro",
+              "sidebar": "stage2Sidebar"
+            },
+            {
+              "id": "stage-2/middleware/2-2-pub-sub",
+              "path": "/AINativeBook/stage-2/middleware/2-2-pub-sub",
+              "sidebar": "stage2Sidebar"
+            },
+            {
+              "id": "stage-2/ros2-setup",
+              "path": "/AINativeBook/stage-2/ros2-setup",
+              "sidebar": "stage2Sidebar"
+            },
+            {
+              "id": "stage-2/services/2-3-services-actions",
+              "path": "/AINativeBook/stage-2/services/2-3-services-actions",
+              "sidebar": "stage2Sidebar"
+            },
+            {
+              "id": "stage-2/tf2/2-4-coordinate-frames",
+              "path": "/AINativeBook/stage-2/tf2/2-4-coordinate-frames",
+              "sidebar": "stage2Sidebar"
+            },
+            {
+              "id": "stage-3/computer-vision",
+              "path": "/AINativeBook/stage-3/computer-vision",
+              "sidebar": "stage3Sidebar"
+            },
+            {
+              "id": "stage-3/intro",
+              "path": "/AINativeBook/stage-3/intro",
+              "sidebar": "stage3Sidebar"
+            },
+            {
+              "id": "stage-4/intro",
+              "path": "/AINativeBook/stage-4/intro",
+              "sidebar": "stage4Sidebar"
+            },
+            {
+              "id": "stage-4/machine-learning-basics",
+              "path": "/AINativeBook/stage-4/machine-learning-basics",
+              "sidebar": "stage4Sidebar"
+            },
+            {
+              "id": "stage-5/intro",
+              "path": "/AINativeBook/stage-5/intro",
+              "sidebar": "stage5Sidebar"
+            },
+            {
+              "id": "stage-5/project-guidelines",
+              "path": "/AINativeBook/stage-5/project-guidelines",
+              "sidebar": "stage5Sidebar"
+            },
+            {
+              "id": "/category/01-linux--systems",
+              "path": "/AINativeBook/category/01-linux--systems",
+              "sidebar": "stage1Sidebar"
+            },
+            {
+              "id": "/category/02-python-internal-theory",
+              "path": "/AINativeBook/category/02-python-internal-theory",
+              "sidebar": "stage1Sidebar"
+            },
+            {
+              "id": "/category/03-mathematics-of-reality",
+              "path": "/AINativeBook/category/03-mathematics-of-reality",
+              "sidebar": "stage1Sidebar"
+            },
+            {
+              "id": "/category/04-git--history",
+              "path": "/AINativeBook/category/04-git--history",
+              "sidebar": "stage1Sidebar"
+            },
+            {
+              "id": "/category/01-the-distributed-mind",
+              "path": "/AINativeBook/category/01-the-distributed-mind",
+              "sidebar": "stage2Sidebar"
+            },
+            {
+              "id": "/category/02-middleware--communication",
+              "path": "/AINativeBook/category/02-middleware--communication",
+              "sidebar": "stage2Sidebar"
+            },
+            {
+              "id": "/category/03-services--actions",
+              "path": "/AINativeBook/category/03-services--actions",
+              "sidebar": "stage2Sidebar"
+            },
+            {
+              "id": "/category/04-tf2--transforms",
+              "path": "/AINativeBook/category/04-tf2--transforms",
+              "sidebar": "stage2Sidebar"
+            }
+          ],
+          "draftIds": [],
+          "sidebars": {
+            "stage1Sidebar": {
+              "link": {
+                "path": "/AINativeBook/stage-1/intro",
+                "label": "Stage 1: Foundations"
+              }
+            },
+            "stage2Sidebar": {
+              "link": {
+                "path": "/AINativeBook/stage-2/intro",
+                "label": "Stage 2: ROS 2 & Simulation"
+              }
+            },
+            "stage3Sidebar": {
+              "link": {
+                "path": "/AINativeBook/stage-3/intro",
+                "label": "Stage 3: Perception & Planning"
+              }
+            },
+            "stage4Sidebar": {
+              "link": {
+                "path": "/AINativeBook/stage-4/intro",
+                "label": "Stage 4: AI Integration"
+              }
+            },
+            "stage5Sidebar": {
+              "link": {
+                "path": "/AINativeBook/stage-5/intro",
+                "label": "Stage 5: Capstone Project"
+              }
+            }
+          }
+        }
+      ],
+      "breadcrumbs": true
+    }
+  }
+}

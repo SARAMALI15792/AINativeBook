@@ -1,0 +1,26 @@
+{
+  "id": "stage-1/math/README",
+  "title": "Mathematics of Reality",
+  "description": "Files in this module cover Linear Algebra and Calculus for robotics.",
+  "source": "@site/docs/stage-1/math/README.md",
+  "sourceDirName": "stage-1/math",
+  "slug": "/stage-1/math/",
+  "permalink": "/AINativeBook/stage-1/math/",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/saramali15792/physicalhumoniodbook/tree/main/intellistack/content/docs/stage-1/math/README.md",
+  "tags": [],
+  "version": "current",
+  "lastUpdatedBy": "Author",
+  "lastUpdatedAt": 1539502055000,
+  "frontMatter": {},
+  "sidebar": "stage1Sidebar",
+  "previous": {
+    "title": "1.5 Calculus & Dynamics",
+    "permalink": "/AINativeBook/stage-1/math/1-5-calculus-dynamics"
+  },
+  "next": {
+    "title": "04. Git & History",
+    "permalink": "/AINativeBook/category/04-git--history"
+  }
+}

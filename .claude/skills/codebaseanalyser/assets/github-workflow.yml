@@ -1,0 +1,119 @@
+# GitHub Actions CI/CD Workflow for Production Testing
+
+name: CI/CD Pipeline for Auto-Testing
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+        python-version: [3.9, 3.11]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Node.js \${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: \${{ matrix.node-version }}
+        cache: 'npm'
+
+    - name: Setup Python \${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: \${{ matrix.python-version }}
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: |
+        npm ci
+        pip install -r requirements.txt
+
+    - name: Run linting
+      run: |
+        npm run lint
+        pylint src/
+
+    - name: Run type checking
+      run: |
+        npm run type-check
+        mypy src/
+
+    - name: Run unit tests
+      run: |
+        npm run test:unit
+        python -m pytest tests/unit/
+
+    - name: Run integration tests
+      run: |
+        npm run test:integration
+        python -m pytest tests/integration/
+
+    - name: Run authentication flow tests
+      run: |
+        npm run test:auth
+        python -m pytest tests/auth/
+
+    - name: Build frontend
+      run: |
+        npm run build
+
+    - name: Build backend
+      run: |
+        python -m build
+
+    - name: Security scan
+      run: |
+        npm audit --audit-level high
+        bandit -r src/
+
+    - name: Environment validation
+      run: |
+        # Validate environment variables are properly set
+        echo "Validating environment variables..."
+        if [ -z "\$DATABASE_URL" ]; then
+          echo "DATABASE_URL not set"
+          exit 1
+        fi
+        if [ -z "\$JWT_SECRET" ]; then
+          echo "JWT_SECRET not set"
+          exit 1
+        fi
+
+  deploy-staging:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop'
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Deploy to staging
+      run: |
+        # Deploy to staging environment
+        echo "Deploying to staging..."
+        # Add your deployment commands here
+
+  deploy-production:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    environment: production
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Deploy to production
+      run: |
+        # Deploy to production environment
+        echo "Deploying to production..."
+        # Add your deployment commands here
+        # Only deploy if all tests pass

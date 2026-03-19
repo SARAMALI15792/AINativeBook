@@ -1,0 +1,824 @@
+openapi: 3.1.0
+info:
+  title: IntelliStack AI API
+  version: 1.0.0
+  description: AI Tutor and RAG Chatbot endpoints (FR-026 to FR-035, FR-066 to FR-090)
+
+servers:
+  - url: /api/v1/ai
+    description: AI API base path
+
+tags:
+  - name: Tutor
+    description: AI Tutor with Socratic guardrails
+  - name: RAG
+    description: RAG chatbot for textbook content
+  - name: Personalization
+    description: Content personalization
+
+paths:
+  # AI Tutor Endpoints (FR-026 to FR-035)
+  /tutor/conversations:
+    get:
+      tags: [Tutor]
+      summary: List recent tutor conversations
+      operationId: listTutorConversations
+      security:
+        - sessionAuth: []
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: Conversation list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ConversationSummary'
+    post:
+      tags: [Tutor]
+      summary: Start new tutor conversation
+      operationId: startTutorConversation
+      security:
+        - sessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                contextContentId:
+                  type: string
+                  format: uuid
+                  description: Optional content context
+      responses:
+        '201':
+          description: Conversation started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationResponse'
+
+  /tutor/conversations/{conversationId}:
+    get:
+      tags: [Tutor]
+      summary: Get conversation history
+      operationId: getTutorConversation
+      security:
+        - sessionAuth: []
+      parameters:
+        - name: conversationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Conversation with messages
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationDetailResponse'
+        '404':
+          description: Conversation not found
+
+  /tutor/conversations/{conversationId}/messages:
+    post:
+      tags: [Tutor]
+      summary: Send message to tutor (FR-027, FR-028, FR-029, FR-030)
+      operationId: sendTutorMessage
+      security:
+        - sessionAuth: []
+      parameters:
+        - name: conversationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TutorMessageRequest'
+      responses:
+        '202':
+          description: Message accepted, response streaming
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  streamId:
+                    type: string
+                    format: uuid
+                  streamUrl:
+                    type: string
+                    format: uri
+
+  /tutor/stream/{streamId}:
+    get:
+      tags: [Tutor]
+      summary: Stream tutor response (SSE)
+      operationId: streamTutorResponse
+      security:
+        - sessionAuth: []
+      parameters:
+        - name: streamId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: SSE stream
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                description: |
+                  Event types:
+                  - chunk: {"type": "chunk", "content": "..."}
+                  - done: {"type": "done", "messageId": "uuid"}
+                  - error: {"type": "error", "message": "..."}
+
+  /tutor/debug:
+    post:
+      tags: [Tutor]
+      summary: Request debugging guidance (FR-030)
+      operationId: requestDebuggingHelp
+      security:
+        - sessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DebuggingRequest'
+      responses:
+        '202':
+          description: Debugging session started
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  conversationId:
+                    type: string
+                    format: uuid
+                  streamId:
+                    type: string
+                    format: uuid
+
+  /tutor/code-review:
+    post:
+      tags: [Tutor]
+      summary: Request AI code review (FR-031)
+      operationId: requestCodeReview
+      security:
+        - sessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CodeReviewRequest'
+      responses:
+        '202':
+          description: Code review started
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  conversationId:
+                    type: string
+                    format: uuid
+                  streamId:
+                    type: string
+                    format: uuid
+
+  # RAG Chatbot Endpoints (FR-066 to FR-080)
+  /rag/conversations:
+    post:
+      tags: [RAG]
+      summary: Start RAG conversation
+      operationId: startRAGConversation
+      security:
+        - sessionAuth: []
+      responses:
+        '201':
+          description: RAG conversation started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RAGConversationResponse'
+
+  /rag/conversations/{conversationId}/query:
+    post:
+      tags: [RAG]
+      summary: Query textbook content (FR-066, FR-067, FR-069)
+      operationId: queryRAG
+      security:
+        - sessionAuth: []
+      parameters:
+        - name: conversationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RAGQueryRequest'
+      responses:
+        '202':
+          description: Query accepted, response streaming
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  streamId:
+                    type: string
+                    format: uuid
+
+  /rag/stream/{streamId}:
+    get:
+      tags: [RAG]
+      summary: Stream RAG response (SSE) (FR-069)
+      operationId: streamRAGResponse
+      security:
+        - sessionAuth: []
+      parameters:
+        - name: streamId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: SSE stream with citations
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                description: |
+                  Event types:
+                  - chunk: {"type": "chunk", "content": "..."}
+                  - citation: {"type": "citation", "ref": "ch:sec:para", "text": "..."}
+                  - confidence: {"type": "confidence", "level": "high|medium|low"}
+                  - done: {"type": "done", "messageId": "uuid"}
+
+  /rag/context-query:
+    post:
+      tags: [RAG]
+      summary: Query with text selection context (FR-068)
+      operationId: contextQuery
+      security:
+        - sessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContextQueryRequest'
+      responses:
+        '202':
+          description: Context query accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  conversationId:
+                    type: string
+                    format: uuid
+                  streamId:
+                    type: string
+                    format: uuid
+
+  /rag/citations/{messageId}:
+    get:
+      tags: [RAG]
+      summary: Get full citations for a RAG answer (FR-075)
+      operationId: getCitations
+      security:
+        - sessionAuth: []
+      parameters:
+        - name: messageId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Full citation details
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CitationDetail'
+
+  /rag/escalate:
+    post:
+      tags: [RAG]
+      summary: Escalate to AI tutor or instructor (FR-080)
+      operationId: escalateRAG
+      security:
+        - sessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [messageId, escalateTo]
+              properties:
+                messageId:
+                  type: string
+                  format: uuid
+                escalateTo:
+                  type: string
+                  enum: [tutor, instructor]
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: Escalation created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  escalationId:
+                    type: string
+                    format: uuid
+                  tutorConversationId:
+                    type: string
+                    format: uuid
+                    description: If escalated to tutor
+
+  # Personalization Endpoints (FR-081 to FR-090)
+  /personalization/profile:
+    get:
+      tags: [Personalization]
+      summary: Get personalization profile (FR-081)
+      operationId: getPersonalizationProfile
+      security:
+        - sessionAuth: []
+      responses:
+        '200':
+          description: Personalization profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonalizationProfile'
+    put:
+      tags: [Personalization]
+      summary: Update personalization profile
+      operationId: updatePersonalizationProfile
+      security:
+        - sessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PersonalizationProfileUpdate'
+      responses:
+        '200':
+          description: Profile updated
+
+  /personalization/profile/reset:
+    post:
+      tags: [Personalization]
+      summary: Reset personalization data (FR-089)
+      operationId: resetPersonalization
+      security:
+        - sessionAuth: []
+      responses:
+        '200':
+          description: Personalization reset
+
+  /personalization/content/{contentId}:
+    post:
+      tags: [Personalization]
+      summary: Get personalized content explanation (FR-082, FR-083)
+      operationId: getPersonalizedContent
+      security:
+        - sessionAuth: []
+      parameters:
+        - name: contentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '202':
+          description: Personalization generating
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  streamId:
+                    type: string
+                    format: uuid
+
+  /personalization/translate:
+    post:
+      tags: [Personalization]
+      summary: Translate content to Urdu (FR-084)
+      operationId: translateContent
+      security:
+        - sessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [contentId, targetLocale]
+              properties:
+                contentId:
+                  type: string
+                  format: uuid
+                targetLocale:
+                  type: string
+                  enum: [ur]
+                  description: Currently only Urdu supported
+      responses:
+        '200':
+          description: Translated content (cached)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TranslatedContent'
+        '202':
+          description: Translation in progress
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  streamId:
+                    type: string
+                    format: uuid
+
+  /personalization/exercises:
+    post:
+      tags: [Personalization]
+      summary: Generate personalized exercise variations (FR-086)
+      operationId: generatePersonalizedExercises
+      security:
+        - sessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [contentId]
+              properties:
+                contentId:
+                  type: string
+                  format: uuid
+                weakAreas:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Personalized exercises
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PersonalizedExercise'
+
+  /personalization/time-estimate:
+    get:
+      tags: [Personalization]
+      summary: Get personalized time estimate (FR-088)
+      operationId: getPersonalizedTimeEstimate
+      security:
+        - sessionAuth: []
+      parameters:
+        - name: contentId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: stageId
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Personalized time estimate
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  estimatedMinutes:
+                    type: integer
+                  basedOnPace:
+                    type: string
+                    enum: [fast, average, slow]
+                  confidenceLevel:
+                    type: string
+                    enum: [high, medium, low]
+
+components:
+  securitySchemes:
+    sessionAuth:
+      type: apiKey
+      in: cookie
+      name: session
+
+  schemas:
+    ConversationSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        conversationType:
+          type: string
+          enum: [tutor, rag_chatbot]
+        startedAt:
+          type: string
+          format: date-time
+        lastMessageAt:
+          type: string
+          format: date-time
+        messageCount:
+          type: integer
+
+    ConversationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        conversationType:
+          type: string
+          enum: [tutor, rag_chatbot]
+        contextContentId:
+          type: string
+          format: uuid
+        startedAt:
+          type: string
+          format: date-time
+
+    ConversationDetailResponse:
+      allOf:
+        - $ref: '#/components/schemas/ConversationResponse'
+        - type: object
+          properties:
+            messages:
+              type: array
+              items:
+                $ref: '#/components/schemas/Message'
+
+    Message:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        role:
+          type: string
+          enum: [user, assistant]
+        content:
+          type: string
+        citations:
+          type: array
+          items:
+            $ref: '#/components/schemas/CitationSummary'
+        createdAt:
+          type: string
+          format: date-time
+
+    TutorMessageRequest:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+          maxLength: 5000
+        codeContext:
+          type: string
+          description: Code snippet for context
+        contentReference:
+          type: string
+          format: uuid
+          description: Related content ID
+
+    DebuggingRequest:
+      type: object
+      required: [code, errorDescription]
+      properties:
+        code:
+          type: string
+          maxLength: 10000
+        errorDescription:
+          type: string
+        errorOutput:
+          type: string
+        language:
+          type: string
+          enum: [python, cpp, ros2]
+        contextContentId:
+          type: string
+          format: uuid
+
+    CodeReviewRequest:
+      type: object
+      required: [code]
+      properties:
+        code:
+          type: string
+          maxLength: 10000
+        language:
+          type: string
+          enum: [python, cpp, ros2]
+        contextContentId:
+          type: string
+          format: uuid
+        focusAreas:
+          type: array
+          items:
+            type: string
+            enum: [style, performance, safety, best_practices]
+
+    RAGConversationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        accessibleStages:
+          type: array
+          items:
+            type: integer
+        startedAt:
+          type: string
+          format: date-time
+
+    RAGQueryRequest:
+      type: object
+      required: [query]
+      properties:
+        query:
+          type: string
+          maxLength: 1000
+        followUp:
+          type: boolean
+          default: false
+          description: Is this a follow-up to previous answer (FR-074)
+
+    ContextQueryRequest:
+      type: object
+      required: [selectedText, query, contentId]
+      properties:
+        selectedText:
+          type: string
+          maxLength: 2000
+        query:
+          type: string
+          maxLength: 500
+        contentId:
+          type: string
+          format: uuid
+        selectionStart:
+          type: integer
+        selectionEnd:
+          type: integer
+
+    CitationSummary:
+      type: object
+      properties:
+        chapter:
+          type: string
+        section:
+          type: string
+        contentId:
+          type: string
+          format: uuid
+
+    CitationDetail:
+      allOf:
+        - $ref: '#/components/schemas/CitationSummary'
+        - type: object
+          properties:
+            paragraph:
+              type: integer
+            text:
+              type: string
+            relevanceScore:
+              type: number
+              format: float
+
+    PersonalizationProfile:
+      type: object
+      properties:
+        priorExperience:
+          type: string
+          enum: [none, hobbyist, academic, professional]
+        learningGoals:
+          type: array
+          items:
+            type: string
+        preferredPace:
+          type: string
+          enum: [fast, moderate, slow]
+        backgroundDomain:
+          type: string
+          enum: [manufacturing, research, education, hobbyist, other]
+        weakAreas:
+          type: array
+          items:
+            type: string
+        strongAreas:
+          type: array
+          items:
+            type: string
+        averageSessionMinutes:
+          type: integer
+
+    PersonalizationProfileUpdate:
+      type: object
+      properties:
+        priorExperience:
+          type: string
+          enum: [none, hobbyist, academic, professional]
+        learningGoals:
+          type: array
+          items:
+            type: string
+        preferredPace:
+          type: string
+          enum: [fast, moderate, slow]
+        backgroundDomain:
+          type: string
+          enum: [manufacturing, research, education, hobbyist, other]
+
+    TranslatedContent:
+      type: object
+      properties:
+        contentId:
+          type: string
+          format: uuid
+        locale:
+          type: string
+        translatedText:
+          type: string
+        disclaimer:
+          type: string
+          default: "AI-translated content. Quality may vary."
+        cachedAt:
+          type: string
+          format: date-time
+
+    PersonalizedExercise:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        originalExerciseId:
+          type: string
+          format: uuid
+        variation:
+          type: string
+        targetArea:
+          type: string
+        difficulty:
+          type: string
+          enum: [easier, same, harder]

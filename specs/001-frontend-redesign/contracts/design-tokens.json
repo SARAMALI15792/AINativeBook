@@ -1,0 +1,495 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AI Neural Network Design Tokens",
+  "description": "Design token system for Frontend Redesign feature. Shared across Next.js and Docusaurus platforms via CSS Custom Properties.",
+  "version": "1.0.0",
+  "lastUpdated": "2026-02-18",
+
+  "colors": {
+    "background": {
+      "primary": {
+        "value": "#1a1a2e",
+        "description": "Charcoal - Primary background color",
+        "cssVar": "--color-bg-primary",
+        "usage": ["Page backgrounds", "Card backgrounds", "Modal backgrounds"]
+      },
+      "secondary": {
+        "value": "#16213e",
+        "description": "Midnight Blue - Secondary background color",
+        "cssVar": "--color-bg-secondary",
+        "usage": ["Section backgrounds", "Sidebar backgrounds", "Elevated surfaces"]
+      },
+      "tertiary": {
+        "value": "#0f1419",
+        "description": "Deep Charcoal - Tertiary background for depth",
+        "cssVar": "--color-bg-tertiary",
+        "usage": ["Code blocks", "Input fields", "Dropdown menus"]
+      }
+    },
+    "accent": {
+      "cyan": {
+        "value": "#00efff",
+        "description": "Cyan - Primary accent color",
+        "cssVar": "--color-accent-cyan",
+        "usage": ["Primary buttons", "Links", "Focus indicators", "Active states"],
+        "contrast": {
+          "onDark": "8.2:1",
+          "onLight": "3.1:1"
+        }
+      },
+      "violet": {
+        "value": "#a855f7",
+        "description": "Violet - Secondary accent color",
+        "cssVar": "--color-accent-violet",
+        "usage": ["Secondary buttons", "Badges", "Highlights", "Gradients"],
+        "contrast": {
+          "onDark": "5.8:1",
+          "onLight": "4.2:1"
+        }
+      },
+      "teal": {
+        "value": "#14b8a6",
+        "description": "Teal - Tertiary accent color",
+        "cssVar": "--color-accent-teal",
+        "usage": ["Success states", "Progress indicators", "Icons", "Gradients"],
+        "contrast": {
+          "onDark": "6.5:1",
+          "onLight": "3.8:1"
+        }
+      }
+    },
+    "text": {
+      "primary": {
+        "value": "#ffffff",
+        "description": "White - Primary text color",
+        "cssVar": "--color-text-primary",
+        "usage": ["Headings", "Body text", "Labels"],
+        "contrast": {
+          "onDark": "15.2:1"
+        }
+      },
+      "secondary": {
+        "value": "#e0e0e0",
+        "description": "Light Gray - Secondary text color",
+        "cssVar": "--color-text-secondary",
+        "usage": ["Descriptions", "Captions", "Placeholders"],
+        "contrast": {
+          "onDark": "11.5:1"
+        }
+      },
+      "tertiary": {
+        "value": "#a0a0a0",
+        "description": "Medium Gray - Tertiary text color",
+        "cssVar": "--color-text-tertiary",
+        "usage": ["Disabled text", "Timestamps", "Metadata"],
+        "contrast": {
+          "onDark": "6.2:1"
+        }
+      }
+    },
+    "semantic": {
+      "success": {
+        "value": "#10b981",
+        "description": "Green - Success state",
+        "cssVar": "--color-success",
+        "usage": ["Success messages", "Checkmarks", "Positive feedback"]
+      },
+      "warning": {
+        "value": "#f59e0b",
+        "description": "Amber - Warning state",
+        "cssVar": "--color-warning",
+        "usage": ["Warning messages", "Caution indicators", "Alerts"]
+      },
+      "error": {
+        "value": "#ef4444",
+        "description": "Red - Error state",
+        "cssVar": "--color-error",
+        "usage": ["Error messages", "Validation errors", "Destructive actions"]
+      },
+      "info": {
+        "value": "#3b82f6",
+        "description": "Blue - Info state",
+        "cssVar": "--color-info",
+        "usage": ["Info messages", "Tooltips", "Help text"]
+      }
+    },
+    "glassmorphism": {
+      "background": {
+        "value": "rgba(26, 26, 46, 0.7)",
+        "description": "Semi-transparent background for glass effect",
+        "cssVar": "--glass-bg",
+        "usage": ["Glass cards", "Modals", "Overlays"]
+      },
+      "border": {
+        "value": "rgba(255, 255, 255, 0.1)",
+        "description": "Subtle border for glass effect",
+        "cssVar": "--glass-border",
+        "usage": ["Glass card borders", "Dividers"]
+      },
+      "highlight": {
+        "value": "rgba(255, 255, 255, 0.05)",
+        "description": "Subtle highlight for glass effect",
+        "cssVar": "--glass-highlight",
+        "usage": ["Glass card highlights", "Hover states"]
+      }
+    }
+  },
+
+  "spacing": {
+    "xs": {
+      "value": "0.25rem",
+      "pixels": "4px",
+      "cssVar": "--space-xs",
+      "usage": ["Icon padding", "Tight spacing"]
+    },
+    "sm": {
+      "value": "0.5rem",
+      "pixels": "8px",
+      "cssVar": "--space-sm",
+      "usage": ["Small gaps", "Compact layouts"]
+    },
+    "md": {
+      "value": "1rem",
+      "pixels": "16px",
+      "cssVar": "--space-md",
+      "usage": ["Default spacing", "Paragraph margins"]
+    },
+    "lg": {
+      "value": "1.5rem",
+      "pixels": "24px",
+      "cssVar": "--space-lg",
+      "usage": ["Section spacing", "Card padding"]
+    },
+    "xl": {
+      "value": "2rem",
+      "pixels": "32px",
+      "cssVar": "--space-xl",
+      "usage": ["Large gaps", "Page margins"]
+    },
+    "2xl": {
+      "value": "3rem",
+      "pixels": "48px",
+      "cssVar": "--space-2xl",
+      "usage": ["Section dividers", "Hero spacing"]
+    },
+    "3xl": {
+      "value": "4rem",
+      "pixels": "64px",
+      "cssVar": "--space-3xl",
+      "usage": ["Large sections", "Page headers"]
+    }
+  },
+
+  "typography": {
+    "fontFamily": {
+      "sans": {
+        "value": "'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+        "cssVar": "--font-sans",
+        "usage": ["Body text", "UI elements", "Headings"]
+      },
+      "mono": {
+        "value": "'Fira Code', 'Courier New', monospace",
+        "cssVar": "--font-mono",
+        "usage": ["Code blocks", "Technical content", "Monospace text"]
+      }
+    },
+    "fontSize": {
+      "xs": {
+        "value": "0.75rem",
+        "pixels": "12px",
+        "lineHeight": "1rem",
+        "cssVar": "--text-xs",
+        "usage": ["Captions", "Small labels", "Metadata"]
+      },
+      "sm": {
+        "value": "0.875rem",
+        "pixels": "14px",
+        "lineHeight": "1.25rem",
+        "cssVar": "--text-sm",
+        "usage": ["Small text", "Descriptions", "Secondary content"]
+      },
+      "base": {
+        "value": "1rem",
+        "pixels": "16px",
+        "lineHeight": "1.5rem",
+        "cssVar": "--text-base",
+        "usage": ["Body text", "Paragraphs", "Default size"]
+      },
+      "lg": {
+        "value": "1.125rem",
+        "pixels": "18px",
+        "lineHeight": "1.75rem",
+        "cssVar": "--text-lg",
+        "usage": ["Large body text", "Subheadings"]
+      },
+      "xl": {
+        "value": "1.25rem",
+        "pixels": "20px",
+        "lineHeight": "1.75rem",
+        "cssVar": "--text-xl",
+        "usage": ["H4 headings", "Card titles"]
+      },
+      "2xl": {
+        "value": "1.5rem",
+        "pixels": "24px",
+        "lineHeight": "2rem",
+        "cssVar": "--text-2xl",
+        "usage": ["H3 headings", "Section titles"]
+      },
+      "3xl": {
+        "value": "1.875rem",
+        "pixels": "30px",
+        "lineHeight": "2.25rem",
+        "cssVar": "--text-3xl",
+        "usage": ["H2 headings", "Page titles"]
+      },
+      "4xl": {
+        "value": "2.25rem",
+        "pixels": "36px",
+        "lineHeight": "2.5rem",
+        "cssVar": "--text-4xl",
+        "usage": ["H1 headings", "Hero titles"]
+      },
+      "5xl": {
+        "value": "3rem",
+        "pixels": "48px",
+        "lineHeight": "1",
+        "cssVar": "--text-5xl",
+        "usage": ["Display headings", "Landing page hero"]
+      }
+    },
+    "fontWeight": {
+      "normal": {
+        "value": "400",
+        "cssVar": "--font-normal",
+        "usage": ["Body text", "Paragraphs"]
+      },
+      "medium": {
+        "value": "500",
+        "cssVar": "--font-medium",
+        "usage": ["Emphasized text", "Labels"]
+      },
+      "semibold": {
+        "value": "600",
+        "cssVar": "--font-semibold",
+        "usage": ["Subheadings", "Buttons"]
+      },
+      "bold": {
+        "value": "700",
+        "cssVar": "--font-bold",
+        "usage": ["Headings", "Strong emphasis"]
+      }
+    }
+  },
+
+  "effects": {
+    "blur": {
+      "sm": {
+        "value": "blur(8px)",
+        "cssVar": "--blur-sm",
+        "usage": ["Subtle glass effect", "Light overlays"]
+      },
+      "md": {
+        "value": "blur(12px)",
+        "cssVar": "--blur-md",
+        "usage": ["Standard glass effect", "Modals"]
+      },
+      "lg": {
+        "value": "blur(16px)",
+        "cssVar": "--blur-lg",
+        "usage": ["Strong glass effect", "Hero backgrounds"]
+      }
+    },
+    "shadow": {
+      "sm": {
+        "value": "0 1px 2px 0 rgba(0, 0, 0, 0.3)",
+        "cssVar": "--shadow-sm",
+        "usage": ["Subtle elevation", "Buttons"]
+      },
+      "md": {
+        "value": "0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3)",
+        "cssVar": "--shadow-md",
+        "usage": ["Cards", "Dropdowns"]
+      },
+      "lg": {
+        "value": "0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.4)",
+        "cssVar": "--shadow-lg",
+        "usage": ["Modals", "Popovers"]
+      },
+      "xl": {
+        "value": "0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 10px 10px -5px rgba(0, 0, 0, 0.5)",
+        "cssVar": "--shadow-xl",
+        "usage": ["Large modals", "Overlays"]
+      },
+      "glow": {
+        "cyan": {
+          "value": "0 0 20px rgba(0, 239, 255, 0.5)",
+          "cssVar": "--shadow-glow-cyan",
+          "usage": ["Accent glow", "Focus states"]
+        },
+        "violet": {
+          "value": "0 0 20px rgba(168, 85, 247, 0.5)",
+          "cssVar": "--shadow-glow-violet",
+          "usage": ["Secondary glow", "Hover states"]
+        }
+      }
+    },
+    "borderRadius": {
+      "sm": {
+        "value": "0.25rem",
+        "pixels": "4px",
+        "cssVar": "--radius-sm",
+        "usage": ["Small elements", "Badges"]
+      },
+      "md": {
+        "value": "0.5rem",
+        "pixels": "8px",
+        "cssVar": "--radius-md",
+        "usage": ["Buttons", "Inputs", "Cards"]
+      },
+      "lg": {
+        "value": "0.75rem",
+        "pixels": "12px",
+        "cssVar": "--radius-lg",
+        "usage": ["Large cards", "Modals"]
+      },
+      "xl": {
+        "value": "1rem",
+        "pixels": "16px",
+        "cssVar": "--radius-xl",
+        "usage": ["Hero sections", "Large containers"]
+      },
+      "full": {
+        "value": "9999px",
+        "cssVar": "--radius-full",
+        "usage": ["Pills", "Circular buttons", "Avatars"]
+      }
+    }
+  },
+
+  "animation": {
+    "duration": {
+      "fast": {
+        "value": "150ms",
+        "cssVar": "--duration-fast",
+        "usage": ["Micro-interactions", "Hover states"]
+      },
+      "normal": {
+        "value": "300ms",
+        "cssVar": "--duration-normal",
+        "usage": ["Standard transitions", "Fades"]
+      },
+      "slow": {
+        "value": "500ms",
+        "cssVar": "--duration-slow",
+        "usage": ["Page transitions", "Complex animations"]
+      }
+    },
+    "easing": {
+      "linear": {
+        "value": "linear",
+        "cssVar": "--ease-linear",
+        "usage": ["Constant speed animations"]
+      },
+      "easeIn": {
+        "value": "cubic-bezier(0.4, 0, 1, 1)",
+        "cssVar": "--ease-in",
+        "usage": ["Accelerating animations"]
+      },
+      "easeOut": {
+        "value": "cubic-bezier(0, 0, 0.2, 1)",
+        "cssVar": "--ease-out",
+        "usage": ["Decelerating animations"]
+      },
+      "easeInOut": {
+        "value": "cubic-bezier(0.4, 0, 0.2, 1)",
+        "cssVar": "--ease-in-out",
+        "usage": ["Smooth animations"]
+      }
+    }
+  },
+
+  "breakpoints": {
+    "mobile": {
+      "value": "320px",
+      "description": "Small mobile devices",
+      "usage": ["iPhone SE, small Android phones"]
+    },
+    "tablet": {
+      "value": "768px",
+      "description": "Tablets and large phones",
+      "usage": ["iPad, large Android tablets"]
+    },
+    "desktop": {
+      "value": "1024px",
+      "description": "Desktop and laptops",
+      "usage": ["Standard desktop screens"]
+    },
+    "wide": {
+      "value": "1280px",
+      "description": "Wide desktop screens",
+      "usage": ["Large monitors"]
+    },
+    "ultrawide": {
+      "value": "1920px",
+      "description": "Ultra-wide screens",
+      "usage": ["4K monitors, ultra-wide displays"]
+    }
+  },
+
+  "zIndex": {
+    "base": {
+      "value": "0",
+      "cssVar": "--z-base",
+      "usage": ["Default layer"]
+    },
+    "dropdown": {
+      "value": "1000",
+      "cssVar": "--z-dropdown",
+      "usage": ["Dropdowns", "Tooltips"]
+    },
+    "sticky": {
+      "value": "1100",
+      "cssVar": "--z-sticky",
+      "usage": ["Sticky headers", "Fixed navigation"]
+    },
+    "modal": {
+      "value": "1200",
+      "cssVar": "--z-modal",
+      "usage": ["Modals", "Dialogs"]
+    },
+    "popover": {
+      "value": "1300",
+      "cssVar": "--z-popover",
+      "usage": ["Popovers", "Context menus"]
+    },
+    "toast": {
+      "value": "1400",
+      "cssVar": "--z-toast",
+      "usage": ["Toast notifications", "Alerts"]
+    }
+  },
+
+  "implementation": {
+    "cssCustomProperties": {
+      "location": "styles/tokens.css",
+      "description": "All tokens are implemented as CSS Custom Properties for runtime theming",
+      "example": ":root { --color-bg-primary: #1a1a2e; }"
+    },
+    "platforms": {
+      "nextjs": {
+        "import": "import '@/styles/tokens.css' in app/layout.tsx",
+        "usage": "Use CSS variables in Tailwind config or inline styles"
+      },
+      "docusaurus": {
+        "import": "@import './tokens.css' in src/css/custom.css",
+        "usage": "Override Docusaurus theme variables with custom properties"
+      }
+    },
+    "accessibility": {
+      "contrastRatios": "All color combinations meet WCAG 2.1 Level AA (4.5:1 for normal text, 3:1 for large text)",
+      "reducedMotion": "Respect prefers-reduced-motion media query",
+      "focusIndicators": "2px outline with --color-accent-cyan"
+    }
+  }
+}

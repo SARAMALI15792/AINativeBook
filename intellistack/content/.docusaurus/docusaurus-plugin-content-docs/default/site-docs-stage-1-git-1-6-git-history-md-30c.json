@@ -1,0 +1,31 @@
+{
+  "id": "stage-1/git/1-6-git-history",
+  "title": "1.6 The History of Truth",
+  "description": "DAGs, Merkle Trees, and the theory of Distributed Logic.",
+  "source": "@site/docs/stage-1/git/1-6-git-history.md",
+  "sourceDirName": "stage-1/git",
+  "slug": "/stage-1/git/1-6-git-history",
+  "permalink": "/AINativeBook/stage-1/git/1-6-git-history",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/saramali15792/physicalhumoniodbook/tree/main/intellistack/content/docs/stage-1/git/1-6-git-history.md",
+  "tags": [],
+  "version": "current",
+  "lastUpdatedBy": "Author",
+  "lastUpdatedAt": 1539502055000,
+  "frontMatter": {
+    "id": "1-6-git-history",
+    "title": "1.6 The History of Truth",
+    "sidebar_label": "1.6 Git & Version Control",
+    "description": "DAGs, Merkle Trees, and the theory of Distributed Logic."
+  },
+  "sidebar": "stage1Sidebar",
+  "previous": {
+    "title": "04. Git & History",
+    "permalink": "/AINativeBook/category/04-git--history"
+  },
+  "next": {
+    "title": "Git & History",
+    "permalink": "/AINativeBook/stage-1/git/"
+  }
+}
