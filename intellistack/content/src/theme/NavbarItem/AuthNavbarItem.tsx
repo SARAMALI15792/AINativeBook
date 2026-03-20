@@ -21,7 +21,8 @@ function AuthNavbarItemContent(): JSX.Element {
     try {
       await authClient.signOut();
       window.dispatchEvent(new Event('auth-state-changed'));
-      window.location.href = '/';
+      const baseUrl = (window as any).docusaurus?.siteConfig?.baseUrl || '/AINativeBook/';
+      window.location.href = baseUrl;
     } catch (error) {
       console.error('Logout error:', error);
     }
