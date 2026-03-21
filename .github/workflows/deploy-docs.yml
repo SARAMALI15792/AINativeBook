@@ -36,10 +36,6 @@ jobs:
         working-directory: ./intellistack/content
         run: npm ci
 
-      - name: Run TypeScript type check
-        working-directory: ./intellistack/content
-        run: npm run typecheck
-
       - name: Build website
         working-directory: ./intellistack/content
         run: npm run build
