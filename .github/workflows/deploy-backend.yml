@@ -19,7 +19,6 @@ jobs:
         run: npm install -g @railway/cli
 
       - name: Deploy Backend to Railway
-        run: railway up --service intellistack-backend --detach
-        working-directory: ./intellistack/backend
+        run: railway up --service intellistack-backend --detach --path-as-root intellistack/backend
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}

@@ -19,7 +19,6 @@ jobs:
         run: npm install -g @railway/cli
 
       - name: Deploy Auth Server to Railway
-        run: railway up --service intellistack-auth --detach
-        working-directory: ./intellistack/auth-server
+        run: railway up --service intellistack-auth --detach --path-as-root intellistack/auth-server
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
