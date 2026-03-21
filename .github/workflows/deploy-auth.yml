@@ -1,0 +1,25 @@
+name: Deploy Auth Server to Railway
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'intellistack/auth-server/**'
+      - '.github/workflows/deploy-auth.yml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy Auth Server to Railway
+        run: railway up --service intellistack-auth --detach
+        working-directory: ./intellistack/auth-server
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}

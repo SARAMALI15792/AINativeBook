@@ -39,6 +39,9 @@ jobs:
       - name: Build website
         working-directory: ./intellistack/content
         run: npm run build
+        env:
+          BETTER_AUTH_URL: ${{ secrets.RAILWAY_AUTH_URL }}
+          BACKEND_URL: ${{ secrets.RAILWAY_BACKEND_URL }}
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

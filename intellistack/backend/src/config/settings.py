@@ -56,11 +56,6 @@ class Settings(BaseSettings):
     qdrant_api_key: str | None = None
     qdrant_collection_name: str = "intellistack_content"
 
-    # OpenAI (optional for basic features, required for AI tutor/RAG)
-    openai_api_key: str = Field(default="sk-development-placeholder", alias="OPENAI_API_KEY")
-    openai_model: str = "gpt-4-turbo-preview"
-    openai_embedding_model: str = "text-embedding-3-small"
-
     # Cohere (for reranking)
     cohere_api_key: str | None = Field(default=None, alias="COHERE_API_KEY")
 
