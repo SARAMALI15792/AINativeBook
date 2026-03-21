@@ -3,6 +3,12 @@
  * Provides JWT-based authentication with OIDC discovery and JWKS endpoints
  */
 
+// Force IPv4 for all outbound connections (Docker bridge network lacks IPv6 routes)
+import dns from 'dns';
+dns.setDefaultResultOrder('ipv4first');
+import { setGlobalDispatcher, Agent } from 'undici';
+setGlobalDispatcher(new Agent({ connect: { family: 4 } }));
+
 // Load environment variables BEFORE any other imports
 // Use absolute path resolution to handle different execution contexts
 import dotenv from 'dotenv';

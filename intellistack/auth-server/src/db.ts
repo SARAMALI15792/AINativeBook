@@ -1,11 +1,11 @@
 /**
  * Database Configuration with Drizzle ORM
- * Connects to PostgreSQL via Neon for Better-Auth
+ * Connects to PostgreSQL via standard pg driver (works with local and cloud Postgres)
  */
 
-import { drizzle } from 'drizzle-orm/neon-serverless';
-import { Pool } from '@neondatabase/serverless';
-// Node.js 22 has a native WebSocket global — @neondatabase/serverless uses it automatically
+import { drizzle } from 'drizzle-orm/node-postgres';
+import pkg from 'pg';
+const { Pool } = pkg;
 
 const databaseUrl = process.env.DATABASE_URL;
 
@@ -16,7 +16,7 @@ if (!databaseUrl) {
   throw new Error('DATABASE_URL environment variable is required');
 }
 
-// Create Neon serverless connection pool (connects via WebSocket on port 443)
+// Create standard pg connection pool (connects via TCP — works with local and Neon Postgres)
 const client = new Pool({ connectionString: databaseUrl });
 
 // Initialize Drizzle ORM
