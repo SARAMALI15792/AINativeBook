@@ -1,15 +1,17 @@
 import type { Metadata, Viewport } from 'next';
-import { Sora, DM_Sans, JetBrains_Mono } from 'next/font/google';
+import { Fraunces, DM_Sans, JetBrains_Mono } from 'next/font/google';
 import '@/styles/globals.css';
 import '@/styles/animations.css';
 import { Providers } from './providers';
+import { RouterTransition } from '@/components/ui/RouterTransition';
 
-const geist = Sora({
+const fraunces = Fraunces({
   subsets: ['latin'],
   variable: '--font-heading',
   display: 'swap',
   preload: true,
-  fallback: ['system-ui', 'sans-serif'],
+  axes: ['opsz'],
+  fallback: ['Georgia', 'Times New Roman', 'serif'],
 });
 
 const dmSans = DM_Sans({
@@ -85,7 +87,8 @@ export default function RootLayout({
         <link rel="preconnect" href={process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'} />
         <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_DOCUSAURUS_URL || 'http://localhost:3002/AINativeBook'} />
       </head>
-      <body className={`${geist.variable} ${dmSans.variable} ${jetbrainsMono.variable}`}>
+      <body className={`${fraunces.variable} ${dmSans.variable} ${jetbrainsMono.variable}`}>
+        <RouterTransition />
         <Providers>{children}</Providers>
       </body>
     </html>

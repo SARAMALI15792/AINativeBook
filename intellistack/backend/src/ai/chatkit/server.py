@@ -366,7 +366,7 @@ class IntelliStackChatKitServer:
                 role="assistant",
                 content=full_response,
                 metadata={
-                    "model": "gpt-4o",
+                    "model": "gemini-2.5-flash",
                     "generation_time_ms": int(
                         (datetime.utcnow() - start_time).total_seconds() * 1000
                     ),
@@ -388,6 +388,7 @@ class IntelliStackChatKitServer:
 
             yield self._format_sse_event("response_end", {
                 "message_id": assistant_item.id,
+                "sources": self.agent.tutor._last_citations,
                 "rate_limit": {
                     "remaining": new_rate.remaining,
                     "limit": new_rate.limit,

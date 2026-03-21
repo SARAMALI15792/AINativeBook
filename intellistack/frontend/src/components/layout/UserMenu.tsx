@@ -69,9 +69,14 @@ export function UserMenu() {
 
           {/* Menu */}
           <div className="absolute right-0 mt-2 w-64 glass backdrop-blur-md rounded-lg border border-border-subtle shadow-xl z-dropdown animate-fade-in-up">
-            <div className="p-4 border-b border-border-subtle">
-              <p className="text-sm font-medium text-text-primary">{session.user.name}</p>
-              <p className="text-xs text-text-tertiary">{session.user.email}</p>
+            <div className="p-4 border-b border-border-subtle flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-accent-cyan to-accent-violet flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
+                {session.user.name?.charAt(0).toUpperCase() || 'U'}
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-text-primary">{session.user.name}</p>
+                <p className="text-xs text-text-tertiary capitalize">Active learner</p>
+              </div>
             </div>
 
             <div className="p-2">

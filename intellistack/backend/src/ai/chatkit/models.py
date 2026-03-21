@@ -21,7 +21,7 @@ class ChatKitThread(Base):
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
     enrollment_ended_at = Column(DateTime, nullable=True)  # For retention policy
-    meta = Column("meta_data", JSON, nullable=True)  # Additional context (page URL, tags, etc.)
+    meta = Column("metadata", JSON, nullable=True)  # Additional context (page URL, tags, etc.)
 
     # Relationship
     items = relationship("ChatKitThreadItem", back_populates="thread", cascade="all, delete-orphan")
@@ -39,7 +39,7 @@ class ChatKitThreadItem(Base):
     role = Column(String(20), nullable=False)  # 'user' or 'assistant'
     content = Column(Text, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    meta_data = Column("meta_data", JSON, nullable=True)  # Message metadata (page context, token count, etc.)
+    meta = Column("metadata", JSON, nullable=True)  # Message metadata (page context, token count, etc.)
 
     # Relationship
     thread = relationship("ChatKitThread", back_populates="items")

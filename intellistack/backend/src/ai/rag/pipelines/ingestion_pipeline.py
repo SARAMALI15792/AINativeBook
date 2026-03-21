@@ -1,6 +1,7 @@
 """Content ingestion pipeline for RAG system."""
 
 import logging
+from pathlib import Path
 from typing import List
 
 from sqlalchemy import select
@@ -65,10 +66,20 @@ class IngestionPipeline:
 
         content_item, stage = row
 
-        # Check if content has text to index
-        # TODO: Load actual content from content_path or database
-        # For now, using title and type as placeholder
-        text_to_index = f"{content_item.title}\n\nType: {content_item.content_type}"
+        # Load actual markdown content from the filesystem using content_path.
+        # The docs root is at intellistack/content/docs/ relative to the repo root.
+        docs_base = Path(__file__).parents[5] / "content" / "docs"
+        file_path = docs_base / f"{content_item.content_path}.md"
+        if not file_path.exists():
+            logger.warning(f"Content file not found: {file_path}")
+            return 0
+        raw_text = file_path.read_text(encoding="utf-8")
+        # Strip YAML frontmatter if present
+        text_to_index = raw_text
+        if raw_text.startswith("---"):
+            end_fm = raw_text.find("---", 3)
+            if end_fm != -1:
+                text_to_index = raw_text[end_fm + 3:].lstrip("\n")
 
         if not text_to_index or not text_to_index.strip():
             logger.warning(f"No text to index for content {content_id}")
@@ -83,7 +94,7 @@ class IngestionPipeline:
         chunks = self.chunker.chunk_text(
             text=text_to_index,
             content_id=content_id,
-            stage_id=stage.id,
+            stage_id=f"stage-{stage.number}",
             stage_name=stage.name,
             content_title=content_item.title,
             metadata={

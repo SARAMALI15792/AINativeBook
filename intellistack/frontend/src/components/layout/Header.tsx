@@ -18,7 +18,7 @@ export function Header({ transparent = false, className = '' }: HeaderProps) {
   const stagesRef = useRef<HTMLDivElement>(null);
   const { session } = useAuth();
 
-  const docusaurusUrl = process.env.NEXT_PUBLIC_DOCUSAURUS_URL || 'http://localhost:3005/AINativeBook';
+  const docusaurusUrl = (process.env.NEXT_PUBLIC_DOCUSAURUS_URL || 'http://localhost:3005/AINativeBook').replace(/\/$/, '');
 
   const stages = [
     { label: 'Stage 1: Foundations',          href: `${docusaurusUrl}/stage-1/intro` },
@@ -157,11 +157,11 @@ export function Header({ transparent = false, className = '' }: HeaderProps) {
               {session.isAuthenticated ? (
                 <UserMenu />
               ) : (
-                <Link href="/auth/login">
+                <a href={`${docusaurusUrl}/auth/login`}>
                   <Button variant="primary" size="sm">
                     Login
                   </Button>
-                </Link>
+                </a>
               )}
             </div>
 
@@ -243,11 +243,11 @@ export function Header({ transparent = false, className = '' }: HeaderProps) {
                     <UserMenu />
                   </div>
                 ) : (
-                  <Link href="/auth/login" onClick={() => setIsMobileMenuOpen(false)} className="py-2">
+                  <a href={`${docusaurusUrl}/auth/login`} className="py-2 block">
                     <Button variant="primary" size="sm" fullWidth>
                       Login
                     </Button>
-                  </Link>
+                  </a>
                 )}
               </nav>
             </div>

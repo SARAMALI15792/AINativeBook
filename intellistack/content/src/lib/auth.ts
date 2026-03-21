@@ -140,14 +140,15 @@ export const authClient = {
     }
 
     try {
-      const callback = callbackURL || `${window.location.origin}/auth/callback`;
-      const response = await fetch(`${this.baseURL}/api/auth/oauth/${provider}`, {
+      const baseUrl = ((window as any).docusaurus?.siteConfig?.baseUrl || '/AINativeBook/').replace(/\/$/, '');
+      const callback = callbackURL || `${window.location.origin}${baseUrl}/auth/callback`;
+      const response = await fetch(`${this.baseURL}/api/auth/sign-in/social`, {
         method: 'POST',
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ callbackURL: callback }),
+        body: JSON.stringify({ provider, callbackURL: callback }),
       });
 
       const data = await response.json();

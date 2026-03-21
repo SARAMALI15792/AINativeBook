@@ -3,8 +3,9 @@
  * Connects to PostgreSQL via Neon for Better-Auth
  */
 
-import { drizzle } from 'drizzle-orm/postgres-js';
-import postgres from 'postgres';
+import { drizzle } from 'drizzle-orm/neon-serverless';
+import { Pool } from '@neondatabase/serverless';
+// Node.js 22 has a native WebSocket global — @neondatabase/serverless uses it automatically
 
 const databaseUrl = process.env.DATABASE_URL;
 
@@ -15,14 +16,8 @@ if (!databaseUrl) {
   throw new Error('DATABASE_URL environment variable is required');
 }
 
-// Create PostgreSQL connection pool
-const client = postgres(databaseUrl, {
-  // Connection pool settings for better performance
-  max: 25, // Maximum number of connections
-  idle_timeout: 30, // Close idle connections after 30s
-  connect_timeout: 10, // Connection timeout in seconds
-  prepare: false, // Disable prepared statements for Neon compatibility
-});
+// Create Neon serverless connection pool (connects via WebSocket on port 443)
+const client = new Pool({ connectionString: databaseUrl });
 
 // Initialize Drizzle ORM
 export const db = drizzle(client, {
@@ -32,7 +27,7 @@ export const db = drizzle(client, {
 // Health check function
 export async function checkDatabaseConnection(): Promise<boolean> {
   try {
-    await client`SELECT 1`;
+    await client.query('SELECT 1');
     console.log('✅ Database connection successful');
     return true;
   } catch (error) {

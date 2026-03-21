@@ -51,8 +51,15 @@
   --space-2xl: 3rem;
   --space-3xl: 4rem;
 
+  /* ===== Brand Variables (Premium Redesign) ===== */
+  --color-brand: #6366f1;
+  --color-brand-dim: #4f46e5;
+  --color-surface: #0d0d12;
+  --color-surface-elevated: #16161f;
+  --color-border: rgba(255,255,255,0.08);
+
   /* ===== Typography ===== */
-  --font-heading: 'Sora', system-ui, -apple-system, sans-serif;
+  --font-heading: 'Fraunces', Georgia, 'Times New Roman', serif;
   --font-body: 'DM Sans', system-ui, -apple-system, sans-serif;
   --font-sans: 'DM Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;

@@ -1,7 +1,7 @@
 import React from 'react';
 import { NeuralNetworkBackground } from '@/components/effects/NeuralNetworkBackground';
 import { Hero } from '@/components/landing/Hero';
-import { FeatureCard } from '@/components/landing/FeatureCard';
+import { BentoGrid } from '@/components/landing/BentoGrid';
 import { TestimonialCarousel } from '@/components/landing/TestimonialCarousel';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
@@ -114,21 +114,7 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {features.map((feature, index) => (
-              <div
-                key={index}
-                className="animate-fade-in-up"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                <FeatureCard
-                  icon={feature.icon}
-                  title={feature.title}
-                  description={feature.description}
-                />
-              </div>
-            ))}
-          </div>
+          <BentoGrid items={features} />
         </div>
       </section>
 

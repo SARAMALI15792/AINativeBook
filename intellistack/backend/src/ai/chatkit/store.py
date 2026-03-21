@@ -63,7 +63,7 @@ class PostgresChatKitStore:
             course_id=course_id,
             lesson_stage=lesson_stage,
             status="active",
-            metadata=metadata or {},
+            meta=metadata or {},
             created_at=datetime.utcnow(),
             updated_at=datetime.utcnow(),
         )
@@ -159,7 +159,7 @@ class PostgresChatKitStore:
             thread_id=thread_id,
             role=role,
             content=content,
-            metadata=metadata or {},
+            meta=metadata or {},
             created_at=datetime.utcnow(),
         )
 
@@ -282,7 +282,7 @@ class PostgresChatKitStore:
         if status is not None:
             thread.status = status
         if metadata is not None:
-            thread.metadata = {**thread.metadata, **metadata}
+            thread.meta = {**(thread.meta or {}), **metadata}
 
         thread.updated_at = datetime.utcnow()
 

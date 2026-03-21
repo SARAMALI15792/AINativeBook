@@ -1,20 +1,52 @@
 /**
  * Auth initialization module for Docusaurus
- * Runs on client-side to initialize auth state
+ * Runs on client-side to initialize auth state and restore theme preference.
  */
 
 import ExecutionEnvironment from '@docusaurus/ExecutionEnvironment';
 
-// Only run on client side
 if (ExecutionEnvironment.canUseDOM) {
-  // Initialize auth client when module loads
   import('../lib/auth-client')
     .then(async ({ getAuthClient }) => {
       try {
         const client = getAuthClient();
-        await client.getSession();
+        const session = await client.getSession();
+
+        // Restore theme preference from user profile
+        if (session?.data) {
+          try {
+            const backendUrl = (window as any).docusaurus?.siteConfig?.customFields?.backendUrl || 'http://localhost:8000';
+            const res = await fetch(`${backendUrl}/api/v1/users/preferences`, { credentials: 'include' });
+            if (res.ok) {
+              // Theme is stored in user.preferences on the auth server
+            }
+          } catch {
+            // Non-critical — silently ignore
+          }
+
+          // Check theme from auth server user preferences
+          try {
+            const authServerUrl = (window as any).docusaurus?.siteConfig?.customFields?.betterAuthUrl || 'http://localhost:3001';
+            const sessionRes = await fetch(`${authServerUrl}/api/auth/get-session`, { credentials: 'include' });
+            if (sessionRes.ok) {
+              const sessionData = await sessionRes.json();
+              const savedTheme = sessionData?.user?.preferences?.theme;
+              if (savedTheme === 'light' || savedTheme === 'dark') {
+                // Docusaurus exposes setColorMode via the colorMode store
+                const colorModeKey = 'docusaurus.colorMode';
+                const current = localStorage.getItem(colorModeKey);
+                if (current !== savedTheme) {
+                  localStorage.setItem(colorModeKey, savedTheme);
+                  document.documentElement.setAttribute('data-theme', savedTheme);
+                }
+              }
+            }
+          } catch {
+            // Silent — non-critical
+          }
+        }
       } catch {
-        // Auth server unreachable — silent fail, user not logged in
+        // Auth server unreachable — silent fail
       }
     })
     .catch(() => {
@@ -22,21 +54,12 @@ if (ExecutionEnvironment.canUseDOM) {
     });
 }
 
-/**
- * Called on route change
- * Can be used to refresh auth state or track page views
- */
 export function onRouteDidUpdate({ location, previousLocation }) {
-  // Only refresh if route actually changed
   if (location.pathname !== previousLocation?.pathname) {
-    // Could refresh session here if needed
-    // authClient.getSession();
+    // Route changed — could refresh session here if needed
   }
 }
 
-/**
- * Called when route update starts
- */
 export function onRouteUpdate({ location, previousLocation }) {
   // Can be used to show loading state
 }

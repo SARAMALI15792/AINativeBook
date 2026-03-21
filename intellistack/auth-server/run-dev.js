@@ -1,3 +1,9 @@
+// Force fetch() to use IPv4 — IPv6 is unreachable on this network, causing
+// 10s connect timeouts when Node.js calls external OAuth APIs (GitHub, Google).
+// This only affects undici/fetch; Neon's WebSocket uses its own transport.
+import { Agent, setGlobalDispatcher } from 'undici';
+setGlobalDispatcher(new Agent({ connect: { family: 4 } }));
+
 // Load dotenv first with absolute path, then import the main app
 import dotenv from 'dotenv';
 import path from 'path';

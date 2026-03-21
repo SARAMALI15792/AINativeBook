@@ -48,9 +48,8 @@ class ApiClient {
   private async getAuthToken(): Promise<string | null> {
     try {
       // Dynamically import auth client to avoid circular dependencies
-      const { getAuthClient } = await import('@/lib/auth');
-      const client = getAuthClient();
-      const token = await client.getJwtToken();
+      const { getJwtToken } = await import('@/lib/auth');
+      const token = await getJwtToken();
       return token;
     } catch (error) {
       console.warn('Failed to get auth token:', error);

@@ -4,7 +4,7 @@ Handles onboarding flow and preference management
 Sprint 3: Personalization Engine
 """
 
-from typing import Optional
+from typing import Literal, Optional
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import func, select
@@ -351,6 +351,38 @@ async def reset_preferences(
         logger.error("reset_preferences_error", error=str(e))
         await db.rollback()
         raise HTTPException(status_code=500, detail="Failed to reset preferences")
+
+
+class ThemeRequest(BaseModel):
+    theme: Literal["dark", "light"]
+
+
+@router.patch("/theme")
+async def update_theme_preference(
+    body: ThemeRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Update the user's preferred UI theme (dark / light).
+    Stored in user.preferences JSON column so it can be restored on login.
+    """
+    try:
+        # Load existing preferences dict (may be None)
+        prefs = dict(current_user.preferences or {})
+        prefs["theme"] = body.theme
+
+        current_user.preferences = prefs
+        db.add(current_user)
+        await db.commit()
+
+        logger.info("theme_updated", user_id=str(current_user.id), theme=body.theme)
+        return {"message": f"Theme updated to {body.theme}", "theme": body.theme}
+
+    except Exception as e:
+        logger.error("update_theme_error", error=str(e))
+        await db.rollback()
+        raise HTTPException(status_code=500, detail="Failed to update theme preference")
 
 
 @router.post("/language")

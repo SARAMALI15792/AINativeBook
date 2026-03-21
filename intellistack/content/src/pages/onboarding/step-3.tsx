@@ -2,29 +2,30 @@ import React, { useState } from 'react';
 import BrowserOnly from '@docusaurus/BrowserOnly';
 import Layout from '@theme/Layout';
 import StepIndicator from '../../components/onboarding/StepIndicator';
+import TriangleLoader from '../../components/ui/TriangleLoader';
 import { authClient } from '../../lib/auth';
 
+const LEARNING_PATHS = [
+  { value: 'solo',     emoji: '🧑‍💻', label: 'Solo Learner',     desc: 'Self-paced, independent' },
+  { value: 'team',     emoji: '👥',    label: 'Part of a Team',   desc: 'Collaborative projects' },
+  { value: 'academic', emoji: '🎓',    label: 'Academic Cohort',  desc: 'University / institution' },
+];
+
+const GOALS = [
+  { value: 'career_change',           label: 'Career Change' },
+  { value: 'academic_research',        label: 'Academic Research' },
+  { value: 'hobby',                    label: 'Hobby' },
+  { value: 'professional_development', label: 'Professional Development' },
+];
+
 function Step3Content() {
-  const [learningGoals, setLearningGoals] = useState<string[]>([]);
-  const [learningStyle, setLearningStyle] = useState('');
-  const [topicsOfInterest, setTopicsOfInterest] = useState<string[]>([]);
+  const [path, setPath] = useState('');
+  const [goals, setGoals] = useState<string[]>([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleGoalToggle = (goal: string) => {
-    setLearningGoals(prev =>
-      prev.includes(goal)
-        ? prev.filter(g => g !== goal)
-        : [...prev, goal]
-    );
-  };
-
-  const handleTopicToggle = (topic: string) => {
-    setTopicsOfInterest(prev =>
-      prev.includes(topic)
-        ? prev.filter(t => t !== topic)
-        : [...prev, topic]
-    );
+  const toggleGoal = (value: string) => {
+    setGoals(prev => prev.includes(value) ? prev.filter(g => g !== value) : [...prev, value]);
   };
 
   const handleNext = async (e: React.FormEvent) => {
@@ -33,55 +34,28 @@ function Step3Content() {
     setLoading(true);
 
     try {
-      // Validate inputs
-      if (learningGoals.length === 0) {
-        setError('Please select at least one learning goal');
-        setLoading(false);
-        return;
-      }
+      if (!path) { setError('Please select your learning path'); setLoading(false); return; }
+      if (goals.length === 0) { setError('Please select at least one goal'); setLoading(false); return; }
 
-      if (!learningStyle || !['visual', 'reading', 'hands_on', 'mixed'].includes(learningStyle)) {
-        setError('Please select your learning style');
-        setLoading(false);
-        return;
-      }
-
-      if (topicsOfInterest.length === 0) {
-        setError('Please select at least one topic of interest');
-        setLoading(false);
-        return;
-      }
-
-      // Save step data
       const response = await fetch(`${authClient.baseURL}/api/auth/onboarding/step`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
           step: 'interests',
           data: {
-            learning_goals: learningGoals,
-            learning_style: learningStyle,
-            topics_of_interest: topicsOfInterest,
+            learning_goals: goals,
+            learning_style: path === 'solo' ? 'hands_on' : path === 'team' ? 'mixed' : 'reading',
+            topics_of_interest: ['ros2', 'ai_integration'],
           },
         }),
       });
-
       const result = await response.json();
+      if (!response.ok) { setError(result.message || 'Failed to save'); setLoading(false); return; }
 
-      if (!response.ok) {
-        setError(result.message || 'Failed to save step data');
-        setLoading(false);
-        return;
-      }
-
-      // Navigate to next step
       const baseUrl = (window as any).docusaurus?.siteConfig?.baseUrl || '/AINativeBook/';
       window.location.href = `${baseUrl}onboarding/step-4`;
-    } catch (err) {
-      console.error('Error saving step 3:', err);
+    } catch {
       setError('An unexpected error occurred. Please try again.');
       setLoading(false);
     }
@@ -92,186 +66,59 @@ function Step3Content() {
     window.location.href = `${baseUrl}onboarding/step-2`;
   };
 
-  const goalOptions = [
-    { value: 'career_change', label: 'Career Change' },
-    { value: 'academic_research', label: 'Academic Research' },
-    { value: 'hobby', label: 'Hobby / Personal Interest' },
-    { value: 'professional_development', label: 'Professional Development' },
-  ];
-
-  const topicOptions = [
-    { value: 'ros2', label: 'ROS 2 Fundamentals' },
-    { value: 'simulation', label: 'Simulation (Gazebo)' },
-    { value: 'perception', label: 'Perception & Computer Vision' },
-    { value: 'ai_integration', label: 'AI Integration' },
-    { value: 'hardware', label: 'Hardware & Electronics' },
-  ];
-
   return (
-    <Layout title="Onboarding - Step 3" description="Academic Interests">
-      <div style={{
-        maxWidth: '600px',
-        margin: '4rem auto',
-        padding: '2rem',
-      }}>
-        <StepIndicator currentStep={3} />
+    <Layout title="Onboarding - Step 3" description="Your Learning Path" noFooter>
+      <div className="onboarding-wrapper">
+        <div className="onboarding-card">
+          <StepIndicator currentStep={3} />
+          <div className="onboarding-card-body">
+            <h1 className="onboarding-heading">How do you learn?</h1>
+            <p className="onboarding-subtext">Help us match you with the right experience.</p>
 
-        <div style={{
-          backgroundColor: 'var(--ifm-background-surface-color)',
-          padding: '2rem',
-          borderRadius: '8px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-        }}>
-          <h1 style={{ marginBottom: '0.5rem' }}>Academic Interests</h1>
-          <p style={{ color: 'var(--ifm-color-emphasis-600)', marginBottom: '2rem' }}>
-            Help us personalize your learning experience.
-          </p>
+            {error && <div className="onboarding-error">{error}</div>}
 
-          {error && (
-            <div style={{
-              padding: '1rem',
-              marginBottom: '1rem',
-              backgroundColor: '#fee',
-              border: '1px solid #fcc',
-              borderRadius: '4px',
-              color: '#c33',
-            }}>
-              {error}
-            </div>
-          )}
-
-          <form onSubmit={handleNext}>
-            <div style={{ marginBottom: '1.5rem' }}>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
-                Learning Goals * (Select all that apply)
-              </label>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                {goalOptions.map(option => (
-                  <label
-                    key={option.value}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      padding: '0.75rem',
-                      border: '1px solid var(--ifm-color-emphasis-300)',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      backgroundColor: learningGoals.includes(option.value)
-                        ? 'var(--ifm-color-primary-lightest)'
-                        : 'transparent',
-                    }}
+            <form onSubmit={handleNext}>
+              <label className="onboarding-label" style={{ marginBottom: '0.75rem', display: 'block' }}>Learning context</label>
+              <div className="onboarding-icon-cards" style={{ marginBottom: '1.75rem' }}>
+                {LEARNING_PATHS.map(lp => (
+                  <button
+                    key={lp.value}
+                    type="button"
+                    onClick={() => setPath(lp.value)}
+                    className={`onboarding-icon-card${path === lp.value ? ' active' : ''}`}
                   >
-                    <input
-                      type="checkbox"
-                      checked={learningGoals.includes(option.value)}
-                      onChange={() => handleGoalToggle(option.value)}
-                      disabled={loading}
-                      style={{ marginRight: '0.75rem' }}
-                    />
-                    {option.label}
-                  </label>
+                    <span className="onboarding-icon-card-emoji">{lp.emoji}</span>
+                    <span className="onboarding-icon-card-label" style={{ fontWeight: 600, color: path === lp.value ? undefined : '#f1f5f9', marginBottom: '0.25rem', display: 'block', fontSize: '0.875rem' }}>{lp.label}</span>
+                    <span className="onboarding-icon-card-label" style={{ fontSize: '0.75rem' }}>{lp.desc}</span>
+                  </button>
                 ))}
               </div>
-            </div>
 
-            <div style={{ marginBottom: '1.5rem' }}>
-              <label htmlFor="learningStyle" style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
-                Preferred Learning Style *
-              </label>
-              <select
-                id="learningStyle"
-                value={learningStyle}
-                onChange={(e) => setLearningStyle(e.target.value)}
-                disabled={loading}
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  fontSize: '1rem',
-                  border: '1px solid var(--ifm-color-emphasis-300)',
-                  borderRadius: '4px',
-                  backgroundColor: 'var(--ifm-background-color)',
-                }}
-                required
-              >
-                <option value="">Select your learning style</option>
-                <option value="visual">Visual - Videos and diagrams</option>
-                <option value="reading">Reading - Text and documentation</option>
-                <option value="hands_on">Hands-on - Practice and experiments</option>
-                <option value="mixed">Mixed - Combination of all</option>
-              </select>
-            </div>
-
-            <div style={{ marginBottom: '2rem' }}>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
-                Topics of Interest * (Select all that apply)
-              </label>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                {topicOptions.map(option => (
-                  <label
-                    key={option.value}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      padding: '0.75rem',
-                      border: '1px solid var(--ifm-color-emphasis-300)',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      backgroundColor: topicsOfInterest.includes(option.value)
-                        ? 'var(--ifm-color-primary-lightest)'
-                        : 'transparent',
-                    }}
+              <label className="onboarding-label">Learning goals</label>
+              <div className="onboarding-pills">
+                {GOALS.map(g => (
+                  <button
+                    key={g.value}
+                    type="button"
+                    onClick={() => toggleGoal(g.value)}
+                    className={`onboarding-pill${goals.includes(g.value) ? ' active' : ''}`}
                   >
-                    <input
-                      type="checkbox"
-                      checked={topicsOfInterest.includes(option.value)}
-                      onChange={() => handleTopicToggle(option.value)}
-                      disabled={loading}
-                      style={{ marginRight: '0.75rem' }}
-                    />
-                    {option.label}
-                  </label>
+                    {g.label}
+                  </button>
                 ))}
               </div>
-            </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <button
-                type="button"
-                onClick={handleBack}
-                disabled={loading}
-                style={{
-                  padding: '0.75rem 2rem',
-                  fontSize: '1rem',
-                  fontWeight: 'bold',
-                  color: 'var(--ifm-color-emphasis-700)',
-                  backgroundColor: 'transparent',
-                  border: '1px solid var(--ifm-color-emphasis-300)',
-                  borderRadius: '4px',
-                  cursor: loading ? 'not-allowed' : 'pointer',
-                  opacity: loading ? 0.6 : 1,
-                }}
-              >
-                Back
-              </button>
-              <button
-                type="submit"
-                disabled={loading}
-                style={{
-                  padding: '0.75rem 2rem',
-                  fontSize: '1rem',
-                  fontWeight: 'bold',
-                  color: 'white',
-                  backgroundColor: 'var(--ifm-color-primary)',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: loading ? 'not-allowed' : 'pointer',
-                  opacity: loading ? 0.6 : 1,
-                }}
-              >
-                {loading ? 'Saving...' : 'Next'}
-              </button>
-            </div>
-          </form>
+              <div className="onboarding-nav">
+                <button type="button" onClick={handleBack} className="onboarding-btn-back" disabled={loading}>
+                  ← Back
+                </button>
+                <button type="submit" disabled={loading} className="onboarding-btn-continue">
+                  {loading && <TriangleLoader size="sm" />}
+                  Continue →
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </Layout>
@@ -280,7 +127,7 @@ function Step3Content() {
 
 export default function Step3Page() {
   return (
-    <BrowserOnly fallback={<div>Loading...</div>}>
+    <BrowserOnly fallback={<div style={{ minHeight: '100vh' }} />}>
       {() => <Step3Content />}
     </BrowserOnly>
   );

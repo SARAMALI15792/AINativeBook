@@ -2,75 +2,40 @@ import React from 'react';
 
 interface StepIndicatorProps {
   currentStep: number;
+  totalSteps?: number;
 }
 
-export default function StepIndicator({ currentStep }: StepIndicatorProps) {
-  const steps = [
-    { number: 1, label: 'Basic Information' },
-    { number: 2, label: 'Educational Background' },
-    { number: 3, label: 'Academic Interests' },
-    { number: 4, label: 'Additional Details' },
-  ];
+export default function StepIndicator({ currentStep, totalSteps = 4 }: StepIndicatorProps) {
+  const progress = (currentStep / totalSteps) * 100;
 
   return (
-    <div style={{
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginBottom: '3rem',
-      gap: '1rem',
-    }}>
-      {steps.map((step, index) => (
-        <React.Fragment key={step.number}>
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '0.5rem',
-          }}>
-            <div style={{
-              width: '40px',
-              height: '40px',
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontWeight: 'bold',
-              backgroundColor: step.number === currentStep
-                ? 'var(--ifm-color-primary)'
-                : step.number < currentStep
-                  ? 'var(--ifm-color-success)'
-                  : 'var(--ifm-color-emphasis-300)',
-              color: step.number <= currentStep ? 'white' : 'var(--ifm-color-emphasis-600)',
-              transition: 'all 0.3s ease',
-            }}>
-              {step.number < currentStep ? '✓' : step.number}
-            </div>
-            <span style={{
-              fontSize: '0.875rem',
-              color: step.number === currentStep
-                ? 'var(--ifm-color-primary)'
-                : 'var(--ifm-color-emphasis-600)',
-              fontWeight: step.number === currentStep ? 'bold' : 'normal',
-              textAlign: 'center',
-              maxWidth: '120px',
-            }}>
-              {step.label}
-            </span>
-          </div>
-          {index < steps.length - 1 && (
-            <div style={{
-              width: '60px',
-              height: '2px',
-              backgroundColor: step.number < currentStep
-                ? 'var(--ifm-color-success)'
-                : 'var(--ifm-color-emphasis-300)',
-              marginBottom: '2rem',
-              transition: 'all 0.3s ease',
-            }} />
-          )}
-        </React.Fragment>
-      ))}
-    </div>
+    <>
+      {/* Thin progress bar at top of card */}
+      <div className="onboarding-progress-bar-track">
+        <div
+          className="onboarding-progress-bar-fill"
+          style={{ width: `${progress}%` }}
+          role="progressbar"
+          aria-valuenow={currentStep}
+          aria-valuemin={1}
+          aria-valuemax={totalSteps}
+        />
+      </div>
+
+      {/* Step counter row: label left, dot indicators right */}
+      <div className="onboarding-step-counter" aria-label={`Step ${currentStep} of ${totalSteps}`}>
+        <span>Step {currentStep} of {totalSteps}</span>
+        <div className="onboarding-step-dots">
+          {Array.from({ length: totalSteps }).map((_, i) => (
+            <div
+              key={i}
+              className={`onboarding-step-dot ${
+                i + 1 === currentStep ? 'active' : i + 1 < currentStep ? 'done' : ''
+              }`}
+            />
+          ))}
+        </div>
+      </div>
+    </>
   );
 }

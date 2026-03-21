@@ -1,17 +1,13 @@
 import React, { useEffect } from 'react';
-import { useHistory } from '@docusaurus/router';
 
 /**
  * Landing page redirect
  * Immediately redirects to the first stage of the learning path
  */
 export default function Home(): JSX.Element {
-  const history = useHistory();
-
   useEffect(() => {
-    // Redirect to Stage 1 intro
-    history.replace('/stage-1/intro');
-  }, [history]);
+    window.location.replace('/AINativeBook/stage-1/intro');
+  }, []);
 
   // Show minimal loading state during redirect
   return (

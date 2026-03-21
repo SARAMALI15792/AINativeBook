@@ -50,6 +50,9 @@ def _get_connect_args(database_url: str, statement_timeout_ms: int = 30000) -> d
         "statement_timeout": str(statement_timeout_ms),
         "application_name": "intellistack-backend",
     }
+    # Disable asyncpg prepared statement cache to avoid stale plan errors
+    # after schema migrations (InvalidCachedStatementError from Neon/PgBouncer)
+    connect_args["statement_cache_size"] = 0
     return connect_args
 
 

@@ -81,7 +81,6 @@ export function ExperienceLevelSelector({ value, onChange, className = '' }: Exp
             >
               <GlassCard
                 blur="md"
-                opacity={0.7}
                 border={true}
                 hover={true}
                 className={`p-6 transition-all duration-normal ${

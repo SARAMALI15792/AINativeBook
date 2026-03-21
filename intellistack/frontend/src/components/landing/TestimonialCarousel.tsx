@@ -93,7 +93,7 @@ export function TestimonialCarousel({
       onTouchEnd={handleTouchEnd}
     >
       {/* Testimonial Card */}
-      <GlassCard blur="md" opacity={0.8} border={true} className="p-8 md:p-12">
+      <GlassCard blur="md" border={true} className="p-8 md:p-12">
         <div className="space-y-6 animate-fade-in">
           {/* Rating Stars */}
           <div className="flex space-x-1">

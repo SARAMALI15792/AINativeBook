@@ -1,19 +1,18 @@
 """
 ChatKit Socratic Tutor Agent
 
-AI tutor using OpenAI Agents SDK with Socratic teaching methodology.
+AI tutor using Socratic teaching methodology.
 Integrates RAG for context-aware responses and stage-based access control.
+Uses Google Gemini via LLMClient for streaming generation.
 """
 
 import logging
 from typing import List, Optional, AsyncGenerator, Dict, Any
 
-from agents import Agent, Runner, function_tool
-from pydantic import BaseModel, Field
-
 from src.ai.rag.retrieval import HybridRetriever
 from src.ai.rag.schemas import RetrievalResult
 from src.ai.tutor.guardrails import SocraticGuardrails
+from src.ai.shared.llm_client import LLMClient
 from .context import RequestContext
 
 logger = logging.getLogger(__name__)
@@ -50,36 +49,6 @@ When referencing course content, use: [Source: Stage X - Lesson Title]
 Be encouraging, patient, and supportive. Learning takes time."""
 
 
-class RAGSearchResult(BaseModel):
-    """Result from RAG search."""
-    text: str
-    source: str
-    stage: int
-    relevance: float
-
-
-@function_tool
-async def search_course_content(
-    query: str,
-    stage_limit: int = 5,
-) -> List[RAGSearchResult]:
-    """
-    Search course content for relevant information.
-
-    Only returns results from stages the student has unlocked.
-
-    Args:
-        query: Search query
-        stage_limit: Maximum stage to search (based on user access)
-
-    Returns:
-        List of relevant content chunks with sources
-    """
-    # This is a placeholder - actual implementation uses HybridRetriever
-    # The function is defined for the agent to use
-    return []
-
-
 class SocraticTutorAgent:
     """
     Socratic AI Tutor using OpenAI Agents SDK.
@@ -94,17 +63,18 @@ class SocraticTutorAgent:
     def __init__(
         self,
         retriever: Optional[HybridRetriever] = None,
-        model: str = "gpt-4o",
+        llm_client: Optional[LLMClient] = None,
     ):
         """
         Initialize tutor agent.
 
         Args:
             retriever: Hybrid retriever for RAG
-            model: OpenAI model to use
+            llm_client: Google Gemini LLM client for streaming generation
         """
         self.retriever = retriever
-        self.model = model
+        self.llm_client = llm_client
+        self._last_citations: List[Dict[str, Any]] = []
 
     async def generate_response(
         self,
@@ -123,6 +93,9 @@ class SocraticTutorAgent:
         Yields:
             Response text chunks
         """
+        # Reset citations for this request
+        self._last_citations = []
+
         # Build system prompt with context
         system_prompt = SOCRATIC_SYSTEM_PROMPT.format(
             accessible_stages=", ".join(f"Stage {s}" for s in context.accessible_stages),
@@ -131,7 +104,6 @@ class SocraticTutorAgent:
 
         # Perform RAG retrieval if retriever available
         rag_context = ""
-        citations = []
 
         if self.retriever:
             try:
@@ -143,8 +115,13 @@ class SocraticTutorAgent:
 
                 if results:
                     rag_context = self._format_rag_results(results)
-                    citations = [
-                        {"text": r.text[:100], "source": r.metadata.get("source", "Unknown")}
+                    self._last_citations = [
+                        {
+                            "stage_name": r.stage_name,
+                            "content_title": r.content_title,
+                            "text": r.text[:200],
+                            "score": r.score,
+                        }
                         for r in results
                     ]
                     logger.info(f"RAG retrieved {len(results)} relevant chunks")
@@ -154,39 +131,39 @@ class SocraticTutorAgent:
         # Build messages
         messages = []
 
-        # Add system message
+        # Merge RAG context and guardrail into the single system prompt
+        # (Gemini only accepts one system instruction; mid-conversation system
+        #  messages are not valid and overwrite the main prompt in _convert_messages)
         if rag_context:
             system_prompt += f"\n\n## Relevant Course Content\n{rag_context}"
 
+        if self._is_direct_answer_request(user_message):
+            from src.ai.tutor.models import IntentType
+            guardrail = SocraticGuardrails.generate_redirect_response(
+                intent=IntentType.CONCEPT,
+                original_request=user_message,
+            )
+            system_prompt += f"\n\n## Guardrail\n{guardrail}"
+
         messages.append({"role": "system", "content": system_prompt})
 
-        # Add conversation history
+        # Add conversation history (Gemini requires alternating user/model turns)
         if conversation_history:
-            for msg in conversation_history[-10:]:  # Last 10 messages
-                messages.append({
-                    "role": msg.get("role", "user"),
-                    "content": msg.get("content", ""),
-                })
+            last_role = None
+            for msg in conversation_history[-10:]:
+                role = msg.get("role", "user")
+                content = msg.get("content", "")
+                # Skip empty messages or consecutive same-role turns
+                if not content or role == last_role:
+                    continue
+                messages.append({"role": role, "content": content})
+                last_role = role
 
         # Add current user message
         messages.append({"role": "user", "content": user_message})
 
-        # Check for direct answer requests and add guardrail
-        if self._is_direct_answer_request(user_message):
-            messages.append({
-                "role": "system",
-                "content": SocraticGuardrails.get_redirect_response(),
-            })
-
-        # Create and run agent
+        # Stream response via Gemini
         try:
-            agent = Agent(
-                name="SocraticTutor",
-                model=self.model,
-                instructions=system_prompt,
-            )
-
-            # Use Runner for streaming
             async for chunk in self._stream_response(messages):
                 yield chunk
 
@@ -199,33 +176,25 @@ class SocraticTutorAgent:
         messages: List[Dict[str, str]],
     ) -> AsyncGenerator[str, None]:
         """
-        Stream response from OpenAI.
+        Stream response from Google Gemini via LLMClient.
 
         Args:
-            messages: Conversation messages
+            messages: OpenAI-style conversation messages
 
         Yields:
             Response text chunks
         """
-        import openai
-
-        client = openai.AsyncOpenAI()
-
+        if self.llm_client is None:
+            raise ValueError("LLMClient required. Pass llm_client to SocraticTutorAgent.__init__.")
         try:
-            stream = await client.chat.completions.create(
-                model=self.model,
+            async for chunk in self.llm_client.chat_completion_stream(
                 messages=messages,
-                stream=True,
                 temperature=0.7,
                 max_tokens=1024,
-            )
-
-            async for chunk in stream:
-                if chunk.choices[0].delta.content:
-                    yield chunk.choices[0].delta.content
-
+            ):
+                yield chunk
         except Exception as e:
-            logger.error(f"OpenAI streaming failed: {e}")
+            logger.error(f"Gemini streaming failed: {e}")
             raise
 
     def _format_rag_results(self, results: List[RetrievalResult]) -> str:
@@ -240,10 +209,8 @@ class SocraticTutorAgent:
         """
         formatted = []
         for i, result in enumerate(results, 1):
-            source = result.metadata.get("source", "Unknown")
-            stage = result.metadata.get("stage", "?")
             formatted.append(
-                f"[{i}] Source: Stage {stage} - {source}\n{result.text}\n"
+                f"[{i}] Source: {result.stage_name} - {result.content_title}\n{result.text}\n"
             )
         return "\n".join(formatted)
 
@@ -283,7 +250,11 @@ class ChatKitTutorAgent:
         Args:
             retriever: Hybrid retriever for RAG
         """
-        self.tutor = SocraticTutorAgent(retriever=retriever)
+        llm_client = LLMClient()
+        self.tutor = SocraticTutorAgent(
+            retriever=retriever,
+            llm_client=llm_client,
+        )
 
     async def respond(
         self,

@@ -14,7 +14,7 @@ class QdrantConfig(BaseSettings):
     collection_name: str = "intellistack_content"
 
     # Vector configuration
-    vector_size: int = 1536  # text-embedding-3-small dimension
+    vector_size: int = 3072  # gemini-embedding-001 dimension
     distance_metric: str = "Cosine"
 
     # Chunking configuration (FR-130)
