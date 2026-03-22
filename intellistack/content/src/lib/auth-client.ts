@@ -14,17 +14,22 @@ import { jwtClient } from "better-auth/client/plugins";
  * We read from window.docusaurus customFields or use localhost fallback.
  */
 const getBetterAuthUrl = (): string => {
-  // process.env.BETTER_AUTH_URL is replaced at build time by webpack DefinePlugin.
-  // In production builds this is the Railway auth server URL.
-  // In local dev it falls back to localhost:3001.
-  return process.env.BETTER_AUTH_URL || 'http://localhost:3001';
+  // window.__ENV__ is injected by injectHtmlTags in docusaurus.config.ts at build time.
+  // It is set before any JS bundle loads, so it is always available here.
+  if (typeof window !== 'undefined' && (window as any).__ENV__?.BETTER_AUTH_URL) {
+    return (window as any).__ENV__.BETTER_AUTH_URL;
+  }
+  return 'http://localhost:3001';
 };
 
 /**
  * Get Backend API URL from Docusaurus customFields
  */
 export const getBackendUrl = (): string => {
-  return process.env.BACKEND_URL || 'http://localhost:8000';
+  if (typeof window !== 'undefined' && (window as any).__ENV__?.BACKEND_URL) {
+    return (window as any).__ENV__.BACKEND_URL;
+  }
+  return 'http://localhost:8000';
 };
 
 /**

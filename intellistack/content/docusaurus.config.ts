@@ -1,7 +1,6 @@
 import type { Config } from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 import path from 'path';
-import webpack from 'webpack';
 
 const config: Config = {
   title: 'IntelliStack',
@@ -45,6 +44,25 @@ const config: Config = {
   ],
 
   plugins: [
+    // Inject Railway URLs into the HTML <head> as window.__ENV__ before any JS runs.
+    // This bypasses webpack entirely — no DefinePlugin conflicts, no caching issues.
+    function injectEnvPlugin() {
+      const betterAuthUrl = process.env.BETTER_AUTH_URL || 'http://localhost:3001';
+      const backendUrl = process.env.BACKEND_URL || 'http://localhost:8000';
+      return {
+        name: 'inject-env-globals',
+        injectHtmlTags() {
+          return {
+            headTags: [
+              {
+                tagName: 'script',
+                innerHTML: `window.__ENV__={BETTER_AUTH_URL:${JSON.stringify(betterAuthUrl)},BACKEND_URL:${JSON.stringify(backendUrl)}};`,
+              },
+            ],
+          };
+        },
+      };
+    },
     function (context, options) {
       return {
         name: 'custom-webpack-config',
@@ -60,18 +78,6 @@ const config: Config = {
                 'node_modules'
               ],
             },
-            // Bake Railway URLs into the client bundle at build time.
-            // process.env.BETTER_AUTH_URL / BACKEND_URL are set in GitHub Actions.
-            plugins: [
-              new webpack.DefinePlugin({
-                'process.env.BETTER_AUTH_URL': JSON.stringify(
-                  process.env.BETTER_AUTH_URL || 'http://localhost:3001'
-                ),
-                'process.env.BACKEND_URL': JSON.stringify(
-                  process.env.BACKEND_URL || 'http://localhost:8000'
-                ),
-              }),
-            ],
           };
         },
       };

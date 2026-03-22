@@ -15,7 +15,7 @@ if (ExecutionEnvironment.canUseDOM) {
         // Restore theme preference from user profile
         if (session?.data) {
           try {
-            const backendUrl = process.env.BACKEND_URL || 'http://localhost:8000';
+            const backendUrl = (window as any).__ENV__?.BACKEND_URL || 'http://localhost:8000';
             const res = await fetch(`${backendUrl}/api/v1/users/preferences`, { credentials: 'include' });
             if (res.ok) {
               // Theme is stored in user.preferences on the auth server
@@ -26,7 +26,7 @@ if (ExecutionEnvironment.canUseDOM) {
 
           // Check theme from auth server user preferences
           try {
-            const authServerUrl = process.env.BETTER_AUTH_URL || 'http://localhost:3001';
+            const authServerUrl = (window as any).__ENV__?.BETTER_AUTH_URL || 'http://localhost:3001';
             const sessionRes = await fetch(`${authServerUrl}/api/auth/get-session`, { credentials: 'include' });
             if (sessionRes.ok) {
               const sessionData = await sessionRes.json();

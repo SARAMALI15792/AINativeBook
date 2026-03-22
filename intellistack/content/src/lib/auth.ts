@@ -5,8 +5,10 @@
 
 // Get auth server URL from Docusaurus config or environment
 const getAuthServerUrl = (): string => {
-  // process.env.BETTER_AUTH_URL is replaced at build time by webpack DefinePlugin.
-  return process.env.BETTER_AUTH_URL || 'http://localhost:3001';
+  if (typeof window !== 'undefined' && (window as any).__ENV__?.BETTER_AUTH_URL) {
+    return (window as any).__ENV__.BETTER_AUTH_URL;
+  }
+  return 'http://localhost:3001';
 };
 
 // Auth client with fetch-based implementation

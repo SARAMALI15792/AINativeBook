@@ -44,7 +44,7 @@ export default function ColorModeToggle({ value, onChange, className }: Props) {
 
     // Persist theme preference to backend if session exists
     try {
-      const backendUrl = process.env.BACKEND_URL || 'http://localhost:8000';
+      const backendUrl = (window as any).__ENV__?.BACKEND_URL || 'http://localhost:8000';
       fetch(`${backendUrl}/api/v1/users/preferences/theme`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
