@@ -13,7 +13,7 @@ const nextConfig = {
     // Override via environment variables in local dev.
     NEXT_PUBLIC_AUTH_URL: process.env.NEXT_PUBLIC_AUTH_URL || 'https://intellistack-auth-production.up.railway.app',
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'https://intellistack-backend-production.up.railway.app/api/v1',
-    NEXT_PUBLIC_DOCUSAURUS_URL: process.env.NEXT_PUBLIC_DOCUSAURUS_URL || 'https://saramali15792.github.io/AINativeBook/',
+    NEXT_PUBLIC_DOCUSAURUS_URL: process.env.NEXT_PUBLIC_DOCUSAURUS_URL || 'https://saramali15792.github.io/AINativeBook',
   },
 
   webpack: (config, { isServer }) => {

@@ -168,38 +168,40 @@ function ChatKitWidgetContent(): JSX.Element | null {
     };
   }, [backendUrl]);
 
-  // Listen for text selection — position popup above the selected text
+  // Listen for text selection — position popup above the selected text (mouse + touch)
   useEffect(() => {
-    const handleMouseUp = () => {
+    const showPopupForSelection = () => {
       const selection = window.getSelection();
       const text = selection?.toString().trim() || '';
 
       if (text.length > 10 && selection && selection.rangeCount > 0) {
         const rect = selection.getRangeAt(0).getBoundingClientRect();
-        // Center the popup horizontally over the selection, place it above
         const x = Math.min(
           Math.max(rect.left + rect.width / 2, 80),
           window.innerWidth - 80
         );
-        const y = rect.top + window.scrollY - 8; // 8px above the selection
+        const y = rect.top + window.scrollY - 8;
         setSelectedText(text);
         setPopupPosition({ x, y });
       }
     };
 
-    const handleMouseDown = (e: MouseEvent) => {
-      // Dismiss popup when clicking outside it
+    const handleDismiss = (e: MouseEvent | TouchEvent) => {
       if (selectionPopupRef.current && !selectionPopupRef.current.contains(e.target as Node)) {
         setSelectedText(null);
         setPopupPosition(null);
       }
     };
 
-    document.addEventListener('mouseup', handleMouseUp);
-    document.addEventListener('mousedown', handleMouseDown);
+    document.addEventListener('mouseup', showPopupForSelection);
+    document.addEventListener('touchend', showPopupForSelection);
+    document.addEventListener('mousedown', handleDismiss);
+    document.addEventListener('touchstart', handleDismiss);
     return () => {
-      document.removeEventListener('mouseup', handleMouseUp);
-      document.removeEventListener('mousedown', handleMouseDown);
+      document.removeEventListener('mouseup', showPopupForSelection);
+      document.removeEventListener('touchend', showPopupForSelection);
+      document.removeEventListener('mousedown', handleDismiss);
+      document.removeEventListener('touchstart', handleDismiss);
     };
   }, []);
 
@@ -475,7 +477,11 @@ function ChatKitWidgetContent(): JSX.Element | null {
     // Always render the button to ensure it shows regardless of session status
     const renderButton = () => (
       <button
-        className={session?.user ? styles.fab : `${styles.fab} ${styles.fabUnauthenticated}`}
+        className={[
+          styles.fab,
+          session?.user ? '' : styles.fabUnauthenticated,
+          isOpen ? styles.fabPanelOpen : '',
+        ].filter(Boolean).join(' ')}
         onClick={() => setIsOpen(!isOpen)}
         aria-label={isOpen ? 'Close AI Tutor' : 'Open AI Tutor'}
         style={{ display: 'flex' }} // Ensuring the button is visible

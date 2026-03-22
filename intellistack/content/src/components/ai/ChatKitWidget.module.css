@@ -575,8 +575,26 @@
     border-radius: 0;
   }
 
+  /* Input area needs bottom padding on mobile so content isn't hidden
+     behind the browser's navigation bar / home indicator */
+  .inputArea {
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+
+  /* When the panel is open it covers the whole screen — hide the FAB
+     so it doesn't sit on top of the send button */
+  .fabPanelOpen {
+    display: none;
+  }
+
   .fab {
     bottom: 16px;
     right: 16px;
+  }
+
+  /* Selection popup: keep fully on-screen on narrow displays */
+  .selectionPopup {
+    font-size: 0.75rem;
+    padding: 5px 10px;
   }
 }
