@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import useBaseUrl from '@docusaurus/useBaseUrl';
 import { useAuth } from '../contexts/AuthContext';
 
 interface ProtectedRouteProps {
@@ -8,14 +9,14 @@ interface ProtectedRouteProps {
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { user, loading } = useAuth();
   const [checking, setChecking] = useState(true);
+  const loginUrl = useBaseUrl('/auth/login');
 
   useEffect(() => {
     if (!loading) {
       // Check authentication only — onboarding is handled by individual pages
       if (!user) {
-        const baseUrl = (window as any).docusaurus?.siteConfig?.baseUrl || '/AINativeBook/';
         const returnUrl = encodeURIComponent(window.location.pathname + window.location.search);
-        window.location.href = `${baseUrl}auth/login?returnUrl=${returnUrl}`;
+        window.location.href = `${loginUrl}?returnUrl=${returnUrl}`;
         return;
       }
 

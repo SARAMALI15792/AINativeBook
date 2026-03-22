@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
+import Link from '@docusaurus/Link';
+import useBaseUrl from '@docusaurus/useBaseUrl';
 import { useAuth } from '../../contexts/AuthContext';
 import { authClient } from '../../lib/auth';
 
@@ -6,6 +8,7 @@ export default function AuthNavbarItem() {
   const { user, loading } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const homeUrl = useBaseUrl('/');
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -23,7 +26,7 @@ export default function AuthNavbarItem() {
     try {
       await authClient.signOut();
       window.dispatchEvent(new Event('auth-state-changed'));
-      window.location.href = '/';
+      window.location.href = homeUrl;
     } catch (error) {
       console.error('Logout error:', error);
     }
@@ -37,8 +40,8 @@ export default function AuthNavbarItem() {
   if (!user) {
     return (
       <div style={{ display: 'flex', alignItems: 'center' }}>
-        <a
-          href="/auth/login"
+        <Link
+          to="/auth/login"
           style={{
             padding: '0.5rem 1rem',
             borderRadius: '4px',
@@ -49,7 +52,7 @@ export default function AuthNavbarItem() {
           }}
         >
           Login
-        </a>
+        </Link>
       </div>
     );
   }
@@ -132,8 +135,8 @@ export default function AuthNavbarItem() {
           </div>
 
           <div style={{ padding: '0.5rem 0' }}>
-            <a
-              href="/profile"
+            <Link
+              to="/profile"
               style={{
                 display: 'block',
                 padding: '0.75rem 1rem',
@@ -141,16 +144,16 @@ export default function AuthNavbarItem() {
                 color: 'var(--ifm-font-color-base)',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = 'var(--ifm-color-emphasis-100)';
+                (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--ifm-color-emphasis-100)';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent';
+                (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent';
               }}
             >
               Profile
-            </a>
-            <a
-              href="/settings"
+            </Link>
+            <Link
+              to="/settings"
               style={{
                 display: 'block',
                 padding: '0.75rem 1rem',
@@ -158,14 +161,14 @@ export default function AuthNavbarItem() {
                 color: 'var(--ifm-font-color-base)',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = 'var(--ifm-color-emphasis-100)';
+                (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--ifm-color-emphasis-100)';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent';
+                (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent';
               }}
             >
               Settings
-            </a>
+            </Link>
           </div>
 
           <div

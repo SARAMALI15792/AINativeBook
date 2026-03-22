@@ -81,9 +81,11 @@ function ChatKitWidgetContent(): JSX.Element | null {
   const [error, setError] = useState<string | null>(null);
   const [streamingContent, setStreamingContent] = useState('');
   const [selectedText, setSelectedText] = useState<string | null>(null);
+  const [popupPosition, setPopupPosition] = useState<{ x: number; y: number } | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const selectionPopupRef = useRef<HTMLButtonElement>(null);
 
   const backendUrl = (siteConfig.customFields?.backendUrl as string) || 'http://localhost:8000';
   console.log('ChatKitWidget: Backend URL:', backendUrl); // Debug log
@@ -166,17 +168,39 @@ function ChatKitWidgetContent(): JSX.Element | null {
     };
   }, [backendUrl]);
 
-  // Listen for text selection
+  // Listen for text selection — position popup above the selected text
   useEffect(() => {
-    const handleSelection = () => {
+    const handleMouseUp = () => {
       const selection = window.getSelection();
-      if (selection && selection.toString().trim().length > 10) {
-        setSelectedText(selection.toString().trim());
+      const text = selection?.toString().trim() || '';
+
+      if (text.length > 10 && selection && selection.rangeCount > 0) {
+        const rect = selection.getRangeAt(0).getBoundingClientRect();
+        // Center the popup horizontally over the selection, place it above
+        const x = Math.min(
+          Math.max(rect.left + rect.width / 2, 80),
+          window.innerWidth - 80
+        );
+        const y = rect.top + window.scrollY - 8; // 8px above the selection
+        setSelectedText(text);
+        setPopupPosition({ x, y });
       }
     };
 
-    document.addEventListener('mouseup', handleSelection);
-    return () => document.removeEventListener('mouseup', handleSelection);
+    const handleMouseDown = (e: MouseEvent) => {
+      // Dismiss popup when clicking outside it
+      if (selectionPopupRef.current && !selectionPopupRef.current.contains(e.target as Node)) {
+        setSelectedText(null);
+        setPopupPosition(null);
+      }
+    };
+
+    document.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener('mousedown', handleMouseDown);
+    return () => {
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener('mousedown', handleMouseDown);
+    };
   }, []);
 
   // Scroll to bottom on new messages
@@ -432,10 +456,19 @@ function ChatKitWidgetContent(): JSX.Element | null {
   };
 
   const askAboutSelection = () => {
-    if (selectedText) {
-      setInputValue(`Can you explain this: "${selectedText.slice(0, 200)}${selectedText.length > 200 ? '...' : ''}"`);
+    if (!selectedText) return;
+    const query = `Can you explain this: "${selectedText.slice(0, 200)}${selectedText.length > 200 ? '...' : ''}"`;
+    setInputValue(query);
+    setSelectedText(null);
+    setPopupPosition(null);
+    if (!isOpen) {
       setIsOpen(true);
-      setTimeout(() => inputRef.current?.focus(), 100);
+      setTimeout(() => inputRef.current?.focus(), 150);
+    } else {
+      // Chat already open — focus and auto-send
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 50);
     }
   };
 
@@ -463,16 +496,24 @@ function ChatKitWidgetContent(): JSX.Element | null {
     return (
       <ChatKitErrorBoundary>
         <>
-          {/* Text Selection Popup */}
-          {selectedText && !isOpen && (
+          {/* Text Selection Popup — appears above the selected text */}
+          {selectedText && popupPosition && (
             <button
+              ref={selectionPopupRef}
               className={styles.selectionPopup}
+              style={{
+                left: popupPosition.x,
+                top: popupPosition.y,
+                transform: 'translate(-50%, -100%)',
+              }}
               onClick={askAboutSelection}
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
               </svg>
               Ask AI
+              {/* Arrow pointing down toward the text */}
+              <span className={styles.selectionArrow} />
             </button>
           )}
 
@@ -687,7 +728,7 @@ function ChatKitWidgetContent(): JSX.Element | null {
                       } catch (err) {
                         console.error('Auth client import failed:', err);
                         // Fallback: redirect to login page
-                        window.location.href = '/login';
+                        window.location.href = '/AINativeBook/auth/login';
                       }
                     }}
                   >
