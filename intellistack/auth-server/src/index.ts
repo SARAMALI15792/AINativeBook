@@ -137,6 +137,50 @@ app.get('/.well-known/jwks.json', async (_req: Request, res: Response) => {
 // Mount onboarding routes at /api/auth/onboarding/*
 app.use('/api/auth/onboarding', onboardingRoutes);
 
+// GET /api/auth/sign-in/social?provider=google&callbackURL=...
+// Better-Auth only exposes POST for social sign-in (returns JSON { url }).
+// A direct browser navigation (window.location.href) hits this GET route instead.
+// We proxy to the POST endpoint on ourselves, forward the state cookies
+// (now set in a first-party context so Chrome won't partition them),
+// then redirect the browser to the OAuth provider URL.
+app.get('/api/auth/sign-in/social', async (req: Request, res: Response) => {
+  const { provider, callbackURL } = req.query as Record<string, string>;
+
+  if (!provider) {
+    res.status(400).json({ error: 'Missing provider' });
+    return;
+  }
+
+  try {
+    const selfUrl = `http://localhost:${PORT}`;
+
+    const postRes = await fetch(`${selfUrl}/api/auth/sign-in/social`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ provider, callbackURL }),
+    });
+
+    // Forward all state cookies so the OAuth callback can validate them.
+    // getSetCookie() handles multiple Set-Cookie headers correctly (Node 18+).
+    const setCookies: string[] =
+      typeof (postRes.headers as any).getSetCookie === 'function'
+        ? (postRes.headers as any).getSetCookie()
+        : [postRes.headers.get('set-cookie')].filter(Boolean) as string[];
+
+    setCookies.forEach((c) => res.append('Set-Cookie', c));
+
+    const data = await postRes.json() as any;
+    if (data?.url) {
+      return res.redirect(302, data.url);
+    }
+
+    res.status(400).json({ error: 'OAuth initiation failed', detail: data });
+  } catch (err) {
+    console.error('GET /api/auth/sign-in/social error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Mount all Better-Auth routes at /api/auth/*
 app.all('/api/auth/*', toNodeHandler(auth));
 
