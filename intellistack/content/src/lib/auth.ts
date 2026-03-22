@@ -5,16 +5,8 @@
 
 // Get auth server URL from Docusaurus config or environment
 const getAuthServerUrl = (): string => {
-  if (typeof window !== 'undefined') {
-    // Try to get from Docusaurus customFields first
-    if (window.docusaurus?.siteConfig?.customFields?.betterAuthUrl) {
-      return window.docusaurus.siteConfig.customFields.betterAuthUrl as string;
-    }
-    // Fallback to default - Docusaurus customFields should be configured in docusaurus.config.ts
-    return 'http://localhost:3001';
-  }
-  // During SSR/SSG, return placeholder
-  return 'http://localhost:3001';
+  // process.env.BETTER_AUTH_URL is replaced at build time by webpack DefinePlugin.
+  return process.env.BETTER_AUTH_URL || 'http://localhost:3001';
 };
 
 // Auth client with fetch-based implementation

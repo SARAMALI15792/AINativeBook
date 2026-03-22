@@ -1,6 +1,7 @@
 import type { Config } from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 import path from 'path';
+import webpack from 'webpack';
 
 const config: Config = {
   title: 'IntelliStack',
@@ -59,6 +60,18 @@ const config: Config = {
                 'node_modules'
               ],
             },
+            // Bake Railway URLs into the client bundle at build time.
+            // process.env.BETTER_AUTH_URL / BACKEND_URL are set in GitHub Actions.
+            plugins: [
+              new webpack.DefinePlugin({
+                'process.env.BETTER_AUTH_URL': JSON.stringify(
+                  process.env.BETTER_AUTH_URL || 'http://localhost:3001'
+                ),
+                'process.env.BACKEND_URL': JSON.stringify(
+                  process.env.BACKEND_URL || 'http://localhost:8000'
+                ),
+              }),
+            ],
           };
         },
       };

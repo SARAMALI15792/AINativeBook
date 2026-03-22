@@ -39,7 +39,7 @@ function CallbackPageContent() {
 
         let onboardingCompleted = false;
         try {
-          const authServerUrl = (window as any).docusaurus?.siteConfig?.customFields?.betterAuthUrl || 'http://localhost:3001';
+          const authServerUrl = process.env.BETTER_AUTH_URL || 'http://localhost:3001';
           const statusRes = await fetch(`${authServerUrl}/api/auth/onboarding/status`, { credentials: 'include' });
           if (statusRes.ok) {
             const statusData = await statusRes.json();
