@@ -74,11 +74,12 @@ export const auth = betterAuth({
 
   // Advanced configuration for cookie handling
   advanced: {
-    // SameSite=Lax for same-domain deployment (Next.js and Docusaurus on same domain)
-    // Secure flag enabled in production for HTTPS
+    // SameSite=None required: frontend (github.io) and auth server (railway.app) are
+    // different domains — Lax blocks the state cookie during the OAuth redirect loop.
+    // Secure=true is mandatory when SameSite=None (browser enforces this).
     defaultCookieAttributes: {
-      sameSite: 'lax' as 'lax',
-      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'none' as 'none',
+      secure: true,
       path: '/',
       domain: undefined,
     },
