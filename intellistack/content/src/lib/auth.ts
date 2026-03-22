@@ -127,40 +127,18 @@ export const authClient = {
     }
   },
 
-  // OAuth sign in
-  async signInWithOAuth(provider: 'google' | 'github', callbackURL?: string) {
+  // OAuth sign in — direct browser navigation to auth server (first-party).
+  // Using fetch() here causes cross-origin state cookies which Chrome blocks.
+  // A full-page redirect makes the auth server first-party so state cookies work.
+  signInWithOAuth(provider: 'google' | 'github', callbackURL?: string) {
     if (typeof window === 'undefined') {
       throw new Error('signInWithOAuth can only be called in browser');
     }
-
-    try {
-      const baseUrl = ((window as any).docusaurus?.siteConfig?.baseUrl || '/AINativeBook/').replace(/\/$/, '');
-      const callback = callbackURL || `${window.location.origin}${baseUrl}/auth/callback`;
-      const response = await fetch(`${this.baseURL}/api/auth/sign-in/social`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ provider, callbackURL: callback }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        return { data: null, error: data };
-      }
-
-      // Redirect to OAuth provider
-      if (data.url) {
-        window.location.href = data.url;
-      }
-
-      return { data, error: null };
-    } catch (error) {
-      console.error('OAuth sign in error:', error);
-      return { data: null, error };
-    }
+    const baseUrl = '/AINativeBook/';
+    const callback = callbackURL || `${window.location.origin}${baseUrl}auth/callback`;
+    const authServerUrl = getAuthServerUrl();
+    window.location.href = `${authServerUrl}/api/auth/sign-in/social?provider=${provider}&callbackURL=${encodeURIComponent(callback)}`;
+    return { data: null, error: null };
   },
 };
 

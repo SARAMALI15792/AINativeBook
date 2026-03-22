@@ -169,7 +169,15 @@ class SocraticTutorAgent:
 
         except Exception as e:
             logger.error(f"Agent execution failed: {e}")
-            yield f"I apologize, but I encountered an error. Please try again. Error: {str(e)}"
+            error_str = str(e)
+
+            # Detect quota / rate-limit errors so we show a helpful fallback
+            # instead of dumping the raw API error at the student.
+            if "RESOURCE_EXHAUSTED" in error_str or "429" in error_str or "quota" in error_str.lower():
+                async for chunk in self._quota_fallback_response(user_message):
+                    yield chunk
+            else:
+                yield "I'm having a little trouble connecting right now. Please try again in a moment."
 
     async def _stream_response(
         self,
@@ -213,6 +221,51 @@ class SocraticTutorAgent:
                 f"[{i}] Source: {result.stage_name} - {result.content_title}\n{result.text}\n"
             )
         return "\n".join(formatted)
+
+    async def _quota_fallback_response(self, user_message: str) -> AsyncGenerator[str, None]:
+        """
+        Yield a helpful, educational reply when the AI is unreachable.
+        Shows a network message + short concept recap instead of an error.
+        """
+        lower = user_message.lower()
+
+        if any(k in lower for k in ["ros", "robot", "navigation", "sensor", "lidar"]):
+            topic_reply = (
+                "Please check your network connection and try again.\n\n"
+                "**Quick recap — ROS 2 & Robotics:**\n"
+                "- Nodes talk to each other via topics & services\n"
+                "- TF2 tracks every coordinate frame on the robot\n"
+                "- Nav2 handles planning + obstacle avoidance"
+            )
+        elif any(k in lower for k in ["ai", "neural", "deep learning", "model", "inference"]):
+            topic_reply = (
+                "Please check your network connection and try again.\n\n"
+                "**Quick recap — AI Integration:**\n"
+                "- Edge inference = low latency, limited compute\n"
+                "- Perception pipeline: sensor → preprocess → model → decision\n"
+                "- Sim-to-real gap is the #1 deployment challenge"
+            )
+        elif any(k in lower for k in ["linux", "bash", "shell", "process", "command"]):
+            topic_reply = (
+                "Please check your network connection and try again.\n\n"
+                "**Quick recap — Linux & Bash:**\n"
+                "- `ps aux` / `top` — monitor running processes\n"
+                "- `chmod` / `chown` — manage file permissions\n"
+                "- `ip addr` / `ping` — diagnose network issues"
+            )
+        else:
+            topic_reply = (
+                "Please check your network connection and try again.\n\n"
+                "**Quick recap — IntelliStack curriculum:**\n"
+                "- Stage 1: Linux, Bash, Python basics\n"
+                "- Stage 2: ROS 2, simulation, URDF\n"
+                "- Stage 3: Perception, SLAM, path planning\n"
+                "- Stage 4: AI integration, edge inference\n"
+                "- Stage 5: Capstone project\n\n"
+                "Pick up where you left off once you're back online!"
+            )
+
+        yield topic_reply
 
     def _is_direct_answer_request(self, message: str) -> bool:
         """
