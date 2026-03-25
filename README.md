@@ -4,21 +4,12 @@
 
 ### AI-Native Learning Management System for Physical AI & Humanoid Robotics
 
-[![Live App](https://img.shields.io/badge/🌐_Live_App-intellistack--app.netlify.app-00C7B7?style=for-the-badge&logo=netlify)](https://intellistack-app.netlify.app/)
-[![Docs](https://img.shields.io/badge/📚_Docs-GitHub_Pages-181717?style=for-the-badge&logo=github)](https://saramali15792.github.io/AINativeBook/)
-[![Backend](https://img.shields.io/badge/⚙️_API-Railway-0B0D0E?style=for-the-badge&logo=railway)](https://intellistack-backend-production.up.railway.app)
+[![Live App](https://img.shields.io/badge/Live_App-intellistack--app.netlify.app-00C7B7?style=for-the-badge&logo=netlify)](https://intellistack-app.netlify.app/)
+[![Docs](https://img.shields.io/badge/Docs-GitHub_Pages-181717?style=for-the-badge&logo=github)](https://saramali15792.github.io/AINativeBook/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](./LICENSE)
 
 <br/>
 
-> **IntelliStack** is a full-stack, AI-native LMS built for the next generation of robotics engineers.
-> It combines progressive learning paths, a RAG-powered chatbot with citations, an AI Socratic tutor,
-> content authoring tools, and institution management — all in one platform.
-
-<br/>
-
-![Platform Banner](https://img.shields.io/badge/Phases_Complete-6_of_11-blueviolet?style=flat-square)
-![Tasks Done](https://img.shields.io/badge/Tasks-38_of_51_done-green?style=flat-square)
 ![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=flat-square&logo=python&logoColor=white)
 ![Next.js](https://img.shields.io/badge/Next.js-14-black?style=flat-square&logo=next.js)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.109+-009688?style=flat-square&logo=fastapi&logoColor=white)
@@ -28,14 +19,34 @@
 
 ---
 
-## 🌐 Live Application
+## What Is IntelliStack?
 
-| Service | URL | Status |
-|---------|-----|--------|
-| **Frontend** | [https://intellistack-app.netlify.app/](https://intellistack-app.netlify.app/) | [![Netlify Status](https://api.netlify.com/api/v1/badges/placeholder/deploy-status)](https://intellistack-app.netlify.app/) |
-| **Backend API** | [Railway — intellistack-backend](https://intellistack-backend-production.up.railway.app) | Auto-deploy on push |
-| **Auth Server** | [Railway — intellistack-auth](https://intellistack-auth-production.up.railway.app) | Auto-deploy on push |
-| **Docs** | [GitHub Pages](https://saramali15792.github.io/AINativeBook/) | Auto-deploy on push |
+IntelliStack is an AI-native Learning Management System purpose-built for **Physical AI and Humanoid Robotics education**. It replaces static course platforms with an intelligent, adaptive environment where learners progress through 5 gated stages — from foundational robotics concepts to a full capstone project — guided by a RAG-powered chatbot and a Socratic AI tutor at every step.
+
+**The problem it solves:**
+- Traditional LMS platforms have no AI layer — learners get stuck with no contextual help
+- Robotics education content is scattered across docs, papers, and videos with no unified path
+- Instructors have no visibility into where students struggle or how to adapt content
+- Institutions lack the tools to manage cohorts, track progress, and deliver assessments at scale
+
+**How it works:**
+
+```mermaid
+graph LR
+    A[Student Signs Up] --> B[Personalized Onboarding]
+    B --> C[Stage 1 Unlocked]
+    C --> D{Learn via Lessons}
+    D --> E[Ask RAG Chatbot]
+    D --> F[Use AI Tutor]
+    D --> G[Complete Assessment]
+    G -->|Pass| H[Stage 2 Unlocked]
+    G -->|Fail| D
+    H --> I[...]
+    I --> J[Stage 5 Capstone]
+    J --> K[Certificate Issued]
+```
+
+**Scale:** The platform is architected to handle **10,000+ concurrent learners** — async FastAPI backend with connection pooling, Redis-backed rate limiting and caching, Qdrant vector search with sub-50ms retrieval, and horizontally scalable Railway deployments.
 
 ---
 
@@ -43,31 +54,31 @@
 
 ```mermaid
 graph TB
-    subgraph Client["🖥️ Client Layer"]
-        FE["Next.js 14 Frontend<br/>(Netlify)"]
-        DOCS["Docusaurus Docs<br/>(GitHub Pages)"]
+    subgraph Client["Client Layer"]
+        FE["Next.js 14 Frontend\n(Netlify)"]
+        DOCS["Docusaurus Docs\n(GitHub Pages)"]
     end
 
-    subgraph Auth["🔐 Auth Layer"]
-        AUTH["Better-Auth OIDC Server<br/>(Railway · Node.js)"]
-        JWKS["JWKS Endpoint<br/>/.well-known/jwks.json"]
+    subgraph Auth["Auth Layer"]
+        AUTH["Better-Auth OIDC Server\n(Railway · Node.js)"]
+        JWKS["JWKS Endpoint\n/.well-known/jwks.json"]
     end
 
-    subgraph API["⚙️ API Layer"]
-        BACKEND["FastAPI Backend<br/>(Railway · Python 3.11)"]
-        MW["JWKS Middleware<br/>JWT Validation"]
+    subgraph API["API Layer"]
+        BACKEND["FastAPI Backend\n(Railway · Python 3.11)"]
+        MW["JWKS Middleware\nJWT Validation"]
     end
 
-    subgraph AI["🤖 AI Layer"]
-        RAG["RAG Pipeline<br/>Qdrant + Cohere + OpenAI"]
-        TUTOR["AI Tutor<br/>LangGraph · Socratic Method"]
-        CHATKIT["ChatKit<br/>Streaming SSE"]
+    subgraph AI["AI Layer"]
+        RAG["RAG Pipeline\nQdrant + Cohere + OpenAI"]
+        TUTOR["AI Tutor\nLangGraph · Socratic Method"]
+        CHATKIT["ChatKit\nStreaming SSE"]
     end
 
-    subgraph Data["🗄️ Data Layer"]
-        PG[("PostgreSQL<br/>(Neon)")]
-        REDIS[("Redis<br/>Cache + Rate Limit")]
-        QDRANT[("Qdrant<br/>Vector Store")]
+    subgraph Data["Data Layer"]
+        PG[("PostgreSQL\nNeon")]
+        REDIS[("Redis\nCache + Rate Limit")]
+        QDRANT[("Qdrant\nVector Store")]
     end
 
     FE -->|"OAuth / Session"| AUTH
@@ -92,7 +103,7 @@ graph TB
 
 ```mermaid
 sequenceDiagram
-    participant U as 👤 User
+    participant U as User
     participant FE as Next.js Frontend
     participant AUTH as Better-Auth OIDC
     participant API as FastAPI Backend
@@ -104,7 +115,7 @@ sequenceDiagram
     AUTH-->>FE: JWT Access Token (RS256)
     FE->>API: API Request + Bearer Token
     API->>AUTH: Verify via JWKS endpoint
-    AUTH-->>API: Token valid ✓
+    AUTH-->>API: Token valid
     API->>DB: Fetch user/content data
     DB-->>API: Data
     API->>AI: RAG query / Tutor session
@@ -119,11 +130,11 @@ sequenceDiagram
 
 ```mermaid
 graph LR
-    S1["🔵 Stage 1<br/>Foundations"]
-    S2["🟢 Stage 2<br/>ROS 2 & Simulation"]
-    S3["🟡 Stage 3<br/>Perception & Planning"]
-    S4["🟠 Stage 4<br/>AI Integration"]
-    S5["🔴 Stage 5<br/>Capstone"]
+    S1["Stage 1\nFoundations"]
+    S2["Stage 2\nROS 2 & Simulation"]
+    S3["Stage 3\nPerception & Planning"]
+    S4["Stage 4\nAI Integration"]
+    S5["Stage 5\nCapstone"]
 
     S1 -->|"Unlock"| S2
     S2 -->|"Unlock"| S3
@@ -137,7 +148,7 @@ graph LR
     style S5 fill:#EF4444,color:#fff
 ```
 
-Each stage unlocks progressively based on prerequisite completion. Progress is tracked at lesson, exercise, and assessment level with badge issuance and certificate generation.
+Each stage unlocks based on passing assessments in the previous stage. Progress is tracked at lesson, exercise, and assessment level with badge issuance and certificate generation upon completion.
 
 ---
 
@@ -155,7 +166,6 @@ Each stage unlocks progressively based on prerequisite completion. Progress is t
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=flat&logo=python&logoColor=white)](https://python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.109+-009688?style=flat&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.0_async-D71F00?style=flat)](https://www.sqlalchemy.org/)
-[![Alembic](https://img.shields.io/badge/Alembic-1.13+-6BA539?style=flat)](https://alembic.sqlalchemy.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16+-4169E1?style=flat&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![Redis](https://img.shields.io/badge/Redis-5.x-DC382D?style=flat&logo=redis&logoColor=white)](https://redis.io/)
 [![Qdrant](https://img.shields.io/badge/Qdrant-1.7+-FF4158?style=flat)](https://qdrant.tech/)
@@ -187,7 +197,7 @@ Each stage unlocks progressively based on prerequisite completion. Progress is t
 <td width="50%">
 
 ### 🤖 RAG Chatbot
-- OpenAI + SSE streaming
+- OpenAI + SSE streaming responses
 - Qdrant hybrid vector retrieval
 - Cohere `rerank-v3.5` for precision
 - Source citations with passage viewer
@@ -214,7 +224,6 @@ Each stage unlocks progressively based on prerequisite completion. Progress is t
 - Email/password + Google + GitHub OAuth
 - JWKS endpoint for token verification
 - Role-based access: `student` / `instructor` / `admin`
-- Password reset via Resend email
 
 </td>
 <td width="50%">
@@ -241,7 +250,7 @@ Each stage unlocks progressively based on prerequisite completion. Progress is t
 
 ### 🎯 Personalization
 - Adaptive content recommendations
-- User profile-based learning path adjustments
+- Profile-based learning path adjustments
 - Progress tracking (lesson / exercise / assessment)
 - Badge issuance & certificate generation
 
@@ -259,118 +268,69 @@ Each stage unlocks progressively based on prerequisite completion. Progress is t
 |------|---------|
 | Node.js | 20+ |
 | Python | 3.11+ |
-| Docker | Latest |
 | PostgreSQL | 16+ (or Neon cloud) |
 | Redis | 7+ |
 | Qdrant | 1.7+ (or Qdrant Cloud) |
 
-### 1. Clone the Repository
+### 1. Clone
 
 ```bash
 git clone https://github.com/SARAMALI15792/AINativeBook.git
 cd AINativeBook
 ```
 
-### 2. Configure Environment Variables
+### 2. Configure Environment
 
 ```bash
-# Root env (backend + shared services)
 cp intellistack/.env.example intellistack/.env
-
-# Auth server env
 cp intellistack/auth-server/.env.example intellistack/auth-server/.env
 ```
 
-Edit `intellistack/.env` with your values:
+Key values in `intellistack/.env`:
 
 ```env
-# Database
 DATABASE_URL=postgresql://user:password@host:5432/intellistack
-
-# Cache
 REDIS_URL=redis://localhost:6379/0
-
-# Vector Store
 QDRANT_HOST=localhost
-QDRANT_PORT=6333
-
-# AI Services
 OPENAI_API_KEY=sk-...
-COHERE_API_KEY=...          # optional — for reranking
-
-# Better-Auth
 BETTER_AUTH_URL=http://localhost:3001
 BETTER_AUTH_SECRET=<min-32-random-chars>
-
-# OAuth (optional)
-GOOGLE_CLIENT_ID=...
-GOOGLE_CLIENT_SECRET=...
-GITHUB_CLIENT_ID=...
-GITHUB_CLIENT_SECRET=...
 ```
 
-### 3. Start the Auth Server
+### 3. Start Auth Server
 
 ```bash
-cd intellistack/auth-server
-npm install
-npm run migrate          # run DB migrations
-npm run dev              # http://localhost:3001
+cd intellistack/auth-server && npm install && npm run migrate && npm run dev
+# Runs on http://localhost:3001
 ```
 
-Test: `GET http://localhost:3001/.well-known/openid-configuration`
-
-### 4. Start the Backend API
+### 4. Start Backend API
 
 ```bash
 cd intellistack/backend
-pip install -r requirements.txt
-alembic upgrade head     # run DB migrations
+pip install -r requirements.txt && alembic upgrade head
 uvicorn src.main:app --reload --port 8000
+# API docs: http://localhost:8000/docs
 ```
 
-API docs: `http://localhost:8000/docs`
-
-### 5. Start the Frontend
+### 5. Start Frontend
 
 ```bash
-cd intellistack/frontend
-npm install
-npm run dev              # http://localhost:3000
+cd intellistack/frontend && npm install && npm run dev
+# Runs on http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) — or visit the live app at **[https://intellistack-app.netlify.app/](https://intellistack-app.netlify.app/)**
+Or skip local setup and use the live app: **[intellistack-app.netlify.app](https://intellistack-app.netlify.app/)**
 
 ---
 
 ## 📖 How to Use the Platform
 
-### For Students
+**Students** — [Sign up](https://intellistack-app.netlify.app/) → complete onboarding → work through Stage 1 lessons and exercises → ask the RAG chatbot for instant answers with source citations → use the AI Tutor when you're stuck (it guides, not gives away answers) → pass the assessment → Stage 2 unlocks → repeat through all 5 stages → receive your certificate.
 
-1. **Sign up** at [intellistack-app.netlify.app](https://intellistack-app.netlify.app/) using email or Google/GitHub
-2. **Complete onboarding** — set your learning preferences and background
-3. **Start Stage 1** — Foundations of Physical AI
-4. **Work through lessons** — video, text, and interactive Pyodide coding exercises
-5. **Ask the AI Chatbot** — click the chat button to query the RAG chatbot for help
-6. **Use the AI Tutor** — get Socratic guidance on problems without being given direct answers
-7. **Complete assessments** — unlock the next stage after passing requirements
-8. **Earn badges & certificates** upon stage completion
+**Instructors** — Log in with an `instructor` account → go to Content Authoring → write lessons in MDX with live preview → submit for review → once approved, content is automatically indexed into the RAG vector store → manage your cohort enrollments and view per-student progress analytics.
 
-### For Instructors
-
-1. Log in with an `instructor` role account
-2. Navigate to **Content Authoring** to create/edit lessons in MDX
-3. Submit content for review → it enters the `in_review` workflow
-4. Once published, content is automatically ingested into the RAG vector store
-5. Manage your **Cohort** — add students, set enrollment limits
-6. View **Analytics** — track student progress and engagement
-
-### For Admins
-
-1. Log in with an `admin` role account
-2. Manage institutions, cohorts, and user roles from the admin dashboard
-3. Monitor platform health at `/health/detail` and Prometheus metrics at `/metrics`
-4. Configure webhooks for external integrations
+**Admins** — Log in with an `admin` account → manage institutions, cohorts, and user roles → monitor platform health and Prometheus metrics → configure external webhooks.
 
 ---
 
@@ -378,138 +338,57 @@ Open [http://localhost:3000](http://localhost:3000) — or visit the live app at
 
 ```
 AINativeBook/
-│
-├── 🌐 intellistack/
-│   ├── .env.example                 # Root environment template
-│   │
-│   ├── 🐍 backend/                  # FastAPI Python backend
+├── intellistack/
+│   ├── backend/                  # FastAPI Python backend
 │   │   ├── src/
-│   │   │   ├── main.py              # App entry point
-│   │   │   ├── config/              # Settings & structured logging
-│   │   │   ├── core/                # Domain modules
-│   │   │   │   ├── auth/            # Auth routes & JWT handling
-│   │   │   │   ├── users/           # User management
-│   │   │   │   ├── content/         # Content CRUD & versioning
-│   │   │   │   ├── learning/        # Learning paths & progress
-│   │   │   │   ├── institution/     # Cohorts & analytics
-│   │   │   │   └── assessment/      # Quizzes & grading
-│   │   │   ├── ai/
-│   │   │   │   ├── rag/             # RAG pipeline (Qdrant + Cohere + OpenAI)
-│   │   │   │   ├── tutor/           # AI Tutor (LangGraph)
-│   │   │   │   ├── chatkit/         # ChatKit streaming server
-│   │   │   │   └── personalization/ # Adaptive learning engine
-│   │   │   └── shared/              # DB, middleware, metrics
-│   │   └── alembic/                 # DB migrations
-│   │
-│   ├── 🔐 auth-server/              # Better-Auth OIDC (TypeScript)
-│   │   └── src/
-│   │       ├── index.ts             # Express entry point
-│   │       ├── auth.ts              # Better-Auth config
-│   │       └── db.ts                # Drizzle ORM + Neon
-│   │
-│   ├── ⚛️  frontend/                # Next.js 14 (App Router)
-│   │   └── src/
-│   │       ├── app/                 # Pages & layouts
-│   │       ├── components/          # UI components
-│   │       ├── contexts/            # Auth & app contexts
-│   │       └── lib/                 # API clients & utilities
-│   │
-│   └── 📚 content/                  # Docusaurus learning content
-│
-├── 📋 specs/                        # SDD artifacts
-│   └── 001-intellistack-platform/
-│       ├── spec.md                  # Requirements (~1400 lines)
-│       ├── plan.md                  # Architecture decisions
-│       └── tasks.md                 # Task tracking
-│
-├── 📜 history/                      # Prompt History Records (PHRs)
-│   ├── prompts/                     # Session records
-│   └── adr/                         # Architecture Decision Records
-│
-└── ⚙️  .github/workflows/           # CI/CD pipelines
-    ├── deploy-backend.yml           # → Railway
-    ├── deploy-auth.yml              # → Railway
-    ├── deploy-frontend.yml          # → Netlify
-    └── deploy-docs.yml              # → GitHub Pages
+│   │   │   ├── main.py           # App entry point
+│   │   │   ├── config/           # Settings & structured logging
+│   │   │   ├── core/             # Domain modules (auth, users, content, learning, institution, assessment)
+│   │   │   ├── ai/               # RAG, AI Tutor, ChatKit, Personalization
+│   │   │   └── shared/           # DB, middleware, metrics
+│   │   └── alembic/              # DB migrations
+│   ├── auth-server/              # Better-Auth OIDC server (TypeScript/Node.js)
+│   ├── frontend/                 # Next.js 14 App Router frontend
+│   └── content/                  # Docusaurus learning content
+├── specs/                        # Feature specs, plans, and task tracking
+├── history/                      # Prompt History Records & ADRs
+└── .github/workflows/            # CI/CD (Railway + Netlify + GitHub Pages)
 ```
-
----
-
-## 🔌 API Reference
-
-### Backend — `https://intellistack-backend-production.up.railway.app`
-
-| Method | Endpoint | Description |
-|--------|---------|-------------|
-| `GET` | `/health` | Basic health check |
-| `GET` | `/health/detail` | Health + live metrics |
-| `GET` | `/metrics` | Prometheus scrape endpoint |
-| `GET` | `/api/v1` | API root |
-| `GET` | `/docs` | Swagger UI (dev only) |
-
-### Auth Server — `https://intellistack-auth-production.up.railway.app`
-
-| Method | Endpoint | Description |
-|--------|---------|-------------|
-| `POST` | `/api/auth/sign-up/email` | Email registration |
-| `POST` | `/api/auth/sign-in/email` | Email login |
-| `POST` | `/api/auth/sign-in/social` | OAuth (Google / GitHub) |
-| `POST` | `/api/auth/forget-password` | Request password reset |
-| `POST` | `/api/auth/reset-password` | Reset with token |
-| `GET` | `/.well-known/openid-configuration` | OIDC discovery |
-| `GET` | `/.well-known/jwks.json` | Public key set (JWKS) |
 
 ---
 
 ## 🧪 Testing
 
-### Frontend (Vitest + Playwright)
+### Frontend
+
 ```bash
 cd intellistack/frontend
-
 npm test              # Unit tests (Vitest)
-npm run test:watch    # Watch mode
 npm run test:e2e      # E2E tests (Playwright)
-npm run lighthouse    # Accessibility + performance audit
+npm run lighthouse    # Performance + accessibility audit
 ```
 
-### Backend (pytest)
+### Backend
+
 ```bash
 cd intellistack/backend
 pytest
-```
-
-### Auth Server (TypeScript checks)
-```bash
-cd intellistack/auth-server
-npm run type-check
-npm run lint
 ```
 
 ---
 
 ## 🚢 Deployment
 
-### CI/CD — GitHub Actions
+All deployments are automated via GitHub Actions on push to `main`:
 
-| Workflow | Trigger Path | Target |
+| Workflow | Path Trigger | Target |
 |---------|-------------|--------|
 | `deploy-backend.yml` | `intellistack/backend/**` | Railway |
 | `deploy-auth.yml` | `intellistack/auth-server/**` | Railway |
 | `deploy-frontend.yml` | `intellistack/frontend/**` | Netlify |
 | `deploy-docs.yml` | `intellistack/content/**` | GitHub Pages |
 
-All pipelines trigger automatically on push to `main`.
-
-### Required GitHub Secrets
-
-| Secret | Used By |
-|--------|---------|
-| `RAILWAY_TOKEN` | Backend + Auth deploys |
-| `NETLIFY_SITE_ID` | Frontend deploy |
-| `NETLIFY_AUTH_TOKEN` | Frontend deploy |
-| `RAILWAY_AUTH_URL` | Docs build env |
-| `RAILWAY_BACKEND_URL` | Docs build env |
+**Required GitHub Secrets:** `RAILWAY_TOKEN`, `NETLIFY_SITE_ID`, `NETLIFY_AUTH_TOKEN`, `RAILWAY_AUTH_URL`, `RAILWAY_BACKEND_URL`
 
 ---
 
@@ -536,53 +415,22 @@ Phase 11 ░░░░░░░░░░░░░░░░░░░░  Pending  
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b <phase>-<feature-name>`
-3. Follow the **Spec-Driven workflow**: write spec → plan → tasks → implement
-4. Keep commits small and focused
-5. Ensure all tests pass before opening a PR
-6. Open a pull request against `main`
+1. Fork the repository and create a branch: `git checkout -b <phase>-<feature>`
+2. Keep commits small and reference task IDs
+3. Ensure tests pass before opening a PR against `main`
 
-**Code Standards:**
-- **Python:** PEP 8 · type hints required · async-first
-- **TypeScript:** strict mode · no untyped `any`
-- **React:** functional components · hooks only
-- **Database:** all schema changes via Alembic migrations
+**Code Standards:** Python — PEP 8, type hints, async-first · TypeScript — strict mode · React — functional components only · DB — all schema changes via Alembic migrations
 
 ---
 
 ## 📄 License
 
-```
-MIT License
-
-Copyright (c) 2026 IntelliStack Team
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-```
+MIT — see [LICENSE](./LICENSE)
 
 ---
 
 <div align="center">
 
-Built with ❤️ using [Spec-Driven Development](https://github.com/SARAMALI15792/AINativeBook/tree/main/specs) and [Claude Code](https://claude.ai/code)
-
-**[🌐 Try the Live App](https://intellistack-app.netlify.app/) · [📚 Read the Docs](https://saramali15792.github.io/AINativeBook/) · [⚙️ API Reference](https://intellistack-backend-production.up.railway.app/docs)**
+**[Try the Live App](https://intellistack-app.netlify.app/) · [Read the Docs](https://saramali15792.github.io/AINativeBook/)**
 
 </div>
