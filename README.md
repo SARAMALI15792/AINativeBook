@@ -7,6 +7,7 @@
 [![Live App](https://img.shields.io/badge/Live_App-intellistack--app.netlify.app-00C7B7?style=for-the-badge&logo=netlify)](https://intellistack-app.netlify.app/)
 [![Docs](https://img.shields.io/badge/Docs-GitHub_Pages-181717?style=for-the-badge&logo=github)](https://saramali15792.github.io/AINativeBook/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](./LICENSE)
+[![Export Agent](https://img.shields.io/badge/Export_Agent-Convert_to_Any_Framework-6366F1?style=for-the-badge&logo=github-actions&logoColor=white)](./gitagent/workflows/convert.md)
 
 <br/>
 
@@ -16,6 +17,35 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=flat-square&logo=typescript&logoColor=white)
 
 </div>
+
+---
+
+## 🔄 Export Agent — Convert to Any Framework
+
+IntelliStack ships with a built-in **Export Agent** (`gitagent/`) that lets any developer port the entire platform — or just one layer — to their preferred language and framework.
+
+| Target Language | Frameworks Supported |
+|----------------|---------------------|
+| Python | Django REST Framework |
+| TypeScript / Node.js | NestJS, Express.js, Hono, Elysia |
+| Java | Spring Boot |
+| PHP | Laravel |
+| Ruby | Ruby on Rails |
+| Go | Go Fiber, Gin, Echo |
+| C# | ASP.NET Core Minimal APIs |
+
+**How it works — just ask in plain language:**
+
+```
+"Convert IntelliStack to NestJS with Prisma"
+"Port only the auth layer to Laravel"
+"Give me the Go Fiber version of the RAG chatbot"
+"Convert the database models to TypeORM"
+```
+
+The agent reads the live codebase, produces a migration plan, then outputs production-ready, framework-idiomatic code with all imports, env vars, and a wire-up checklist.
+
+**Start here:** [`gitagent/workflows/convert.md`](./gitagent/workflows/convert.md) · Example scenarios: [NestJS](./gitagent/workflows/scenarios/nestjs.md) · [Django](./gitagent/workflows/scenarios/django.md) · [Go Fiber](./gitagent/workflows/scenarios/go-fiber.md)
 
 ---
 
@@ -256,6 +286,19 @@ Each stage unlocks based on passing assessments in the previous stage. Progress 
 
 </td>
 </tr>
+<tr>
+<td width="100%" colspan="2">
+
+### 🔄 Export Agent — Convert to Any Framework or Language
+- Port any layer (backend / auth / database / frontend / RAG) to your preferred stack
+- Supports 7 languages: Python, TypeScript, Java, PHP, Ruby, Go, C#
+- Frameworks: Django, NestJS, Express, Spring Boot, Laravel, Rails, Go Fiber, and more
+- Full migration plan produced before any code is written
+- Production-ready output: imports, full bodies, env vars, wire-up checklist
+- See [`gitagent/workflows/convert.md`](./gitagent/workflows/convert.md) to get started
+
+</td>
+</tr>
 </table>
 
 ---
@@ -352,6 +395,10 @@ AINativeBook/
 │   └── content/                  # Docusaurus learning content
 ├── specs/                        # Feature specs, plans, and task tracking
 ├── history/                      # Prompt History Records & ADRs
+├── gitagent/                     # Export Agent — convert to any framework/language
+│   ├── workflows/convert.md      # Main conversion workflow guide
+│   ├── workflows/scenarios/      # NestJS, Django, Go Fiber worked examples
+│   └── skills/                   # export-backend, export-auth, export-database, export-frontend, export-rag
 └── .github/workflows/            # CI/CD (Railway + Netlify + GitHub Pages)
 ```
 

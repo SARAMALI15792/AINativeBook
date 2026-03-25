@@ -1,0 +1,50 @@
+documents:
+  - id: spec
+    title: IntelliStack Platform Specification
+    path: ../specs/001-intellistack-platform/spec.md
+    description: >
+      Authoritative requirements for all 51 tasks across 11 phases.
+      Use this as the source of truth for any business rule question.
+
+  - id: plan
+    title: IntelliStack Architecture Decisions
+    path: ../specs/001-intellistack-platform/plan.md
+    description: >
+      Architectural decisions, ADRs, and rationale for framework choices.
+
+  - id: tasks
+    title: IntelliStack Implementation Tasks
+    path: ../specs/001-intellistack-platform/tasks.md
+    description: >
+      Granular task list with completion status (74.5% at last update).
+
+  - id: claude_md
+    title: Development Guidelines
+    path: ../CLAUDE.md
+    description: >
+      Project conventions, code standards, and SDD methodology rules.
+
+  - id: backend_main
+    title: FastAPI Application Entry
+    path: ../intellistack/backend/src/main.py
+    description: App factory, middleware stack, router registration.
+
+  - id: settings
+    title: Backend Configuration
+    path: ../intellistack/backend/src/config/settings.py
+    description: All environment variables and their defaults.
+
+  - id: database
+    title: Database Session & Engine
+    path: ../intellistack/backend/src/shared/database.py
+    description: Async SQLAlchemy engine setup, session factory.
+
+  - id: auth_server
+    title: Better-Auth Server Entry
+    path: ../intellistack/auth-server/src/index.ts
+    description: TypeScript OIDC server entry point.
+
+  - id: auth_config
+    title: Better-Auth Configuration
+    path: ../intellistack/auth-server/src/auth.ts
+    description: Provider config, session settings, callbacks.

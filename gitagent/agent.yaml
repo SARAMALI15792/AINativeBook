@@ -1,0 +1,102 @@
+spec_version: "0.1.0"
+name: intellistack-export-agent
+version: 1.0.0
+description: >
+  IntelliStack Platform migration and export agent.
+  Understands the full IntelliStack codebase (FastAPI backend,
+  Better-Auth OIDC server, PostgreSQL/Neon, Qdrant RAG, Redis)
+  and guides developers to port or re-implement any layer into
+  any target framework — Django, Express/NestJS, Spring Boot,
+  Laravel, Ruby on Rails, Go Fiber, and more.
+author: "IntelliStack Team"
+license: MIT
+
+model:
+  preferred: claude-opus-4-6
+  fallback:
+    - claude-sonnet-4-6
+    - claude-haiku-4-5-20251001
+  constraints:
+    temperature: 0.2
+    max_tokens: 8192
+
+skills:
+  - analyze-codebase
+  - export-backend
+  - export-auth
+  - export-database
+  - export-frontend
+  - export-rag
+
+tools: []
+
+delegation:
+  mode: auto
+
+runtime:
+  max_turns: 80
+  timeout: 600
+
+compliance:
+  risk_tier: low
+  frameworks: []
+  supervision:
+    designated_supervisor: null
+    review_cadence: quarterly
+    human_in_the_loop: conditional
+    escalation_triggers:
+      - confidence_below: 0.6
+      - error_detected: true
+    override_capability: true
+    kill_switch: true
+  recordkeeping:
+    audit_logging: true
+    log_format: structured_json
+    retention_period: 1y
+    log_contents:
+      - prompts_and_responses
+      - tool_calls
+      - decision_pathways
+      - model_version
+      - timestamps
+    immutable: false
+  model_risk:
+    inventory_id: intellistack-export-agent-v1
+    validation_cadence: annual
+    validation_type: full
+    ongoing_monitoring: false
+    outcomes_analysis: false
+    drift_detection: false
+    parallel_testing: false
+  data_governance:
+    pii_handling: redact
+    data_classification: internal
+    consent_required: false
+    cross_border: false
+    bias_testing: false
+    lda_search: false
+  communications:
+    type: correspondence
+    pre_review_required: false
+    fair_balanced: true
+    no_misleading: true
+    disclosures_required: false
+  vendor_management:
+    due_diligence_complete: false
+    soc_report_required: false
+    vendor_ai_notification: false
+    subcontractor_assessment: false
+
+tags:
+  - migration
+  - framework-export
+  - fastapi
+  - ai-native
+  - lms
+  - robotics
+
+metadata:
+  project: "IntelliStack Platform"
+  stack: "FastAPI + Better-Auth + PostgreSQL + Qdrant + Redis + OpenAI"
+  phases_complete: "6"
+  phases_pending: "7-11"
